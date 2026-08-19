@@ -946,23 +946,37 @@ function watchRewardedAd() {
     const btn = document.getElementById('btn-watch-ad');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Visualizzazione Sponsor (15s)...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Caricamento Sponsor Google...';
+    }
+
+    // Initialize Google AdSense Rewarded Slot
+    if (window.adsbygoogle) {
+        try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({
+                params: {
+                    google_ad_client: 'ca-pub-7028010056444247',
+                    enable_page_level_ads: true
+                }
+            });
+        } catch (e) {
+            console.log('Google AdSense trigger:', e);
+        }
     }
 
     setTimeout(() => {
         const current = getUserCredits();
         setUserCredits(current + 1);
         if (typeof confetti === 'function') {
-            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
         }
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-check"></i> +1 Consulto Accreditato!';
             setTimeout(() => {
                 btn.innerHTML = '<i class="fa-solid fa-clapperboard"></i> Guarda Video (+1)';
-            }, 3000);
+            }, 3500);
         }
-        alert('✨ Complimenti! Hai ricaricato +1 Consulto Gratuito grazie allo sponsor.');
+        alert('✨ Sponsor completato!\nTi è stato accreditato +1 Consulto Gratuito sulla Matrice del Destino.');
     }, 2500);
 }
 
