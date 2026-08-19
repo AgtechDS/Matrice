@@ -336,30 +336,41 @@
                     <div class="recharge-card free-option">
                         <div class="recharge-badge free">100% Gratuito</div>
                         <div class="recharge-icon"><i class="fa-solid fa-circle-play"></i></div>
-                        <h4 class="recharge-title">Sblocco con Sponsor</h4>
-                        <p class="recharge-desc">Guarda un breve video promozionale per ricaricare istantaneamente +1 Consulto.</p>
+                        <h4 class="recharge-title">Sblocco Sponsor</h4>
+                        <p class="recharge-desc">Guarda un breve video promozionale di 15s per ricaricare +1 Consulto istantaneo.</p>
                         <button class="btn-recharge btn-free" id="btn-watch-ad" onclick="watchRewardedAd()">
                             <i class="fa-solid fa-clapperboard"></i> Guarda Video (+1)
                         </button>
                     </div>
 
-                    <!-- Option 2: Premium Pass -->
+                    <!-- Option 2: Premium Pass 5 -->
                     <div class="recharge-card premium-option">
-                        <div class="recharge-badge premium">Più Popolare</div>
-                        <div class="recharge-icon"><i class="fa-solid fa-crown"></i></div>
-                        <h4 class="recharge-title">Pass Arcano 5 Consulti</h4>
-                        <p class="recharge-desc">5 Consulti completi + Download PDF ad Alta Risoluzione + Voce Neurale HD illimitata.</p>
-                        <button class="btn-recharge btn-premium" onclick="buyPremiumPass()">
-                            <i class="fa-solid fa-bolt"></i> Sblocca a 1.99€
+                        <div class="recharge-badge premium">Più Scelto</div>
+                        <div class="recharge-icon"><i class="fa-solid fa-crown text-gold"></i></div>
+                        <h4 class="recharge-title">Pass Arcano (5)</h4>
+                        <p class="recharge-desc">5 Consulti completi + Download PDF HD + Voce Neurale Gemini Illimitata.</p>
+                        <button class="btn-recharge btn-premium" onclick="buyPremiumPass('pass_5')">
+                            <i class="fa-brands fa-stripe"></i> Paga 1.99€
                         </button>
                     </div>
 
-                    <!-- Option 3: Referral -->
+                    <!-- Option 3: Premium Pass 15 -->
+                    <div class="recharge-card premium-option" style="border-color: rgba(212, 175, 55, 0.5);">
+                        <div class="recharge-badge premium" style="background: #38bdf8; color: #000;">Best Value</div>
+                        <div class="recharge-icon"><i class="fa-solid fa-wand-magic-sparkles" style="color: #38bdf8;"></i></div>
+                        <h4 class="recharge-title">Mappa Maestra (15)</h4>
+                        <p class="recharge-desc">15 Consulti + Sinastria di Coppia + Report PDF Completo + Accesso Prioritario.</p>
+                        <button class="btn-recharge btn-premium" style="background: linear-gradient(135deg, #38bdf8, #d4af37);" onclick="buyPremiumPass('pass_15')">
+                            <i class="fa-brands fa-stripe"></i> Paga 4.49€
+                        </button>
+                    </div>
+
+                    <!-- Option 4: Referral -->
                     <div class="recharge-card referral-option">
                         <div class="recharge-badge referral">Bonus Amici</div>
                         <div class="recharge-icon"><i class="fa-solid fa-users"></i></div>
                         <h4 class="recharge-title">Invita un Amico</h4>
-                        <p class="recharge-desc">Condividi il tuo link personale: ricevi +2 Consulti non appena genera la sua mappa.</p>
+                        <p class="recharge-desc">Condividi il tuo link personale: ricevi +2 Consulti per ogni mappa generata.</p>
                         <button class="btn-recharge btn-referral" onclick="copyReferralLink()">
                             <i class="fa-solid fa-share-nodes"></i> Copia Link (+2)
                         </button>
@@ -394,8 +405,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=8"></script>
-    <script src="js/api-client.js?v=8"></script>
-    <script src="js/app.js?v=8"></script>
+    <script src="js/matrix-calc.js?v=9"></script>
+    <script src="js/api-client.js?v=9"></script>
+    <script src="js/app.js?v=9"></script>
 </body>
 </html>

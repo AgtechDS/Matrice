@@ -305,6 +305,7 @@ function initChatInputs() {
     if (btnReport) btnReport.addEventListener('click', openReportModal);
 
     updateCreditsDisplay();
+    checkPaymentReturn();
 }
 
 function setGeneratingState(isGen) {
@@ -1007,19 +1008,53 @@ function watchRewardedAd() {
             }, 3000);
         }
         alert('✨ Complimenti! Hai ricaricato +1 Consulto Gratuito grazie allo sponsor.');
-    }, 2500);
+async function buyPremiumPass(planType = 'pass_5') {
+    const btn = event?.currentTarget || document.querySelector('.btn-premium');
+    let originalHtml = '';
+    if (btn) {
+        originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connessione a Stripe...';
+    }
+
+    try {
+        const response = await fetch('/api/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: planType })
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.url) {
+            throw new Error(data.error || 'Impossibile inizializzare il pagamento Stripe.');
+        }
+
+        // Redirect to Stripe Hosted Checkout
+        window.location.href = data.url;
+    } catch (err) {
+        console.error('Stripe Checkout error:', err);
+        alert(`⚠️ Errore Pagamento Stripe:\n${err.message}`);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
 }
 
-function buyPremiumPass() {
-    const confirmed = confirm('Procedere con lo sblocco del Pass Arcano (5 Consulti + Download PDF HD) a 1.99€?');
-    if (confirmed) {
+function checkPaymentReturn() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+        const addedCredits = parseInt(urlParams.get('credits') || '5', 10);
         const current = getUserCredits();
-        setUserCredits(current + 5);
+        setUserCredits(current + addedCredits);
         if (typeof confetti === 'function') {
-            confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
         }
-        closeCreditsModal();
-        alert('🔮 Pass Arcano Attivato! Hai ricevuto +5 Consulti e accesso prioritario.');
+        alert(`🎉 Pagamento completato con successo su Stripe!\n\nTi sono stati accreditati +${addedCredits} Consulti sulla Matrice del Destino.`);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('payment') === 'cancel') {
+        alert('Pagamento annullato. Nessun addebito è stato effettuato.');
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
@@ -1040,6 +1075,7 @@ window.closeCreditsModal = closeCreditsModal;
 window.watchRewardedAd = watchRewardedAd;
 window.buyPremiumPass = buyPremiumPass;
 window.copyReferralLink = copyReferralLink;
+window.checkPaymentReturn = checkPaymentReturn;
 
 // --- Report Modal Handlers ---
 function openReportModal() {

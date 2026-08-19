@@ -103,6 +103,79 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // API: /api/create-checkout-session
+    if (pathname === '/api/create-checkout-session' && req.method === 'POST') {
+        const stripeKey = process.env.STRIPE_SECRET_KEY;
+        if (!stripeKey) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'STRIPE_SECRET_KEY non configurata sul server.' }));
+            return;
+        }
+
+        try {
+            const body = await parseBody(req);
+            const plan = body.plan || 'pass_5';
+            const origin = req.headers.origin || req.headers.referer || `http://${req.headers.host}`;
+            const cleanOrigin = origin.replace(/\/$/, '');
+
+            let name = 'Pass Arcano — 5 Consulti Matrice del Destino';
+            let desc = 'Include 5 Consulti Completi a 14 sezioni, Download PDF e Sintesi Vocale Neurale HD';
+            let amount = 199;
+            let credits = 5;
+
+            if (plan === 'pass_15') {
+                name = 'Mappa Maestra — 15 Consulti Matrice del Destino';
+                desc = 'Include 15 Consulti Completi, Sinastria di Coppia, Download PDF e Voce Neurale';
+                amount = 449;
+                credits = 15;
+            } else if (plan === 'single') {
+                name = 'Consulto Singolo Arcano';
+                desc = 'Include 1 Consulto Completo + Voce Neurale Gemini';
+                amount = 99;
+                credits = 1;
+            }
+
+            const params = new URLSearchParams();
+            params.append('payment_method_types[0]', 'card');
+            params.append('mode', 'payment');
+            params.append('line_items[0][price_data][currency]', 'eur');
+            params.append('line_items[0][price_data][unit_amount]', String(amount));
+            params.append('line_items[0][price_data][product_data][name]', name);
+            params.append('line_items[0][price_data][product_data][description]', desc);
+            params.append('line_items[0][quantity]', '1');
+            params.append('success_url', `${cleanOrigin}/?payment=success&credits=${credits}&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`);
+            params.append('cancel_url', `${cleanOrigin}/?payment=cancel`);
+            params.append('metadata[plan]', plan);
+            params.append('metadata[credits]', String(credits));
+
+            const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${stripeKey}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
+            });
+
+            const data = await stripeRes.json();
+            if (!stripeRes.ok) {
+                console.error('Stripe API error:', data);
+                res.writeHead(stripeRes.status, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: data.error?.message || 'Stripe error' }));
+                return;
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ url: data.url, id: data.id }));
+            return;
+        } catch (err) {
+            console.error('Stripe checkout error:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: err.message }));
+            return;
+        }
+    }
+
     // API: /api/test-connection
     if (pathname === '/api/test-connection' && req.method === 'POST') {
         const body = await parseBody(req);
