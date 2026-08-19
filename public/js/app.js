@@ -253,22 +253,6 @@ function resetSession() {
     }
 }
 
-function setupWelcomeAutoplay() {
-    const welcomeAudio = new Audio('/audio/welcome.wav');
-    welcomeAudio.volume = 0.85;
-
-    const playWelcome = () => {
-        welcomeAudio.play().catch(() => {});
-        document.removeEventListener('click', playWelcome);
-        document.removeEventListener('keydown', playWelcome);
-    };
-
-    welcomeAudio.play().catch(() => {
-        document.addEventListener('click', playWelcome, { once: true });
-        document.addEventListener('keydown', playWelcome, { once: true });
-    });
-}
-
 // --- Chat Inputs & Handlers ---
 function initChatInputs() {
     const input = document.getElementById('chat-input');
@@ -324,35 +308,6 @@ function setGeneratingState(isGen) {
         input.disabled = false;
         input.focus();
     }
-}
-
-// Reset Session
-function resetSession() {
-    stopAllSpeech();
-    state.messages = [
-        { role: 'system', content: state.systemPrompt || "Sei un consulente di numerologia simbolica." }
-    ];
-    const chatContainer = document.getElementById('chat-messages');
-    chatContainer.innerHTML = '';
-
-    // Welcome Greeting from Assistant
-    const initialGreeting = `### Benvenuto nell'Analisi della Matrice del Destino 🌌
-
-Sono la tua guida all'interpretazione simbolica e numerologica archetipica dei **22 Arcani** e della **Matrice del Destino**.
-
-> *Ricorda: La numerologia è un linguaggio simbolico millenario per favorire l'introspezione e l'autoconsapevolezza, non per determinare un futuro immutabile.*
-
-Per costruire la tua mappa energetica completa, procederemo raccogliendo i tuoi dati un passo alla volta.
-
----
-
-**Domanda 1:**
-*Qual è il tuo nome completo riportato all'anagrafe?*
-
-*(Puoi rispondere direttamente qui in chat o cliccare su **Modulo Guidato** in alto per inserire tutti i dati insieme!)*`;
-
-    appendMessage('assistant', initialGreeting, '', true);
-    state.messages.push({ role: 'assistant', content: initialGreeting });
 }
 
 // Append message bubble to UI
@@ -1008,6 +963,9 @@ function watchRewardedAd() {
             }, 3000);
         }
         alert('✨ Complimenti! Hai ricaricato +1 Consulto Gratuito grazie allo sponsor.');
+    }, 2500);
+}
+
 async function buyPremiumPass(planType = 'pass_5') {
     const btn = event?.currentTarget || document.querySelector('.btn-premium');
     let originalHtml = '';
