@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrice del Destino — Analisi Numerologica & Archetipica</title>
+    <meta name="description" content="Piattaforma di analisi numerologica e simbolica della Matrice del Destino basata su intelligenza artificiale DeepSeek e 22 Arcani Maggiori.">
+    <!-- Font & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Marked.js and Confetti (Local Bundled) -->
+    <script src="js/marked.min.js"></script>
+    <script src="js/confetti.browser.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Background Canvas for dynamic sacred geometry particles -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-sun" style="color: #000; font-size: 22px;"></i>
+                </div>
+                <div>
+                    <h1 class="brand-title">MATRICE DEL DESTINO <span class="brand-badge">DEEPSEEK V4 FLASH</span></h1>
+                </div>
+            </div>
+
+            <div class="header-status-indicator">
+                <span class="status-dot" id="status-indicator"></span>
+                <span id="status-text">DeepSeek V4 Flash AI & Gemini Voice</span>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn-header" id="btn-open-wizard" title="Inserisci dati con modulo guidato">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Modulo Guidato
+                </button>
+                <button class="btn-header" id="btn-export-report" title="Esporta o visualizza il report completo">
+                    <i class="fa-solid fa-file-invoice"></i> Report
+                </button>
+                <button class="btn-header" id="btn-clear-chat" title="Ricomincia sessione">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-workspace">
+            <!-- Left Pane: Interactive Matrix Visualizer -->
+            <aside class="matrix-sidebar">
+                <div class="sidebar-tabs">
+                    <button class="tab-btn active" data-tab="tab-octagram">
+                        <i class="fa-solid fa-dharmachakra"></i> Ottagramma
+                    </button>
+                    <button class="tab-btn" data-tab="tab-aspects">
+                        <i class="fa-solid fa-gem"></i> Arcani & Punti
+                    </button>
+                    <button class="tab-btn" data-tab="tab-pitagora">
+                        <i class="fa-solid fa-table-cells"></i> Griglia 3×3
+                    </button>
+                </div>
+
+                <div class="sidebar-content">
+                    <!-- Tab 1: Octagram Visualizer -->
+                    <div id="tab-octagram" class="tab-pane active">
+                        <div class="matrix-canvas-card">
+                            <svg id="matrix-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <!-- Glow Filters -->
+                                    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="3" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                </defs>
+
+                                <!-- Background Outer Rings -->
+                                <circle cx="200" cy="200" r="185" fill="none" stroke="rgba(212, 175, 55, 0.15)" stroke-width="1" stroke-dasharray="4,4" />
+                                <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(212, 175, 55, 0.2)" stroke-width="1" />
+                                <circle cx="200" cy="200" r="105" fill="none" stroke="rgba(56, 189, 248, 0.15)" stroke-width="1" />
+
+                                <!-- Straight Square (Personal Line: Day, Month, Year, Karma) -->
+                                <polygon points="200,50 350,200 200,350 50,200" fill="rgba(212, 175, 55, 0.03)" stroke="rgba(212, 175, 55, 0.6)" stroke-width="2" />
+
+                                <!-- Rotated Square (Ancestral Diagonals) -->
+                                <polygon points="94,94 306,94 306,306 94,306" fill="rgba(56, 189, 248, 0.02)" stroke="rgba(56, 189, 248, 0.45)" stroke-width="1.5" stroke-dasharray="6,4" />
+
+                                <!-- Main Connecting Axis Lines -->
+                                <line x1="200" y1="50" x2="200" y2="350" stroke="rgba(212, 175, 55, 0.3)" stroke-width="1" />
+                                <line x1="50" y1="200" x2="350" y2="200" stroke="rgba(212, 175, 55, 0.3)" stroke-width="1" />
+                                <line x1="94" y1="94" x2="306" y2="306" stroke="rgba(56, 189, 248, 0.25)" stroke-width="1" />
+                                <line x1="306" y1="94" x2="94" y2="306" stroke="rgba(56, 189, 248, 0.25)" stroke-width="1" />
+
+                                <!-- Nodes (Interactive G groups) -->
+                                <!-- Top: Node A (Day) -->
+                                <g class="matrix-node" id="node-top" transform="translate(200, 50)" onclick="selectNode('top')">
+                                    <circle class="matrix-node-circle" r="18" />
+                                    <text class="matrix-node-text" id="svg-node-top">?</text>
+                                </g>
+
+                                <!-- Left: Node B (Month) -->
+                                <g class="matrix-node" id="node-left" transform="translate(50, 200)" onclick="selectNode('left')">
+                                    <circle class="matrix-node-circle" r="18" />
+                                    <text class="matrix-node-text" id="svg-node-left">?</text>
+                                </g>
+
+                                <!-- Right: Node C (Year) -->
+                                <g class="matrix-node" id="node-right" transform="translate(350, 200)" onclick="selectNode('right')">
+                                    <circle class="matrix-node-circle" r="18" />
+                                    <text class="matrix-node-text" id="svg-node-right">?</text>
+                                </g>
+
+                                <!-- Bottom: Node D (Karma) -->
+                                <g class="matrix-node" id="node-bottom" transform="translate(200, 350)" onclick="selectNode('bottom')">
+                                    <circle class="matrix-node-circle" r="18" />
+                                    <text class="matrix-node-text" id="svg-node-bottom">?</text>
+                                </g>
+
+                                <!-- Ancestral Corner Nodes -->
+                                <g class="matrix-node" id="node-father-top" transform="translate(94, 94)" onclick="selectNode('fatherTop')">
+                                    <circle class="matrix-node-circle" r="14" style="stroke: var(--cyan-accent);" />
+                                    <text class="matrix-node-text" id="svg-node-father-top" style="font-size: 9px;">?</text>
+                                </g>
+                                <g class="matrix-node" id="node-mother-top" transform="translate(306, 94)" onclick="selectNode('motherTop')">
+                                    <circle class="matrix-node-circle" r="14" style="stroke: var(--cyan-accent);" />
+                                    <text class="matrix-node-text" id="svg-node-mother-top" style="font-size: 9px;">?</text>
+                                </g>
+                                <g class="matrix-node" id="node-mother-bottom" transform="translate(94, 306)" onclick="selectNode('motherBottom')">
+                                    <circle class="matrix-node-circle" r="14" style="stroke: var(--cyan-accent);" />
+                                    <text class="matrix-node-text" id="svg-node-mother-bottom" style="font-size: 9px;">?</text>
+                                </g>
+                                <g class="matrix-node" id="node-father-bottom" transform="translate(306, 306)" onclick="selectNode('fatherBottom')">
+                                    <circle class="matrix-node-circle" r="14" style="stroke: var(--cyan-accent);" />
+                                    <text class="matrix-node-text" id="svg-node-father-bottom" style="font-size: 9px;">?</text>
+                                </g>
+
+                                <!-- Center: Node E (Heart / Comfort Zone) -->
+                                <g class="matrix-node" id="node-center" transform="translate(200, 200)" onclick="selectNode('center')">
+                                    <circle class="matrix-node-circle" r="22" style="stroke: var(--gold-bright); fill: #171d2b;" />
+                                    <text class="matrix-node-text" id="svg-node-center" style="font-size: 13px; font-weight: 900;">?</text>
+                                </g>
+
+                                <!-- Line of Money & Line of Love Nodes -->
+                                <g class="matrix-node" id="node-money" transform="translate(275, 200)" onclick="selectNode('money')">
+                                    <circle class="matrix-node-circle" r="13" style="stroke: #10b981;" />
+                                    <text class="matrix-node-text" id="svg-node-money" style="font-size: 9px; fill: #10b981;">?</text>
+                                </g>
+                                <g class="matrix-node" id="node-love" transform="translate(200, 275)" onclick="selectNode('love')">
+                                    <circle class="matrix-node-circle" r="13" style="stroke: #f59e0b;" />
+                                    <text class="matrix-node-text" id="svg-node-love" style="font-size: 9px; fill: #f59e0b;">?</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Selected Node Detail Card -->
+                        <div class="aspect-card" id="selected-node-card" style="margin-top: 10px;">
+                            <div class="aspect-title" id="node-card-title">PUNTO SELEZIONATO</div>
+                            <div class="aspect-value" id="node-card-arcana">Clicca su un nodo dell'ottagramma</div>
+                            <div class="aspect-subtitle" id="node-card-desc">Scopri l'archetipo e le energie corrispondenti.</div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Arcana & Aspects Cards -->
+                    <div id="tab-aspects" class="tab-pane" style="display: none;">
+                        <div class="aspects-grid" id="aspects-list">
+                            <div class="aspect-card" onclick="selectNode('top')">
+                                <div class="aspect-title">Spirito / Risorse (Giorno)</div>
+                                <div class="aspect-value" id="val-day">-</div>
+                                <div class="aspect-subtitle" id="sub-day">In attesa dati</div>
+                            </div>
+                            <div class="aspect-card" onclick="selectNode('left')">
+                                <div class="aspect-title">Anima / Connessione (Mese)</div>
+                                <div class="aspect-value" id="val-month">-</div>
+                                <div class="aspect-subtitle" id="sub-month">In attesa dati</div>
+                            </div>
+                            <div class="aspect-card" onclick="selectNode('right')">
+                                <div class="aspect-title">Materia / Finanze (Anno)</div>
+                                <div class="aspect-value" id="val-year">-</div>
+                                <div class="aspect-subtitle" id="sub-year">In attesa dati</div>
+                            </div>
+                            <div class="aspect-card" onclick="selectNode('bottom')">
+                                <div class="aspect-title">Coda Karmica</div>
+                                <div class="aspect-value" id="val-karma">-</div>
+                                <div class="aspect-subtitle" id="sub-karma">In attesa dati</div>
+                            </div>
+                            <div class="aspect-card" onclick="selectNode('center')">
+                                <div class="aspect-title">Centro / Comfort Zone</div>
+                                <div class="aspect-value" id="val-center">-</div>
+                                <div class="aspect-subtitle" id="sub-center">In attesa dati</div>
+                            </div>
+                            <div class="aspect-card" onclick="selectNode('money')">
+                                <div class="aspect-title">Sblocco Denaro</div>
+                                <div class="aspect-value" id="val-money">-</div>
+                                <div class="aspect-subtitle" id="sub-money">In attesa dati</div>
+                            </div>
+                            <div class="aspect-card" onclick="selectNode('love')">
+                                <div class="aspect-title">Canale Relazioni</div>
+                                <div class="aspect-value" id="val-love">-</div>
+                                <div class="aspect-subtitle" id="sub-love">In attesa dati</div>
+                            </div>
+                            <div class="aspect-card">
+                                <div class="aspect-title">Percorso di Vita</div>
+                                <div class="aspect-value" id="val-lifepath">-</div>
+                                <div class="aspect-subtitle" id="sub-lifepath">In attesa dati</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Pythagorean 3x3 Grid -->
+                    <div id="tab-pitagora" class="tab-pane" style="display: none;">
+                        <div class="aspect-title">Griglia Numerologica Pitagorica (Presenza Cifre)</div>
+                        <div class="pitagora-grid">
+                            <div class="pitagora-cell"><span class="cell-digit">3</span><span class="cell-count empty" id="grid-3">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">6</span><span class="cell-count empty" id="grid-6">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">9</span><span class="cell-count empty" id="grid-9">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">2</span><span class="cell-count empty" id="grid-2">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">5</span><span class="cell-count empty" id="grid-5">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">8</span><span class="cell-count empty" id="grid-8">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">1</span><span class="cell-count empty" id="grid-1">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">4</span><span class="cell-count empty" id="grid-4">-</span></div>
+                            <div class="pitagora-cell"><span class="cell-digit">7</span><span class="cell-count empty" id="grid-7">-</span></div>
+                        </div>
+                        <div style="margin-top: 14px; font-size: 0.8rem; color: var(--text-muted);">
+                            La griglia 3×3 evidenzia le linee di forza: <em>Piano Mentale (3-6-9)</em>, <em>Piano Emotivo (2-5-8)</em> e <em>Piano Fisico (1-4-7)</em>.
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Pane: Conversational Chat Interface -->
+            <section class="chat-workspace">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Dynamic Messages will be appended here -->
+                </div>
+
+                <!-- Quick Suggestions Bar -->
+                <div class="quick-suggestions" id="quick-suggestions">
+                    <button class="chip" onclick="sendQuickPrompt('Ciao, vorrei fare la mia analisi della matrice del destino.')">✨ Inizia Analisi</button>
+                    <button class="chip" onclick="openWizardModal()">📝 Compila Dati nel Modulo</button>
+                    <button class="chip" onclick="sendQuickPrompt('Confermo tutti i dati inseriti. Puoi procedere con il report completo a 14 sezioni.')">✅ Conferma Dati & Genera</button>
+                    <button class="chip" onclick="sendQuickPrompt('Puoi approfondire in dettaglio la mia Coda Karmica e le lezioni delle vite passate?')">🔮 Approfondisci Karma</button>
+                    <button class="chip" onclick="sendQuickPrompt('Quali sono le opportunità e i punti di sblocco sul canale del Denaro e della Carriera?')">💰 Analisi Denaro</button>
+                </div>
+
+                <!-- Input Container -->
+                <div class="chat-input-container">
+                    <div class="input-box-wrapper">
+                        <textarea class="chat-input" id="chat-input" placeholder="Scrivi la tua risposta o domanda all'assistente..." rows="1"></textarea>
+                    </div>
+                    <button class="btn-send" id="btn-send" title="Invia messaggio">
+                        <i class="fa-solid fa-paper-plane" id="send-icon"></i>
+                    </button>
+                    <button class="btn-send btn-stop" id="btn-stop" title="Ferma generazione" style="display: none;">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal 1: Guided Data Wizard -->
+    <div class="modal-overlay" id="wizard-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Configurazione Rapida Profilo</h3>
+                <button class="modal-close" onclick="closeWizardModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                    Compilando questo modulo, i dati verranno calcolati istantaneamente nell'ottagramma grafico e inviati all'assistente AI per l'analisi.
+                </p>
+                <div class="form-group">
+                    <label class="form-label">Nome Completo all'Anagrafe</label>
+                    <input type="text" class="form-control" id="wz-name" placeholder="Es. Andrea Giuliano">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label class="form-label">Data di Nascita</label>
+                        <input type="date" class="form-control" id="wz-date" value="1992-11-28">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Orario di Nascita</label>
+                        <input type="text" class="form-control" id="wz-time" placeholder="HH:MM o 'non disponibile'" value="non disponibile">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Città e Nazione di Nascita</label>
+                    <input type="text" class="form-control" id="wz-place" placeholder="Es. Roma, Italia">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo di Analisi</label>
+                    <select class="form-control" id="wz-type">
+                        <option value="1. Numerologica">1. Numerologica</option>
+                        <option value="2. Numerologica + Astrologica simbolica" selected>2. Numerologica + Astrologica simbolica</option>
+                        <option value="3. Solo Numerologia Avanzata">3. Solo Numerologia Avanzata</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-header" onclick="fillSampleData()">
+                    <i class="fa-solid fa-flask"></i> Esempio Rapido
+                </button>
+                <button class="btn-header primary" onclick="submitWizardData()">
+                    <i class="fa-solid fa-check"></i> Calcola & Invia ad AI
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Settings & System Prompt -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card" style="max-width: 720px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-sliders"></i> Impostazioni Modello & Prompt</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Provider AI / Piattaforma</label>
+                    <select class="form-control" id="cfg-provider" onchange="onProviderChange()">
+                        <option value="groq">Groq Cloud (100% Free & Velocissimo)</option>
+                        <option value="llmapi">LLMAPI.ai (DeepSeek V4 Flash)</option>
+                        <option value="openrouter" selected>OpenRouter (Modelli Free :free)</option>
+                        <option value="gemini">Google AI Studio (Gemini 2.0 Flash Free)</option>
+                        <option value="tokenrouter">TokenRouter</option>
+                        <option value="ollama">Ollama Locale (100% Offline)</option>
+                        <option value="custom">Personalizzato (Custom Endpoint)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; justify-content: space-between;">
+                        <span>API Key</span>
+                        <a id="provider-link" href="https://openrouter.ai/keys" target="_blank" style="color: var(--cyan-accent); text-decoration: underline; font-size: 0.75rem;">Ottieni Chiave Gratuita ↗</a>
+                    </label>
+                    <input type="password" class="form-control" id="cfg-apikey" placeholder="Inserisci la tua API Key...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Base URL Endpoint</label>
+                    <input type="text" class="form-control" id="cfg-baseurl" value="https://openrouter.ai/api/v1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nome Modello</label>
+                    <input type="text" class="form-control" id="cfg-model" value="deepseek/deepseek-r1:free">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Temperatura (0.0 - 1.0)</label>
+                    <input type="number" class="form-control" id="cfg-temp" min="0" max="1" step="0.1" value="0.6">
+                </div>
+                <div style="border-top: 1px solid var(--border-subtle); margin: 18px 0; padding-top: 14px;">
+                    <div style="font-size: 0.86rem; font-weight: 700; color: var(--gold-bright); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-volume-high"></i> Sintesi Vocale Neurale (Google AI Studio / Gemini TTS)
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="display: flex; justify-content: space-between;">
+                            <span>Google AI Studio API Key (100% Free - Senza Carta)</span>
+                            <a href="https://aistudio.google.com/" target="_blank" style="color: var(--cyan-accent); text-decoration: underline; font-size: 0.75rem;">Google AI Studio ↗</a>
+                        </label>
+                        <input type="password" class="form-control" id="cfg-google-tts-key" placeholder="AIzaSy... (Preconfigurata nel server)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Timbro Voce Neurale Gemini</label>
+                        <select class="form-control" id="cfg-gemini-voice">
+                            <option value="Aoede" selected>Aoede (Femminile — Calda, Armoniosa, Spirituale)</option>
+                            <option value="Puck">Puck (Maschile — Brillante, Dinamico, Coinvolgente)</option>
+                            <option value="Charon">Charon (Maschile — Profondo, Autorevole, Solenne)</option>
+                            <option value="Kore">Kore (Femminile — Dolce, Rilassante, Serena)</option>
+                            <option value="Fenrir">Fenrir (Maschile — Energetico, Diretto)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="form-label" style="display: flex; justify-content: space-between;">
+                            <span>ElevenLabs API Key (Opzionale)</span>
+                            <a href="https://elevenlabs.io/app/speech-synthesis" target="_blank" style="color: var(--cyan-accent); text-decoration: underline; font-size: 0.75rem;">ElevenLabs Console ↗</a>
+                        </label>
+                        <input type="password" class="form-control" id="cfg-elevenlabs-key" placeholder="Inserisci la tua API Key ElevenLabs...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ElevenLabs Voice ID</label>
+                        <input type="text" class="form-control" id="cfg-elevenlabs-voice" placeholder="21m00Tcm4TlvDq8ikWAM" value="21m00Tcm4TlvDq8ikWAM">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Prompt di Sistema (Governa le 14 fasi da prompt2analisi.md)</label>
+                    <textarea class="form-control" id="cfg-prompt" rows="7" style="font-family: var(--font-mono); font-size: 0.78rem;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-header" onclick="testConnectionFromSettings()">
+                    <i class="fa-solid fa-plug"></i> Test Connessione
+                </button>
+                <button class="btn-header primary" onclick="saveSettings()">
+                    <i class="fa-solid fa-floppy-disk"></i> Salva
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Report Viewer Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-card" style="max-width: 900px; max-height: 90vh;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-file-lines"></i> Report Completo Matrice del Destino</h3>
+                <button class="modal-close" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="report-modal-content" style="background: rgba(8, 12, 20, 0.95); font-size: 0.95rem;">
+                <!-- Full formatted report will be injected here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-header" id="btn-report-tts" onclick="toggleSpeech(document.getElementById('report-modal-content').innerText, this)">
+                    <i class="fa-solid fa-volume-high"></i> <span>Ascolta Report</span>
+                </button>
+                <button class="btn-header" onclick="copyReportMarkdown()">
+                    <i class="fa-solid fa-copy"></i> Copia Markdown
+                </button>
+                <button class="btn-header primary" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> Stampa / PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="js/matrix-calc.js?v=7"></script>
+    <script src="js/api-client.js?v=7"></script>
+    <script src="js/app.js?v=7"></script>
+</body>
+</html>

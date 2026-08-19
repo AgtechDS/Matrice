@@ -1,0 +1,154 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --font-cinzel: 'Cinzel', serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --bg-space: #070A0F;
+  --gold-primary: #DFB15B;
+  --gold-glow: rgba(223, 177, 91, 0.35);
+  --cyan-accent: #38EF7D;
+  --crimson-karma: #FF4B4B;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-space);
+  color: #E2E8F0;
+  font-family: var(--font-outfit);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(13, 19, 33, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(223, 177, 91, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(223, 177, 91, 0.6);
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(13, 19, 33, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(223, 177, 91, 0.15);
+}
+
+.glass-card {
+  background: rgba(16, 24, 40, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(223, 177, 91, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card:hover {
+  border-color: rgba(223, 177, 91, 0.45);
+  box-shadow: 0 0 20px rgba(223, 177, 91, 0.2);
+}
+
+/* Equalizer Soundwave */
+.soundwave {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 14px;
+}
+.soundwave-bar {
+  width: 3px;
+  height: 100%;
+  background: #DFB15B;
+  border-radius: 2px;
+  animation: soundwave-anim 1s ease-in-out infinite alternate;
+}
+.soundwave-bar:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.soundwave-bar:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes soundwave-anim {
+  0% { height: 20%; }
+  100% { height: 100%; }
+}
+
+/* Markdown Styling inside chat */
+.prose-sacred {
+  color: #E2E8F0;
+  font-size: 0.94rem;
+  line-height: 1.68;
+}
+.prose-sacred h1, .prose-sacred h2, .prose-sacred h3, .prose-sacred h4 {
+  color: #FBE6B5;
+  font-family: var(--font-cinzel);
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.prose-sacred h3 {
+  border-bottom: 1px solid rgba(223, 177, 91, 0.2);
+  padding-bottom: 4px;
+}
+.prose-sacred strong {
+  color: #DFB15B;
+}
+.prose-sacred blockquote {
+  border-left: 3px solid #DFB15B;
+  padding-left: 12px;
+  color: #94A3B8;
+  font-style: italic;
+  margin: 8px 0;
+}
+.prose-sacred ul, .prose-sacred ol {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+.prose-sacred li {
+  margin-bottom: 4px;
+}
+.prose-sacred table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.86rem;
+}
+.prose-sacred th, .prose-sacred td {
+  border: 1px solid rgba(223, 177, 91, 0.2);
+  padding: 8px 12px;
+  text-align: left;
+}
+.prose-sacred th {
+  background: rgba(223, 177, 91, 0.1);
+  color: #DFB15B;
+  font-weight: 600;
+}
+
+/* Glowing text */
+.text-gold-glow {
+  color: #DFB15B;
+  text-shadow: 0 0 14px rgba(223, 177, 91, 0.5);
+}
+
+.text-cyan-glow {
+  color: #38EF7D;
+  text-shadow: 0 0 14px rgba(56, 239, 125, 0.5);
+}
