@@ -11,13 +11,22 @@ export default async function handler(req) {
         const body = await req.json();
         const { messages, stream = true, temperature = 0.6, apiKey = process.env.LLMAPI_KEY || process.env.TOKENROUTER_API_KEY, model = process.env.LLM_MODEL || process.env.TOKENROUTER_MODEL || 'deepseek-v4-flash-0731' } = body;
         let baseUrl = body.baseUrl || process.env.LLM_BASE_URL || process.env.TOKENROUTER_BASE_URL || 'https://api.llmapi.ai/v1';
-        baseUrl = baseUrl.replace(/\/+$/, '');
+        let activeApiKey = apiKey || process.env.LLMAPI_KEY || process.env.TOKENROUTER_API_KEY || '';
+        let activeModel = model;
+        let activeBaseUrl = baseUrl;
+
+        if (activeApiKey.startsWith('gsk_')) {
+            activeBaseUrl = 'https://api.groq.com/openai/v1';
+            if (activeModel === 'deepseek-v4-flash-0731') {
+                activeModel = 'qwen/qwen3.6-27b';
+            }
+        }
 
         if (!messages || !Array.isArray(messages)) {
             return new Response(JSON.stringify({ error: { message: 'Messages array is required' } }), { status: 400 });
         }
 
-        if (!apiKey) {
+        if (!activeApiKey) {
             return new Response(JSON.stringify({ error: { message: 'Nessuna API Key configurata.' } }), { status: 401 });
         }
 
@@ -33,21 +42,21 @@ export default async function handler(req) {
         }
 
         const payload = {
-            model: model,
+            model: activeModel,
             messages: finalMessages,
             temperature: temperature,
             stream: stream,
             max_tokens: maxTokens
         };
 
-        if (baseUrl.includes('groq.com') || model.includes('qwen') || model.includes('gpt-oss')) {
+        if (activeBaseUrl.includes('groq.com') || activeModel.includes('qwen') || activeModel.includes('gpt-oss')) {
             payload.reasoning_effort = 'none';
         }
 
-        const upstreamRes = await fetch(`${baseUrl}/chat/completions`, {
+        const upstreamRes = await fetch(`${activeBaseUrl}/chat/completions`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                'Authorization': `Bearer ${activeApiKey}`,
                 'Content-Type': 'application/json',
                 'HTTP-Referer': 'https://matrice.vercel.app',
                 'X-Title': 'Destiny Matrix AI'
