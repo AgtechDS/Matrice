@@ -1116,3 +1116,20 @@ function generateLocalReportFallback() {
     state.messages.push({ role: 'assistant', content: reportMarkdown });
 }
 
+// --- Master Application Initialization ---
+function initApp() {
+    console.log("🌌 Inizializzazione Matrice del Destino...");
+    initBackgroundCanvas();
+    initTabs();
+    initChatInputs();
+    setupWelcomeAutoplay();
+    updateCreditsDisplay();
+    checkPaymentReturn();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+

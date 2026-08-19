@@ -238,7 +238,27 @@
             <!-- Right Pane: Conversational Chat Interface -->
             <section class="chat-workspace">
                 <div class="chat-messages" id="chat-messages">
-                    <!-- Dynamic Messages will be appended here -->
+                    <div class="message-wrapper assistant">
+                        <div class="message-avatar"><i class="fa-solid fa-sun"></i></div>
+                        <div class="message-bubble">
+                            <div class="message-content">
+                                <h3 style="color: var(--gold-bright); margin-bottom: 8px;">Benvenuto nell'Analisi della Matrice del Destino 🌌</h3>
+                                <p>Sono la tua guida all'interpretazione simbolica e numerologica archetipica dei <strong>22 Arcani</strong> e della <strong>Matrice del Destino</strong>.</p>
+                                <blockquote style="border-left: 3px solid var(--gold-primary); padding-left: 12px; margin: 10px 0; color: var(--text-secondary); font-style: italic;">
+                                    Ricorda: La numerologia è un linguaggio simbolico millenario per favorire l'introspezione e l'autoconsapevolezza, non per determinare un futuro immutabile.
+                                </blockquote>
+                                <p>Per costruire la tua mappa energetica completa, procederemo raccogliendo i tuoi dati un passo alla volta.</p>
+                                <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 12px 0;">
+                                <p><strong>Domanda 1:</strong><br><em>Qual è il tuo nome completo riportato all'anagrafe?</em></p>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;"><em>(Puoi rispondere direttamente qui in chat o cliccare su <strong>Calcola Mappa</strong> in alto per inserire tutti i dati insieme!)</em></p>
+                            </div>
+                            <div class="message-actions">
+                                <button class="btn-tts" id="btn-welcome-tts" onclick="toggleSpeech(this.parentElement.previousElementSibling.innerText, this, '/audio/welcome.wav')">
+                                    <i class="fa-solid fa-volume-high"></i> <span>Ascolta Benvenuto</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Quick Suggestions Bar -->
@@ -405,8 +425,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=9"></script>
-    <script src="js/api-client.js?v=9"></script>
-    <script src="js/app.js?v=9"></script>
+    <script src="js/matrix-calc.js?v=10"></script>
+    <script src="js/api-client.js?v=10"></script>
+    <script src="js/app.js?v=10"></script>
 </body>
 </html>
