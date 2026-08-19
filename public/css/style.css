@@ -1116,3 +1116,288 @@ body {
     color: #07090e;
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
 }
+
+/* ===================================================
+   MIT-GRADE COMPREHENSIVE RESPONSIVE DESIGN SYSTEM
+   =================================================== */
+
+/* Tablet & Compact Screens (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .app-container {
+        height: auto;
+        min-height: 100dvh;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .main-workspace {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        gap: 12px;
+    }
+
+    .matrix-sidebar {
+        width: 100%;
+        max-height: 480px;
+        border-radius: var(--radius-md);
+    }
+
+    .matrix-canvas-card svg {
+        max-width: 320px;
+    }
+
+    .chat-workspace {
+        height: 600px;
+        min-height: 500px;
+        border-radius: var(--radius-md);
+    }
+
+    .app-header {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 16px;
+    }
+
+    .header-status-indicator {
+        display: none;
+    }
+
+    .header-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        order: 3;
+    }
+
+    .btn-header {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Mobile Devices (max-width: 768px) */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    .app-container {
+        padding: 6px;
+        gap: 8px;
+    }
+
+    .app-header {
+        padding: 8px 10px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .brand-section {
+        gap: 8px;
+    }
+
+    .brand-logo {
+        width: 34px;
+        height: 34px;
+    }
+
+    .brand-logo svg, .brand-logo i {
+        font-size: 16px !important;
+    }
+
+    .brand-title {
+        font-size: 1.0rem;
+        letter-spacing: 0.5px;
+        gap: 4px;
+    }
+
+    .brand-badge {
+        font-size: 0.55rem;
+        padding: 1px 5px;
+    }
+
+    .credits-badge-btn {
+        padding: 4px 8px;
+        font-size: 0.72rem;
+        gap: 4px;
+    }
+
+    .credits-badge-btn .badge-recharge {
+        font-size: 0.65rem;
+        padding: 1px 5px;
+    }
+
+    .header-actions {
+        margin-top: 4px;
+        gap: 6px;
+    }
+
+    .btn-header {
+        padding: 7px 8px;
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+
+    .sidebar-tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tab-btn {
+        padding: 10px 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .matrix-sidebar {
+        max-height: 380px;
+    }
+
+    .matrix-canvas-card {
+        padding: 8px;
+    }
+
+    .matrix-canvas-card svg {
+        max-width: 270px;
+    }
+
+    .chat-workspace {
+        height: 520px;
+        min-height: 420px;
+    }
+
+    .chat-messages {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .message-bubble {
+        max-width: 95%;
+        padding: 10px 12px;
+        font-size: 0.88rem;
+    }
+
+    .message-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .quick-suggestions {
+        display: flex;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 6px 8px;
+        gap: 6px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .quick-suggestions::-webkit-scrollbar {
+        display: none;
+    }
+
+    .chip {
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-size: 0.72rem;
+        padding: 5px 10px;
+    }
+
+    .chat-input-container {
+        padding: 8px;
+        gap: 6px;
+    }
+
+    .chat-input {
+        font-size: 0.88rem;
+        padding: 8px 10px;
+    }
+
+    .btn-send {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+    }
+
+    /* Modals Responsive */
+    .modal-card {
+        width: 94vw !important;
+        max-width: 94vw !important;
+        max-height: 90vh !important;
+        padding: 14px !important;
+        border-radius: var(--radius-md) !important;
+        margin: auto;
+    }
+
+    .modal-header h3 {
+        font-size: 0.95rem !important;
+    }
+
+    .recharge-options-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .recharge-card {
+        padding: 16px 12px !important;
+    }
+
+    .credits-status-card {
+        padding: 14px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .credits-balance-value {
+        font-size: 1.8rem !important;
+    }
+}
+
+/* Small Smart Phones (max-width: 480px) */
+@media (max-width: 480px) {
+    .brand-title {
+        font-size: 0.88rem;
+    }
+
+    .brand-badge {
+        display: none;
+    }
+
+    .brand-logo {
+        width: 30px;
+        height: 30px;
+    }
+
+    .btn-header {
+        font-size: 0.7rem;
+        padding: 6px 4px;
+    }
+
+    .btn-header i {
+        font-size: 0.75rem;
+    }
+
+    .matrix-sidebar {
+        max-height: 340px;
+    }
+
+    .matrix-canvas-card svg {
+        max-width: 230px;
+    }
+
+    .modal-body {
+        padding: 10px 0 !important;
+    }
+
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+    }
+}
+
