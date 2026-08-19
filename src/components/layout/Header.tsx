@@ -23,10 +23,10 @@ export default function Header({
         </div>
         <div>
           <h1 className="text-base sm:text-lg font-serif font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gold-light via-gold to-yellow-600">
-            MATRICE DEL DESTINO AI
+            MATRICE DEL DESTINO <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/40 font-sans tracking-wider ml-1">SACRED ORACLE</span>
           </h1>
           <p className="text-[0.65rem] tracking-wider uppercase text-slate-400">
-            DeepSeek V4 Flash & Gemini Voice
+            Guida Archetipica & Voce Neurale Attiva
           </p>
         </div>
       </div>

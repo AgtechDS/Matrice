@@ -1,7 +1,7 @@
-# 🌌 Matrice del Destino AI — Stato Applicazione (STATUS_APP)
+# 🌌 Matrice del Destino — Sacred Oracle (STATUS_APP)
 
-> **Ultimo Aggiornamento**: 2026-08-19  
-> **Versione**: 2.0.0 (Production Ready)  
+> **Ultimo Aggiornamento**: 2026-08-20  
+> **Versione**: 2.1.0 (MIT-Grade Sacred UI & Monetization Ready)  
 > **Stato Globale**: 🟢 **OPERATIVO & VERIFICATO (100%)**
 
 ---
@@ -10,13 +10,14 @@
 
 | Proprietà | Dettaglio / Valore |
 | :--- | :--- |
-| **Applicazione** | Matrice del Destino AI & Analisi Numerologica Pitagorica |
+| **Applicazione** | Matrice del Destino — Oracolo Archetipico & Numerologia Sacra |
+| **UI/UX Design** | MIT-Grade Neumorfismo 2.0, Deep Obsidian Dark Mode & Golden Accents (`#dfb15b`) |
 | **Ambiente Locale** | `http://localhost:3000` (Node.js Native HTTP Server / Next.js) |
-| **Target Cloud** | Vercel Serverless (`api/*.js` + Next.js App Router) |
-| **Fornitore LLM** | **LLMAPI.ai** (`deepseek-v4-flash-0731`) — Gestito lato server |
-| **Costo LLM** | ~$0.028 per 1M token (Estremamente economico: ~0.00007$ per lettura completa) |
+| **Target Cloud** | Vercel Serverless (`api/*.js` + Static CDN) |
+| **Fornitore LLM** | **LLMAPI.ai** (`deepseek-v4-flash-0731`) — Trasparente per l'utente finale |
+| **Costo LLM** | ~$0.028 per 1M token (~0.00007$ per lettura completa a 14 sezioni) |
 | **Sintesi Vocale TTS** | Google Gemini 3.1 Flash Neural Audio (100% Free senza carta) |
-| **Configurazione Utente** | Modello bloccato e centralizzato (Pulsante Impostazioni rimosso dalla UI) |
+| **Monetizzazione & Crediti** | Sistema Wallet Crediti Energetici + Rewarded Ads + Pass Arcano + Referral |
 
 ---
 

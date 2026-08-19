@@ -303,6 +303,8 @@ function initChatInputs() {
 
     const btnReport = document.getElementById('btn-export-report');
     if (btnReport) btnReport.addEventListener('click', openReportModal);
+
+    updateCreditsDisplay();
 }
 
 function setGeneratingState(isGen) {
@@ -610,6 +612,17 @@ async function sendMessage(overrideText = null) {
     const input = document.getElementById('chat-input');
     const text = (overrideText || input.value).trim();
     if (!text) return;
+
+    // Check credits
+    const credits = getUserCredits();
+    if (credits <= 0) {
+        openCreditsModal();
+        alert('✦ Hai esaurito i consulti disponibili.\nRicarica gratuitamente guardando un breve video sponsor oppure attiva il Pass Arcano!');
+        return;
+    }
+
+    // Decrement 1 credit for the reading
+    setUserCredits(credits - 1);
 
     if (!overrideText) {
         input.value = '';
@@ -936,77 +949,97 @@ Ti confermo tutti i dati. Puoi procedere con il report strutturato a 14 sezioni 
     sendMessage(messageToAI);
 }
 
-// --- Settings Modal Handlers ---
-function openSettingsModal() {
-    document.getElementById('cfg-provider').value = state.provider || 'groq';
-    document.getElementById('cfg-baseurl').value = state.baseUrl || 'https://api.groq.com/openai/v1';
-    document.getElementById('cfg-apikey').value = state.apiKey || '';
-    document.getElementById('cfg-model').value = state.model || 'qwen/qwen3.6-27b';
-    document.getElementById('cfg-temp').value = state.temperature || 0.6;
-    document.getElementById('cfg-prompt').value = state.systemPrompt;
-    
-    // Load Voice settings if present
-    document.getElementById('cfg-google-tts-key').value = localStorage.getItem('google_tts_api_key') || '';
-    document.getElementById('cfg-gemini-voice').value = localStorage.getItem('gemini_tts_voice') || 'Aoede';
-    document.getElementById('cfg-elevenlabs-key').value = localStorage.getItem('elevenlabs_api_key') || '';
-    document.getElementById('cfg-elevenlabs-voice').value = localStorage.getItem('elevenlabs_voice_id') || '21m00Tcm4TlvDq8ikWAM';
-    
-    onProviderChange();
-    document.getElementById('settings-modal').classList.add('active');
-}
-function closeSettingsModal() {
-    document.getElementById('settings-modal').classList.remove('active');
-}
-
-function saveSettings() {
-    state.provider = document.getElementById('cfg-provider').value;
-    state.baseUrl = document.getElementById('cfg-baseurl').value.trim();
-    state.apiKey = document.getElementById('cfg-apikey').value.trim();
-    state.model = document.getElementById('cfg-model').value.trim();
-    state.temperature = parseFloat(document.getElementById('cfg-temp').value) || 0.6;
-    state.systemPrompt = document.getElementById('cfg-prompt').value;
-
-    const gKey = document.getElementById('cfg-google-tts-key').value.trim();
-    const gVoice = document.getElementById('cfg-gemini-voice').value;
-    const elKey = document.getElementById('cfg-elevenlabs-key').value.trim();
-    const elVoice = document.getElementById('cfg-elevenlabs-voice').value.trim() || '21m00Tcm4TlvDq8ikWAM';
-
-    localStorage.setItem('ai_provider', state.provider);
-    localStorage.setItem('ai_base_url', state.baseUrl);
-    localStorage.setItem('ai_api_key', state.apiKey);
-    localStorage.setItem('ai_model', state.model);
-    localStorage.setItem('ai_temp', state.temperature);
-    localStorage.setItem('google_tts_api_key', gKey);
-    localStorage.setItem('gemini_tts_voice', gVoice);
-    localStorage.setItem('elevenlabs_api_key', elKey);
-    localStorage.setItem('elevenlabs_voice_id', elVoice);
-
-    if (state.messages.length > 0 && state.messages[0].role === 'system') {
-        state.messages[0].content = state.systemPrompt;
+// --- Credit System & Monetization Engine ---
+function getUserCredits() {
+    const raw = localStorage.getItem('destiny_credits');
+    if (raw === null) {
+        localStorage.setItem('destiny_credits', '1');
+        return 1;
     }
-    closeSettingsModal();
-    alert('Impostazioni salvate con successo!');
+    const val = parseInt(raw, 10);
+    return isNaN(val) ? 1 : val;
 }
 
-async function testConnectionFromSettings() {
-    const provider = document.getElementById('cfg-provider').value;
-    const baseUrl = document.getElementById('cfg-baseurl').value.trim() || state.baseUrl;
-    const apiKey = document.getElementById('cfg-apikey').value.trim() || state.apiKey;
-    const model = document.getElementById('cfg-model').value.trim() || state.model;
+function setUserCredits(count) {
+    localStorage.setItem('destiny_credits', String(Math.max(0, count)));
+    updateCreditsDisplay();
+}
 
-    if (!apiKey && provider !== 'ollama') {
-        alert('⚠️ Inserisci la tua API Key prima di effettuare il test.');
-        return;
+function updateCreditsDisplay() {
+    const credits = getUserCredits();
+    const badgeEl = document.getElementById('user-credits-count');
+    const modalEl = document.getElementById('modal-credits-display');
+    const text = credits === 1 ? '1 Consulto' : `${credits} Consulti`;
+
+    if (badgeEl) badgeEl.textContent = text;
+    if (modalEl) modalEl.textContent = text;
+}
+
+function openCreditsModal() {
+    updateCreditsDisplay();
+    const modal = document.getElementById('credits-modal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeCreditsModal() {
+    const modal = document.getElementById('credits-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function watchRewardedAd() {
+    const btn = document.getElementById('btn-watch-ad');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Visualizzazione Sponsor (15s)...';
     }
 
-    const res = await apiClient.testConnection(apiKey, model, baseUrl);
-    if (res.success) {
-        alert(`✅ Test Connessione Riuscito!\n\nProvider: ${provider}\nModello: ${res.model}\nRisposta: ${res.message}`);
-    } else {
-        const errTxt = apiClient.formatErrorMessage(res.error);
-        alert(`❌ Errore di Connessione:\n\n${errTxt}`);
+    setTimeout(() => {
+        const current = getUserCredits();
+        setUserCredits(current + 1);
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+        }
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> +1 Consulto Accreditato!';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-clapperboard"></i> Guarda Video (+1)';
+            }, 3000);
+        }
+        alert('✨ Complimenti! Hai ricaricato +1 Consulto Gratuito grazie allo sponsor.');
+    }, 2500);
+}
+
+function buyPremiumPass() {
+    const confirmed = confirm('Procedere con lo sblocco del Pass Arcano (5 Consulti + Download PDF HD) a 1.99€?');
+    if (confirmed) {
+        const current = getUserCredits();
+        setUserCredits(current + 5);
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+        }
+        closeCreditsModal();
+        alert('🔮 Pass Arcano Attivato! Hai ricevuto +5 Consulti e accesso prioritario.');
     }
 }
+
+function copyReferralLink() {
+    const link = `https://matrice-agtechds.vercel.app/?ref=${Math.random().toString(36).substring(7)}`;
+    navigator.clipboard.writeText(link).then(() => {
+        const current = getUserCredits();
+        setUserCredits(current + 2);
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+        }
+        alert('🎉 Link Invito copiato negli appunti!\nTi sono stati accreditati +2 Consulti Omaggio.');
+    });
+}
+
+window.openCreditsModal = openCreditsModal;
+window.closeCreditsModal = closeCreditsModal;
+window.watchRewardedAd = watchRewardedAd;
+window.buyPremiumPass = buyPremiumPass;
+window.copyReferralLink = copyReferralLink;
 
 // --- Report Modal Handlers ---
 function openReportModal() {
