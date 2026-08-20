@@ -883,6 +883,7 @@ function submitWizardData() {
     updateMatrixVisualization(name, date);
 
     // Format message to AI
+    const currentYear = new Date().getFullYear();
     const messageToAI = `Ecco i miei dati completi per l'analisi della Matrice del Destino:
 
 * **Nome completo:** ${name}
@@ -890,8 +891,9 @@ function submitWizardData() {
 * **Orario di nascita:** ${time}
 * **Città e nazione:** ${place}
 * **Tipo di analisi scelta:** ${type}
+* **Anno Solare di Riferimento:** ${currentYear}
 
-Ti confermo tutti i dati. Puoi procedere con il report strutturato a 14 sezioni come previsto dal protocollo.`;
+Ti confermo tutti i dati. Procedi con il report completo a 14 sezioni calcolando l'Anno Personale per l'anno in corso (${currentYear}) e la relativa proiezione decennale.`;
 
     closeWizardModal();
     sendMessage(messageToAI);

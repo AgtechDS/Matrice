@@ -33,10 +33,17 @@ export default async function handler(req) {
         // Generous token budget to guarantee all 14 sections are generated completely without truncation
         let maxTokens = 8192;
 
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentDateStr = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+
         let finalMessages = [...messages];
         if (!finalMessages.some(m => m.role === 'system')) {
             const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino e degli Archetipi Numerologici. 
 Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA. 
+🔴 ANNO E DATA CORRENTE: Oggi è il ${currentDateStr} e l'ANNO SOLARE CORRENTE È IL ${currentYear} (riduzione numerologica: 2+0+2+6 = 10 -> 1).
+Per la Sezione 9 (Anni Personali), Sezione 10 (Mesi Personali) e Sezione 11 (Giorni Personali), DEVI TASSATIVAMENTE calcolare l'Anno Personale per l'anno corrente ${currentYear} (e la proiezione a 10 anni dal ${currentYear} al ${currentYear + 10}). 
+NON usare MAI anni obsoleti passati come 2024 o 2023.
 DEVI GENERARE L'INTERO REPORT COMPLETO A 14 SEZIONI SENZA INTERROMPERTI O TRONCARE IL TESTO.
 Procedi sequenzialmente punto per punto da "## 1. Sintesi iniziale" fino a "## 14. Sintesi Finale & Disclaimer di Consapevolezza".
 Sii esaustivo, profondo ed eloquente in ciascuna sezione, mantenendo uno stile archetipico solenne e trasformativo.`;
