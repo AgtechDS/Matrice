@@ -1485,33 +1485,33 @@ function renderOnboardingStep() {
 
     if (targetEl && spotlight && tooltip) {
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        const rect = targetEl.getBoundingClientRect();
+        
+        setTimeout(() => {
+            const rect = targetEl.getBoundingClientRect();
+            const pad = 6;
+            spotlight.style.top = `${Math.max(0, rect.top - pad)}px`;
+            spotlight.style.left = `${Math.max(0, rect.left - pad)}px`;
+            spotlight.style.width = `${rect.width + pad * 2}px`;
+            spotlight.style.height = `${rect.height + pad * 2}px`;
 
-        // Position Spotlight with padding
-        const pad = 6;
-        spotlight.style.top = `${rect.top - pad}px`;
-        spotlight.style.left = `${rect.left - pad}px`;
-        spotlight.style.width = `${rect.width + pad * 2}px`;
-        spotlight.style.height = `${rect.height + pad * 2}px`;
+            const tooltipWidth = Math.min(320, window.innerWidth - 30);
+            tooltip.style.width = `${tooltipWidth}px`;
 
-        // Position Tooltip smartly
-        const tooltipWidth = 320;
-        let tooltipTop = rect.bottom + 14;
-        let tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+            let tooltipTop = rect.bottom + 14;
+            let tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
 
-        // Viewport boundaries
-        if (tooltipLeft < 15) tooltipLeft = 15;
-        if (tooltipLeft + tooltipWidth > window.innerWidth - 15) {
-            tooltipLeft = window.innerWidth - tooltipWidth - 15;
-        }
+            if (tooltipLeft < 15) tooltipLeft = 15;
+            if (tooltipLeft + tooltipWidth > window.innerWidth - 15) {
+                tooltipLeft = window.innerWidth - tooltipWidth - 15;
+            }
 
-        // If tooltip exceeds bottom of screen, position above target
-        if (tooltipTop + 180 > window.innerHeight) {
-            tooltipTop = Math.max(15, rect.top - 190);
-        }
+            if (tooltipTop + 180 > window.innerHeight) {
+                tooltipTop = Math.max(15, rect.top - 200);
+            }
 
-        tooltip.style.top = `${tooltipTop}px`;
-        tooltip.style.left = `${tooltipLeft}px`;
+            tooltip.style.top = `${tooltipTop}px`;
+            tooltip.style.left = `${tooltipLeft}px`;
+        }, 120);
     }
 }
 
@@ -1536,6 +1536,12 @@ function closeOnboardingTour() {
     const overlay = document.getElementById('onboarding-overlay');
     if (overlay) overlay.classList.remove('active');
 }
+
+window.addEventListener('resize', () => {
+    if (document.getElementById('onboarding-overlay')?.classList.contains('active')) {
+        renderOnboardingStep();
+    }
+});
 
 // Expose to window for inline onclicks
 window.openPrivacyModal = openPrivacyModal;

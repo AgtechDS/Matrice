@@ -1664,7 +1664,7 @@ body {
 
 /* Print/PDF Watermark AI Act Disclosure */
 @media print {
-    .app-header, .chat-input-container, .quick-suggestions, .credits-badge-btn, .modal-overlay, .gdpr-banner-container, .app-footer {
+    .app-header, .chat-input-container, .quick-suggestions, .credits-badge-btn, .modal-overlay, .gdpr-banner-container, .app-footer, .onboarding-overlay {
         display: none !important;
     }
 
@@ -1672,6 +1672,17 @@ body {
         background: #fff !important;
         color: #000 !important;
     }
+
+    .report-ai-watermark {
+        display: block !important;
+        margin-top: 30px;
+        padding-top: 15px;
+        border-top: 1px solid #ccc;
+        font-size: 8pt;
+        color: #666;
+        text-align: center;
+    }
+}
 
 /* ===================================================
    ONBOARDING GUIDED TOUR & SPOTLIGHT SYSTEM
