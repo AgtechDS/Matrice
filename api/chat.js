@@ -30,14 +30,16 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: { message: 'Nessuna API Key configurata.' } }), { status: 401 });
         }
 
-        let maxTokens = 3800;
-        if (baseUrl.includes('openrouter.ai') || baseUrl.includes('tokenrouter.com') || baseUrl.includes('llmapi.ai')) {
-            maxTokens = 6000;
-        }
+        // Generous token budget to guarantee all 14 sections are generated completely without truncation
+        let maxTokens = 8192;
 
         let finalMessages = [...messages];
         if (!finalMessages.some(m => m.role === 'system')) {
-            const sysPrompt = `Sei un consulente esperto e rigoroso in numerologia simbolica e archetipica. Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA. NON mostrare MAI passaggi di calcolo aperti, conteggi di lettere o bozze. Genera DIRETTAMENTE il report strutturato a 14 sezioni partendo da "## 1. Sintesi iniziale" fino a "## 14. Sintesi Finale".`;
+            const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino e degli Archetipi Numerologici. 
+Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA. 
+DEVI GENERARE L'INTERO REPORT COMPLETO A 14 SEZIONI SENZA INTERROMPERTI O TRONCARE IL TESTO.
+Procedi sequenzialmente punto per punto da "## 1. Sintesi iniziale" fino a "## 14. Sintesi Finale & Disclaimer di Consapevolezza".
+Sii esaustivo, profondo ed eloquente in ciascuna sezione, mantenendo uno stile archetipico solenne e trasformativo.`;
             finalMessages.unshift({ role: 'system', content: sysPrompt });
         }
 
@@ -49,7 +51,7 @@ export default async function handler(req) {
             max_tokens: maxTokens
         };
 
-        if (activeBaseUrl.includes('groq.com') || activeModel.includes('qwen') || activeModel.includes('gpt-oss')) {
+        if (activeBaseUrl.includes('groq.com') || activeModel.includes('qwen') || activeModel.includes('gpt-oss') || activeModel.includes('deepseek')) {
             payload.reasoning_effort = 'none';
         }
 

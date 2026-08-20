@@ -557,18 +557,13 @@ async function sendMessage(overrideText = null) {
     if (state.isGenerating) return;
     const input = document.getElementById('chat-input');
     const text = (overrideText || input.value).trim();
-    if (!text) return;
-
-    // Check credits
-    const credits = getUserCredits();
-    if (credits <= 0) {
+    // Check credits before starting
+    const currentCredits = getUserCredits();
+    if (currentCredits <= 0) {
         openCreditsModal();
-        alert('✦ Hai esaurito i consulti disponibili.\nRicarica gratuitamente guardando un breve video sponsor oppure attiva il Pass Arcano!');
+        alert('✦ Hai esaurito i consulti disponibili.\nRicarica gratuitamente condividendo il tuo link Invita un Amico o attiva il Pass Arcano!');
         return;
     }
-
-    // Decrement 1 credit for the reading
-    setUserCredits(credits - 1);
 
     if (!overrideText) {
         input.value = '';
@@ -721,6 +716,13 @@ async function sendMessage(overrideText = null) {
 
             // Also check if assistant response contains structured report info
             extractMatrixFromAssistantReport(finalText);
+
+            // Deduct 1 credit strictly upon valid response reception!
+            const currentCredits = getUserCredits();
+            if (currentCredits > 0) {
+                setUserCredits(currentCredits - 1);
+                console.log(`✦ Consulto completato: crediti scalati da ${currentCredits} a ${currentCredits - 1}.`);
+            }
         },
         onError: (err) => {
             setGeneratingState(false);
@@ -1007,10 +1009,14 @@ function checkPaymentReturn() {
         const addedCredits = parseInt(urlParams.get('credits') || '5', 10);
         const current = getUserCredits();
         setUserCredits(current + addedCredits);
+        localStorage.setItem('md_has_premium_pass', 'true');
+        const prevPurchased = parseInt(localStorage.getItem('destiny_total_purchased') || '0', 10);
+        localStorage.setItem('destiny_total_purchased', String(prevPurchased + addedCredits));
+        
         if (typeof confetti === 'function') {
             confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
         }
-        alert(`🎉 Pagamento completato con successo su Stripe!\n\nTi sono stati accreditati +${addedCredits} Consulti sulla Matrice del Destino.`);
+        alert(`🎉 Pagamento completato con successo su Stripe!\n\nTi sono stati accreditati +${addedCredits} Consulti e hai sbloccato l'Esportazione PDF & Markdown illimitata!`);
         window.history.replaceState({}, document.title, window.location.pathname);
     } else if (urlParams.get('payment') === 'cancel') {
         alert('Pagamento annullato. Nessun addebito è stato effettuato.');
@@ -1105,13 +1111,39 @@ function closeReportModal() {
     document.getElementById('report-modal').classList.remove('active');
 }
 
+function hasPremiumAccess() {
+    return localStorage.getItem('md_has_premium_pass') === 'true' || parseInt(localStorage.getItem('destiny_total_purchased') || '0', 10) > 0;
+}
+
 function copyReportMarkdown() {
+    if (!hasPremiumAccess()) {
+        openCreditsModal();
+        alert('🔒 Funzione Riservata ai Possessori di Pass Arcano\n\nLa copia integrale in formato Markdown e il download dei report in alta definizione sono inclusi con il Pass Arcano (1.99€) o Mappa Maestra (4.49€).\n\nAttiva un Pass per sbloccare l\'esportazione illimitata!');
+        return;
+    }
+
     const assistantMsgs = state.messages.filter(m => m.role === 'assistant');
+    if (assistantMsgs.length === 0) {
+        alert('Nessun report generato da copiare.');
+        return;
+    }
     const fullContent = assistantMsgs.map(m => m.content).join('\n\n---\n\n');
     const fullWithWatermark = fullContent + '\n\n---\n*📄 Generato da Sistema di Intelligenza Artificiale Generativa — Matrice del Destino AI (Conforme Art. 50 Regolamento UE 2024/1689).*';
     navigator.clipboard.writeText(fullWithWatermark).then(() => {
-        alert('Report copiato negli appunti in formato Markdown!');
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+        }
+        alert('✨ Report completo copiato negli appunti in formato Markdown!');
     });
+}
+
+function printReport() {
+    if (!hasPremiumAccess()) {
+        openCreditsModal();
+        alert('🔒 Funzione Riservata ai Possessori di Pass Arcano\n\nLa stampa e il salvataggio in PDF ad alta definizione del Report Completo sono inclusi con il Pass Arcano (1.99€) o Mappa Maestra (4.49€).\n\nAttiva un Pass per stampare o scaricare il PDF!');
+        return;
+    }
+    window.print();
 }
 
 function generateLocalReportFallback() {
@@ -1631,6 +1663,8 @@ window.closeOnboardingTour = closeOnboardingTour;
 window.nextOnboardingStep = nextOnboardingStep;
 window.prevOnboardingStep = prevOnboardingStep;
 window.resumeTourAudio = resumeTourAudio;
+window.copyReportMarkdown = copyReportMarkdown;
+window.printReport = printReport;
 
 // --- Master Application Initialization ---
 function initApp() {
