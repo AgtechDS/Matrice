@@ -371,8 +371,9 @@ function appendMessage(role, content, reasoning = '', isWelcome = false) {
 
 // --- Welcome Audio Autoplay Controller ---
 function playWelcomeAudio(btnElement) {
-    if (btnElement && btnElement.classList.contains('playing')) {
-        stopAllSpeech();
+    const onboardingOverlay = document.getElementById('onboarding-overlay');
+    if (onboardingOverlay && onboardingOverlay.classList.contains('active')) {
+        console.log("Tour in progress: welcome audio delayed until tour ends.");
         return Promise.resolve();
     }
 
@@ -405,33 +406,18 @@ function playWelcomeAudio(btnElement) {
     });
 }
 
-function setupWelcomeAutoplay() {
-    const welcomeBtn = document.getElementById('btn-welcome-audio');
-    
-    // Try instant play on load
-    playWelcomeAudio(welcomeBtn).catch(() => {
-        // If blocked by browser autoplay policy, start on first click/touch/keypress anywhere
-        const onFirstUserAction = () => {
-            const btn = document.getElementById('btn-welcome-audio');
-            if (!currentAudio) {
-                playWelcomeAudio(btn).catch(() => {});
-            }
-            document.removeEventListener('click', onFirstUserAction);
-            document.removeEventListener('touchstart', onFirstUserAction);
-            document.removeEventListener('keydown', onFirstUserAction);
-        };
-        document.addEventListener('click', onFirstUserAction, { once: true });
-        document.addEventListener('touchstart', onFirstUserAction, { once: true });
-        document.addEventListener('keydown', onFirstUserAction, { once: true });
-    });
-}
-
 // --- TTS Speech Synthesis Controller ---
 let currentSpeakingBtn = null;
 let currentAudio = null;
 
-function toggleSpeech(text, btnElement) {
-    if (!text) return;
+function toggleSpeech(text, btnElement, directAudioUrl = null) {
+    const onboardingOverlay = document.getElementById('onboarding-overlay');
+    if (onboardingOverlay && onboardingOverlay.classList.contains('active')) {
+        console.log("Tour in progress: speech delayed until tour concludes.");
+        return;
+    }
+
+    if (!text && !directAudioUrl) return;
 
     if (btnElement && btnElement.classList.contains('playing')) {
         stopAllSpeech();
@@ -439,6 +425,10 @@ function toggleSpeech(text, btnElement) {
     }
 
     stopAllSpeech();
+
+    if (directAudioUrl) {
+        return playWelcomeAudio(btnElement);
+    }
 
     // Clean markdown symbols for natural speech
     const plainText = text
@@ -1446,6 +1436,8 @@ let isTourAudioMuted = false;
 
 function playTourAudioForStep(stepIndex) {
     if (isTourAudioMuted) return;
+
+    stopAllSpeech();
 
     if (tourAudioPlayer) {
         tourAudioPlayer.pause();
