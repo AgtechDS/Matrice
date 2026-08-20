@@ -905,7 +905,21 @@ Ti confermo tutti i dati. Puoi procedere con il report strutturato a 14 sezioni 
     sendMessage(messageToAI);
 }
 
-// --- Credit System & Monetization Engine ---
+// --- Supabase Cloud Sync & Authentication Setup ---
+const SUPABASE_URL = 'https://hqjqmcpifcirnrjyertc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxanFtY3BpZmNpcm5yanllcnRjIiwicm9sZSI6ImhxanFtY3BpZmNpcm5yanllcnRjIiwiaWF0IjoxNzY2OTc3NzcyLCJleHAiOjIwOTIyNzM3NzJ9.GzLbunggPCzAxuxtsqdMmdMoQBg8DwgyPW9WPw2e7-w';
+
+let supabaseClient = null;
+try {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+} catch (e) {
+    console.warn('Supabase initialization warning:', e);
+}
+
+// --- Credits & Wallet Management ---
+
 function getUserCredits() {
     const raw = localStorage.getItem('destiny_credits');
     if (raw === null) {
@@ -916,9 +930,27 @@ function getUserCredits() {
     return isNaN(val) ? 1 : val;
 }
 
-function setUserCredits(count) {
-    localStorage.setItem('destiny_credits', String(Math.max(0, count)));
+function setUserCredits(count, syncToCloud = true) {
+    const validCount = Math.max(0, count);
+    localStorage.setItem('destiny_credits', String(validCount));
     updateCreditsDisplay();
+
+    if (syncToCloud && supabaseClient && state.currentUser) {
+        supabaseClient.from('user_matrix_wallets')
+            .upsert({
+                user_id: state.currentUser.id,
+                email: state.currentUser.email,
+                credits: validCount,
+                updated_at: new Date().toISOString()
+            })
+            .then(({ error }) => {
+                if (error) console.error('Cloud wallet sync error:', error);
+                else {
+                    const cloudDisplay = document.getElementById('cloud-credits-display');
+                    if (cloudDisplay) cloudDisplay.textContent = validCount;
+                }
+            });
+    }
 }
 
 function updateCreditsDisplay() {
@@ -1190,6 +1222,182 @@ function purgeAllUserData() {
     }
 }
 
+// --- Supabase Cloud Sync & Authentication ---
+
+function openAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+async function signInWithGoogle() {
+    if (!supabaseClient) {
+        alert("Servizio di autenticazione non disponibile al momento.");
+        return;
+    }
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin
+        }
+    });
+    if (error) alert("Errore di autenticazione Google: " + error.message);
+}
+
+async function signInWithEmail() {
+    const email = document.getElementById('auth-email')?.value?.trim();
+    const password = document.getElementById('auth-password')?.value;
+
+    if (!email || !password) {
+        showAuthMsg("Inserisci sia email che password.", "error");
+        return;
+    }
+
+    showAuthMsg("Accesso in corso...", "info");
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+        showAuthMsg("Errore di accesso: " + error.message, "error");
+    } else {
+        showAuthMsg("✅ Accesso effettuato con successo!", "success");
+        setTimeout(closeAuthModal, 1000);
+    }
+}
+
+async function signUpWithEmail() {
+    const email = document.getElementById('auth-email')?.value?.trim();
+    const password = document.getElementById('auth-password')?.value;
+
+    if (!email || !password) {
+        showAuthMsg("Inserisci email e password per registrarti.", "error");
+        return;
+    }
+
+    if (password.length < 6) {
+        showAuthMsg("La password deve contenere almeno 6 caratteri.", "error");
+        return;
+    }
+
+    showAuthMsg("Registrazione in corso...", "info");
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) {
+        showAuthMsg("Errore di registrazione: " + error.message, "error");
+    } else {
+        showAuthMsg("🎉 Registrazione completata! Controlla la tua email o accedi.", "success");
+    }
+}
+
+async function signOutUser() {
+    if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+        state.currentUser = null;
+        updateAuthUI(null);
+        alert("Account disconnesso. I crediti rimangono salvati sul cloud e accessibili al prossimo login.");
+        closeAuthModal();
+    }
+}
+
+function showAuthMsg(msg, type = 'info') {
+    const el = document.getElementById('auth-status-msg');
+    if (!el) return;
+    el.style.display = 'block';
+    el.style.color = type === 'error' ? '#ef4444' : (type === 'success' ? '#34d399' : '#38bdf8');
+    el.textContent = msg;
+}
+
+function updateAuthUI(user) {
+    const unloggedView = document.getElementById('auth-unlogged-view');
+    const loggedView = document.getElementById('auth-logged-view');
+    const authBtnLabel = document.getElementById('auth-btn-label');
+    const authHeaderIcon = document.getElementById('auth-header-icon');
+    const loggedEmail = document.getElementById('auth-logged-email');
+    const cloudDisplay = document.getElementById('cloud-credits-display');
+
+    if (user) {
+        if (unloggedView) unloggedView.style.display = 'none';
+        if (loggedView) loggedView.style.display = 'block';
+        if (loggedEmail) loggedEmail.textContent = user.email;
+        if (authBtnLabel) authBtnLabel.textContent = user.email.split('@')[0];
+        if (authHeaderIcon) {
+            authHeaderIcon.className = 'fa-solid fa-cloud-check';
+            authHeaderIcon.style.color = 'var(--gold-bright)';
+        }
+        if (cloudDisplay) cloudDisplay.textContent = getUserCredits();
+    } else {
+        if (unloggedView) unloggedView.style.display = 'block';
+        if (loggedView) loggedView.style.display = 'none';
+        if (authBtnLabel) authBtnLabel.textContent = 'Sincronizza';
+        if (authHeaderIcon) {
+            authHeaderIcon.className = 'fa-solid fa-cloud';
+            authHeaderIcon.style.color = 'var(--cyan-accent)';
+        }
+    }
+}
+
+async function initSupabaseAuth() {
+    if (!supabaseClient) return;
+
+    // Listen for auth state changes
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (session && session.user) {
+            state.currentUser = session.user;
+            updateAuthUI(session.user);
+
+            // Fetch and merge cloud wallet
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_matrix_wallets')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                const localCredits = getUserCredits();
+
+                if (data) {
+                    // Merge local with cloud: take the maximum
+                    const merged = Math.max(data.credits, localCredits);
+                    setUserCredits(merged, false);
+                    if (merged !== data.credits) {
+                        await supabaseClient
+                            .from('user_matrix_wallets')
+                            .update({ credits: merged, updated_at: new Date().toISOString() })
+                            .eq('user_id', session.user.id);
+                    }
+                } else {
+                    // Create initial cloud wallet with local credits
+                    await supabaseClient
+                        .from('user_matrix_wallets')
+                        .insert({
+                            user_id: session.user.id,
+                            email: session.user.email,
+                            credits: localCredits
+                        });
+                }
+                updateCreditsDisplay();
+            } catch (err) {
+                console.error('Wallet sync initialization error:', err);
+            }
+        } else {
+            state.currentUser = null;
+            updateAuthUI(null);
+        }
+    });
+
+    // Check initial session
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session && session.user) {
+            state.currentUser = session.user;
+            updateAuthUI(session.user);
+        }
+    } catch (e) {
+        console.warn('GetSession check notice:', e);
+    }
+}
+
 // Expose to window for inline onclicks
 window.openPrivacyModal = openPrivacyModal;
 window.closePrivacyModal = closePrivacyModal;
@@ -1204,6 +1412,12 @@ window.acceptAllCookies = acceptAllCookies;
 window.rejectOptionalCookies = rejectOptionalCookies;
 window.toggleGdprPreferencesPanel = toggleGdprPreferencesPanel;
 window.openGdprPreferences = openGdprPreferences;
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.signInWithGoogle = signInWithGoogle;
+window.signInWithEmail = signInWithEmail;
+window.signUpWithEmail = signUpWithEmail;
+window.signOutUser = signOutUser;
 
 // --- Master Application Initialization ---
 function initApp() {
@@ -1215,6 +1429,7 @@ function initApp() {
     updateCreditsDisplay();
     checkPaymentReturn();
     initGdprConsent();
+    initSupabaseAuth();
 }
 
 if (document.readyState === 'loading') {
