@@ -906,8 +906,8 @@ Ti confermo tutti i dati. Puoi procedere con il report strutturato a 14 sezioni 
 }
 
 // --- Supabase Cloud Sync & Authentication Setup ---
-const SUPABASE_URL = 'https://hqjqmcpifcirnrjyertc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxanFtY3BpZmNpcm5yanllcnRjIiwicm9sZSI6ImhxanFtY3BpZmNpcm5yanllcnRjIiwiaWF0IjoxNzY2OTc3NzcyLCJleHAiOjIwOTIyNzM3NzJ9.GzLbunggPCzAxuxtsqdMmdMoQBg8DwgyPW9WPw2e7-w';
+const SUPABASE_URL = 'https://zzprmoehmzwzsumuuzdw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6cHJtb2VobXp3enN1bXV1emR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNzg4MzksImV4cCI6MjEwMjc1NDgzOX0.chFyYCLXZcnBdUfzyXDOh4QtWmgKRZcewo9gmBoRVuA';
 
 let supabaseClient = null;
 try {
