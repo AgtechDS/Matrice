@@ -1058,7 +1058,9 @@ function openReportModal() {
         reportContainer.innerHTML = '<p style="color: var(--text-muted);">Nessun report generato finora. Avvia una sessione di analisi.</p>';
     } else {
         const fullContent = assistantMsgs.map(m => m.content).join('\n\n---\n\n');
-        reportContainer.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullContent) : fullContent;
+        const legalDisclosure = `\n\n---\n\n<div class="report-ai-watermark" style="margin-top: 24px; padding-top: 12px; border-top: 1px dashed rgba(212,175,55,0.3); font-size: 0.8rem; color: var(--text-muted); text-align: center;"><em>Documento generato da Sistema di Intelligenza Artificiale Generativa (Matrice del Destino AI) in conformità all'Art. 50 del Regolamento (UE) 2024/1689 (AI Act). Disciplina simbolica e filosofica archetipica non deterministica.</em></div>`;
+        const rendered = typeof marked !== 'undefined' ? marked.parse(fullContent) : fullContent;
+        reportContainer.innerHTML = rendered + legalDisclosure;
     }
     document.getElementById('report-modal').classList.add('active');
 }
@@ -1069,7 +1071,8 @@ function closeReportModal() {
 function copyReportMarkdown() {
     const assistantMsgs = state.messages.filter(m => m.role === 'assistant');
     const fullContent = assistantMsgs.map(m => m.content).join('\n\n---\n\n');
-    navigator.clipboard.writeText(fullContent).then(() => {
+    const fullWithWatermark = fullContent + '\n\n---\n*📄 Generato da Sistema di Intelligenza Artificiale Generativa — Matrice del Destino AI (Conforme Art. 50 Regolamento UE 2024/1689).*';
+    navigator.clipboard.writeText(fullWithWatermark).then(() => {
         alert('Report copiato negli appunti in formato Markdown!');
     });
 }
@@ -1088,6 +1091,120 @@ function generateLocalReportFallback() {
     state.messages.push({ role: 'assistant', content: reportMarkdown });
 }
 
+// --- GDPR & EU AI Act Compliance Engine ---
+
+function initGdprConsent() {
+    const consent = localStorage.getItem('md_gdpr_consent');
+    const banner = document.getElementById('gdpr-banner');
+    if (!consent && banner) {
+        banner.classList.add('active');
+    } else if (consent === 'all') {
+        updateGoogleConsent(true);
+    }
+}
+
+function updateGoogleConsent(granted) {
+    if (typeof gtag === 'function') {
+        gtag('consent', 'update', {
+            'ad_storage': granted ? 'granted' : 'denied',
+            'analytics_storage': granted ? 'granted' : 'denied',
+            'ad_user_data': granted ? 'granted' : 'denied',
+            'ad_personalization': granted ? 'granted' : 'denied'
+        });
+    }
+}
+
+function acceptAllCookies() {
+    localStorage.setItem('md_gdpr_consent', 'all');
+    updateGoogleConsent(true);
+    const banner = document.getElementById('gdpr-banner');
+    if (banner) banner.classList.remove('active');
+}
+
+function rejectOptionalCookies() {
+    localStorage.setItem('md_gdpr_consent', 'essential_only');
+    updateGoogleConsent(false);
+    const banner = document.getElementById('gdpr-banner');
+    if (banner) banner.classList.remove('active');
+}
+
+function toggleGdprPreferencesPanel() {
+    const panel = document.getElementById('gdpr-preferences-panel');
+    if (panel) panel.classList.toggle('active');
+}
+
+function openGdprPreferences() {
+    closeCookieModal();
+    const banner = document.getElementById('gdpr-banner');
+    if (banner) {
+        banner.classList.add('active');
+        const panel = document.getElementById('gdpr-preferences-panel');
+        if (panel) panel.classList.add('active');
+    }
+}
+
+// Legal Modals Open/Close
+function openPrivacyModal() {
+    const modal = document.getElementById('privacy-modal');
+    if (modal) modal.classList.add('active');
+}
+function closePrivacyModal() {
+    const modal = document.getElementById('privacy-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function openAiActModal() {
+    const modal = document.getElementById('ai-act-modal');
+    if (modal) modal.classList.add('active');
+}
+function closeAiActModal() {
+    const modal = document.getElementById('ai-act-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function openCookieModal() {
+    const modal = document.getElementById('cookie-modal');
+    if (modal) modal.classList.add('active');
+}
+function closeCookieModal() {
+    const modal = document.getElementById('cookie-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function openTermsModal() {
+    const modal = document.getElementById('terms-modal');
+    if (modal) modal.classList.add('active');
+}
+function closeTermsModal() {
+    const modal = document.getElementById('terms-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+// Right to be Forgotten (GDPR Art. 17)
+function purgeAllUserData() {
+    if (confirm("⚠️ DIRITTO ALL'OBLIO (GDPR Art. 17)\n\nVuoi cancellare definitivamente tutti i dati anagrafici, la cronologia della chat e i dati salvati in questo browser?\n\nQuesta azione è immediata e irreversibile.")) {
+        localStorage.clear();
+        sessionStorage.clear();
+        alert("✅ Tutti i tuoi dati personali e la cronologia sono stati cancellati definitivamente dal browser.");
+        window.location.reload();
+    }
+}
+
+// Expose to window for inline onclicks
+window.openPrivacyModal = openPrivacyModal;
+window.closePrivacyModal = closePrivacyModal;
+window.openAiActModal = openAiActModal;
+window.closeAiActModal = closeAiActModal;
+window.openCookieModal = openCookieModal;
+window.closeCookieModal = closeCookieModal;
+window.openTermsModal = openTermsModal;
+window.closeTermsModal = closeTermsModal;
+window.purgeAllUserData = purgeAllUserData;
+window.acceptAllCookies = acceptAllCookies;
+window.rejectOptionalCookies = rejectOptionalCookies;
+window.toggleGdprPreferencesPanel = toggleGdprPreferencesPanel;
+window.openGdprPreferences = openGdprPreferences;
+
 // --- Master Application Initialization ---
 function initApp() {
     console.log("🌌 Inizializzazione Matrice del Destino...");
@@ -1097,6 +1214,7 @@ function initApp() {
     setupWelcomeAutoplay();
     updateCreditsDisplay();
     checkPaymentReturn();
+    initGdprConsent();
 }
 
 if (document.readyState === 'loading') {

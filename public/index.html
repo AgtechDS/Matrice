@@ -10,10 +10,22 @@
     <!-- Marked.js and Confetti (Local Bundled) -->
     <script src="js/marked.min.js"></script>
     <script src="js/confetti.browser.min.js"></script>
+    <!-- Google Consent Mode v2 Default Denied (GDPR / ePrivacy Compliance) -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'analytics_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'wait_for_update': 500
+        });
+    </script>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7028010056444247" crossorigin="anonymous"></script>
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css?v=13">
+    <link rel="stylesheet" href="css/style.css?v=14">
 </head>
 <body>
     <!-- Background Canvas for dynamic sacred geometry particles -->
@@ -286,6 +298,25 @@
                 </div>
             </section>
         </main>
+
+        <!-- App Legal & Compliance Footer (GDPR / EU AI Act Compliant) -->
+        <footer class="app-footer">
+            <div class="footer-left">
+                <span class="ai-act-badge"><i class="fa-solid fa-robot"></i> Sistema AI Generativa (UE 2024/1689)</span>
+                <span>© 2026 Matrice del Destino — Tutti i diritti riservati.</span>
+            </div>
+            <div class="footer-links">
+                <button class="footer-link" onclick="openPrivacyModal()">Privacy Policy (GDPR)</button>
+                <span class="dot-sep">•</span>
+                <button class="footer-link" onclick="openCookieModal()">Cookie Policy & Consenso</button>
+                <span class="dot-sep">•</span>
+                <button class="footer-link" onclick="openAiActModal()">Trasparenza AI Act</button>
+                <span class="dot-sep">•</span>
+                <button class="footer-link" onclick="openTermsModal()">Termini di Servizio</button>
+                <span class="dot-sep">•</span>
+                <button class="footer-link danger" onclick="purgeAllUserData()" title="Cancella subito tutti i dati inseriti (Diritto all'Oblio)"><i class="fa-solid fa-trash-can"></i> Cancella Dati</button>
+            </div>
+        </footer>
     </div>
 
     <!-- Modal 1: Guided Data Wizard -->
@@ -426,9 +457,195 @@
         </div>
     </div>
 
+    <!-- Modal 4: GDPR Privacy Policy Modal -->
+    <div class="modal-overlay" id="privacy-modal">
+        <div class="modal-card" style="max-width: 850px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-shield-halved text-gold"></i> Informativa Privacy (GDPR UE 2016/679)</h3>
+                <button class="modal-close" onclick="closePrivacyModal()">&times;</button>
+            </div>
+            <div class="modal-body legal-modal-body">
+                <div class="legal-badge-box">
+                    <strong>Informativa sul Trattamento dei Dati Personali</strong> redatta ai sensi degli Artt. 13 e 14 del Regolamento Generale sulla Protezione dei Dati (Regolamento UE 2016/679 - "GDPR") e del D.Lgs. 196/2003 e s.m.i.
+                </div>
+
+                <h4>1. Titolare del Trattamento</h4>
+                <p>Il Titolare del Trattamento dei dati è <strong>Matrice del Destino AI</strong> (AgTech Designe). Per qualsiasi richiesta in materia di privacy o per l'esercizio dei diritti di seguito descritti, è possibile contattare il Titolare direttamente tramite i canali ufficiali della piattaforma.</p>
+
+                <h4>2. Tipologia di Dati Trattati e Finalità</h4>
+                <p>La piattaforma tratta esclusivamente i dati forniti volontariamente dall'utente per la corretta generazione della mappa numerologica e del consulto archetipico:</p>
+                <ul>
+                    <li><strong>Dati di Nascita e Anagrafici:</strong> Nome, data di nascita, orario e luogo di nascita. Tali dati sono utilizzati <em>esclusivamente</em> per il calcolo matematico dell'Ottagramma Sacro dei 22 Arcani e per la generazione in tempo reale dell'interpretazione tramite AI.</li>
+                    <li><strong>Dati Tecnici di Navigazione:</strong> Indirizzo IP anonimizzato, log di sicurezza del server, stato della sessione e crediti residui.</li>
+                </ul>
+
+                <h4>3. Base Giuridica del Trattamento</h4>
+                <p>Il trattamento dei dati si fonda sulle seguenti basi giuridiche (Art. 6 GDPR):</p>
+                <ul>
+                    <li><strong>Esecuzione di un Contratto / Servizio Richiesto (Art. 6.1.b):</strong> Elaborazione dei dati di nascita per generare la Matrice e il report.</li>
+                    <li><strong>Consenso Esplicito (Art. 6.1.a):</strong> Per l'eventuale erogazione di annunci pubblicitari personalizzati (Google AdSense) e per l'accettazione del servizio di intelligenza artificiale generativa.</li>
+                </ul>
+
+                <h4>4. Principio di Minimizzazione ed Effimerità</h4>
+                <p>I tuoi dati anagrafici vengono elaborati <strong>in memoria locale e via streaming sicuro (TLS 1.3)</strong>. La piattaforma non memorizza i tuoi dati personali in banche dati permanenti non crittografate. La cronologia e i crediti sono conservati localmente nel tuo browser (Local Storage) e possono essere eliminati in qualsiasi momento tramite il pulsante <strong>"Cancella Dati"</strong>.</p>
+
+                <h4>5. Destinatari dei Dati e Trasferimenti verso Paesi Terzi</h4>
+                <p>I dati necessari all'erogazione del servizio possono essere elaborati da fornitori terzi qualificati in qualità di Responsabili del Trattamento conformi al GDPR:</p>
+                <ul>
+                    <li><strong>Stripe Inc.:</strong> Gestione crittografata dei pagamenti certificata PCI-DSS Livello 1.</li>
+                    <li><strong>Google LLC (Google AdSense & Gemini TTS):</strong> Erogazione di annunci conformi a Google Consent Mode v2 e sintesi vocale neurale.</li>
+                    <li><strong>Vercel Inc.:</strong> Hosting edge ad alta sicurezza con CDN europea.</li>
+                </ul>
+
+                <h4>6. Diritti dell'Interessato (Artt. 15-22 GDPR)</h4>
+                <p>In qualità di interessato, hai il diritto di:</p>
+                <ul>
+                    <li>Ottenere la conferma dell'esistenza o meno di dati personali che ti riguardano e la loro comunicazione;</li>
+                    <li>Chiedere la rettifica, l'aggiornamento o la <strong>cancellazione immediata ("Diritto all'Oblio")</strong> dei dati;</li>
+                    <li>Revocare in qualsiasi momento il consenso prestato;</li>
+                    <li>Proporre reclamo all'Autorità Garante per la Protezione dei Dati Personali (<a href="https://www.garanteprivacy.it" target="_blank" style="color: var(--cyan-accent);">www.garanteprivacy.it</a>).</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-header primary" onclick="closePrivacyModal()">Ho Letto e Compreso</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: EU AI Act & Deontological Transparency Modal -->
+    <div class="modal-overlay" id="ai-act-modal">
+        <div class="modal-card" style="max-width: 850px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-robot text-gold"></i> Trasparenza AI Act (Regolamento UE 2024/1689)</h3>
+                <button class="modal-close" onclick="closeAiActModal()">&times;</button>
+            </div>
+            <div class="modal-body legal-modal-body">
+                <div class="legal-badge-box" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1);">
+                    <i class="fa-solid fa-circle-info text-gold"></i> <strong>Dichiarazione di Trasparenza ai sensi dell'Articolo 50 del Regolamento (UE) 2024/1689 (European AI Act)</strong>
+                </div>
+
+                <h4>1. Interazione con Sistema di Intelligenza Artificiale</h4>
+                <p>Ai sensi dell'Art. 50 dell'AI Act dell'Unione Europea, si informa espressamente l'utente che <strong>i testi interpretativi, le risposte della chat e i report generati in questa applicazione sono prodotti da un sistema di Intelligenza Artificiale Generativa</strong> addestrato su modelli linguistici avanzati.</p>
+
+                <h4>2. Natura Simbolico-Archetipica e Filosofica</h4>
+                <p>La Matrice del Destino e i 22 Arcani Maggiori rappresentano un <strong>sistema di modelli simbolici, filosofici e introspettivi millenari</strong> volti a stimolare l'autoriflessione e la crescita personale. L'interpretazione numerologica <strong>non determina un destino immutabile</strong> e non ha natura predittiva o deterministica.</p>
+
+                <h4>3. Disclaimer Deontologico, Medico-Sanitario e Giuridico</h4>
+                <p style="color: #fbbf24; font-weight: 500;">
+                    ⚠️ L'assistente AI e i report generati NON costituiscono né sostituiscono in alcun modo:
+                </p>
+                <ul>
+                    <li>Diagnosi, pareri, terapie o trattamenti medici, psicologici o psichiatrici;</li>
+                    <li>Consulenze legali, fiscali, aziendali o finanziarie professionali;</li>
+                    <li>Indicazioni vincolanti per decisioni di vita critiche.</li>
+                </ul>
+                <p>Per qualsiasi problematica di natura medica, psicologica, legale o finanziaria, l'utente è invitato a rivolgersi esclusivamente a professionisti abilitati e iscritti ai rispettivi albi professionali.</p>
+
+                <h4>4. Tracciabilità e Supervisione Umana (Human Agency)</h4>
+                <p>L'utente mantiene in ogni momento la piena autonomia e responsabilità nell'interpretazione dei simboli e delle indicazioni fornite dal sistema AI.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-header primary" onclick="closeAiActModal()">Accetta & Continua</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Cookie Policy Modal -->
+    <div class="modal-overlay" id="cookie-modal">
+        <div class="modal-card" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-cookie-bite text-gold"></i> Informativa Estesa sui Cookie</h3>
+                <button class="modal-close" onclick="closeCookieModal()">&times;</button>
+            </div>
+            <div class="modal-body legal-modal-body">
+                <p>Questa applicazione utilizza cookie e tecnologie affini per garantire il corretto funzionamento della piattaforma e per consentire l'erogazione di annunci pubblicitari tramite Google AdSense nel rispetto del GDPR e della Direttiva ePrivacy.</p>
+
+                <h4>1. Cookie Tecnici Strettamente Necessari</h4>
+                <p>Questi cookie sono essenziali per consentire la navigazione e memorizzare lo stato temporaneo della sessione (es. crediti consulti, preferenze di consenso privacy). Non richiedono il preventivo consenso dell'utente e non possono essere disattivati.</p>
+
+                <h4>2. Cookie di Profilazione e Pubblicitari (Google AdSense)</h4>
+                <p>Forniti da Google LLC per erogare annunci pubblicitari (inclusi i video sponsor per sbloccare consulti gratuiti). Questi cookie vengono attivati <strong>esclusivamente previo tuo consenso esplicito</strong> in conformità a Google Consent Mode v2.</p>
+
+                <h4>3. Come Gestire le Preferenze sui Cookie</h4>
+                <p>Puoi modificare o revocare il tuo consenso in qualunque momento cliccando su <strong>"Cookie Policy & Consenso"</strong> nel piè di pagina dell'applicazione.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-header" onclick="openGdprPreferences()">Personalizza Consenso</button>
+                <button class="btn-header primary" onclick="closeCookieModal()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 7: Terms of Service Modal -->
+    <div class="modal-overlay" id="terms-modal">
+        <div class="modal-card" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-scale-balanced text-gold"></i> Termini e Condizioni di Servizio</h3>
+                <button class="modal-close" onclick="closeTermsModal()">&times;</button>
+            </div>
+            <div class="modal-body legal-modal-body">
+                <h4>1. Oggetto del Servizio</h4>
+                <p>Matrice del Destino AI fornisce un servizio digitale interattivo di calcolo geometrico e interpretazione archetipica dei 22 Arcani tramite modelli di Intelligenza Artificiale.</p>
+
+                <h4>2. Crediti, Acquisti e Pagamenti (Stripe)</h4>
+                <p>L'utente può effettuare consulti utilizzando i crediti gratuiti (inclusi o ricaricati tramite sponsor) oppure acquistando pacchetti premium tramite la piattaforma sicura Stripe.</p>
+
+                <h4>3. Diritto di Recesso per Contenuti Digitali (Codice del Consumo)</h4>
+                <p>Ai sensi dell'<strong>Art. 59, comma 1, lett. o) del D.Lgs. 206/2005 (Codice del Consumo)</strong>, l'utente riconosce e accetta espressamente che l'acquisto di crediti o pass per consulti immediati comporta l'erogazione istantanea del contenuto digitale, con conseguente perdita del diritto di recesso una volta avviata l'elaborazione del consulto da parte dell'AI.</p>
+
+                <h4>4. Limitazione di Responsabilità</h4>
+                <p>Il servizio è fornito "così com'è" a scopo puramente divulgativo, culturale e di intrattenimento introspettivo. Il Titolare non è responsabile per decisioni personali, economiche o relazionali intraprese dall'utente.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-header primary" onclick="closeTermsModal()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GDPR Interactive Floating Consent Banner -->
+    <div class="gdpr-banner-container" id="gdpr-banner">
+        <div class="gdpr-banner-header">
+            <i class="fa-solid fa-shield-halved text-gold" style="font-size: 1.3rem;"></i>
+            <h4 class="gdpr-banner-title">Tutela della Privacy & Consenso Trasparente</h4>
+        </div>
+        <p class="gdpr-banner-text">
+            Rispettiamo la tua privacy ai sensi del <strong>GDPR (Reg. UE 2016/679)</strong> e dell'<strong>AI Act (Reg. UE 2024/1689)</strong>. Utilizziamo cookie tecnici essenziali e partner certificati (Google AdSense & Stripe). I tuoi dati anagrafici sono trattati localmente per la sola generazione dell'Ottagramma e non vengono venduti a terzi. Leggi la nostra <a onclick="openPrivacyModal()">Informativa Privacy</a> e <a onclick="openCookieModal()">Cookie Policy</a>.
+        </p>
+
+        <!-- Expandable Preferences Panel -->
+        <div class="gdpr-preferences-panel" id="gdpr-preferences-panel">
+            <div class="gdpr-toggle-row">
+                <div class="gdpr-toggle-info">
+                    <h5>Cookie Tecnici & Sessione (Necessari)</h5>
+                    <p>Indispensabili per il salvataggio dei crediti, sessione chat e sicurezza crittografica.</p>
+                </div>
+                <input type="checkbox" checked disabled style="accent-color: var(--gold-primary); transform: scale(1.2);">
+            </div>
+            <div class="gdpr-toggle-row">
+                <div class="gdpr-toggle-info">
+                    <h5>Cookie Pubblicitari Personalizzati (Google AdSense)</h5>
+                    <p>Consentono l'erogazione di annunci video sponsor per ottenere consulti gratuiti.</p>
+                </div>
+                <input type="checkbox" id="consent-ads-toggle" checked style="accent-color: var(--gold-primary); transform: scale(1.2);">
+            </div>
+        </div>
+
+        <div class="gdpr-actions">
+            <button class="btn-gdpr customize" onclick="toggleGdprPreferencesPanel()">
+                <i class="fa-solid fa-sliders"></i> Personalizza
+            </button>
+            <button class="btn-gdpr reject" onclick="rejectOptionalCookies()">
+                Solo Necessari (Rifiuta)
+            </button>
+            <button class="btn-gdpr accept-all" onclick="acceptAllCookies()">
+                <i class="fa-solid fa-check"></i> Accetta Tutti
+            </button>
+        </div>
+    </div>
+
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=13"></script>
-    <script src="js/api-client.js?v=13"></script>
-    <script src="js/app.js?v=13"></script>
+    <script src="js/matrix-calc.js?v=14"></script>
+    <script src="js/api-client.js?v=14"></script>
+    <script src="js/app.js?v=14"></script>
 </body>
 </html>
