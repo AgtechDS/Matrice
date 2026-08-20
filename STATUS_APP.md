@@ -1,7 +1,7 @@
 # 🌌 Matrice del Destino — Sacred Oracle (STATUS_APP)
 
 > **Ultimo Aggiornamento**: 2026-08-20  
-> **Versione**: 2.1.0 (MIT-Grade Sacred UI & Monetization Ready)  
+> **Versione**: 2.2.0 (Supabase Cloud Sync, GDPR/AI Act 2026, Stripe & AdSense Monetization)  
 > **Stato Globale**: 🟢 **OPERATIVO & VERIFICATO (100%)**
 
 ---
@@ -11,13 +11,16 @@
 | Proprietà | Dettaglio / Valore |
 | :--- | :--- |
 | **Applicazione** | Matrice del Destino — Oracolo Archetipico & Numerologia Sacra |
-| **UI/UX Design** | MIT-Grade Neumorfismo 2.0, Deep Obsidian Dark Mode & Golden Accents (`#dfb15b`) |
+| **UI/UX Design** | MIT-Grade Neumorfismo 2.0, Deep Obsidian Dark Mode, Responsive Mobile/Tablet |
 | **Ambiente Locale** | `http://localhost:3000` (Node.js Native HTTP Server / Next.js) |
-| **Target Cloud** | Vercel Serverless (`api/*.js` + Static CDN) |
-| **Fornitore LLM** | **LLMAPI.ai** (`deepseek-v4-flash-0731`) — Trasparente per l'utente finale |
+| **Target Cloud** | Vercel Serverless (`api/*.js` + Static CDN) — Live: `https://matrice-jade.vercel.app` |
+| **Database & Auth** | **Supabase Postgres (EU West 1)** con Row Level Security (RLS) & Google/Email OAuth |
+| **Cloud Sync** | Sincronizzazione automatica del wallet crediti multi-dispositivo (PC, Mobile, Tablet) |
+| **Fornitore LLM** | **LLMAPI.ai** (`deepseek-v4-flash-0731`) / Groq Smart Auto-Routing |
 | **Costo LLM** | ~$0.028 per 1M token (~0.00007$ per lettura completa a 14 sezioni) |
-| **Sintesi Vocale TTS** | Google Gemini 3.1 Flash Neural Audio (100% Free senza carta) |
-| **Monetizzazione & Crediti** | Sistema Wallet Crediti Energetici + Rewarded Ads + Pass Arcano + Referral |
+| **Sintesi Vocale TTS** | Google Gemini 3.1 Flash Neural Audio (Voce `Aoede` & `Puck`) |
+| **Monetizzazione** | Stripe Checkout (1.99€ Pass 5 / 4.49€ Mappa Maestra) + Google AdSense Rewarded Ads (`ca-pub-7028010056444247`) |
+| **Conformità Legale** | **GDPR (Reg. UE 2016/679)**, **EU AI Act 2026 (Reg. UE 2024/1689 Art. 50)**, Google Consent Mode v2, Diritto all'Oblio |
 
 ---
 
