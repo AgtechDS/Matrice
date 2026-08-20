@@ -1236,16 +1236,27 @@ function closeAuthModal() {
 
 async function signInWithGoogle() {
     if (!supabaseClient) {
-        alert("Servizio di autenticazione non disponibile al momento.");
+        showAuthMsg("Servizio di autenticazione non disponibile al momento.", "error");
         return;
     }
-    const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: window.location.origin
+    showAuthMsg("Connessione a Google in corso...", "info");
+    try {
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) {
+            if (error.message?.includes('not enabled') || error.message?.includes('Unsupported provider') || JSON.stringify(error).includes('validation_failed')) {
+                showAuthMsg("ℹ️ Il login Google richiede l'abilitazione in Supabase Dashboard. Puoi accedere o registrarti subito con Email e Password qui sotto!", "info");
+            } else {
+                showAuthMsg("Errore Google: " + error.message, "error");
+            }
         }
-    });
-    if (error) alert("Errore di autenticazione Google: " + error.message);
+    } catch (err) {
+        showAuthMsg("ℹ️ Puoi accedere o registrarti subito inserendo la tua Email e Password qui sotto!", "info");
+    }
 }
 
 async function signInWithEmail() {
