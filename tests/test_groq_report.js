@@ -11,7 +11,7 @@ async function test() {
             },
             {
                 role: 'user',
-                content: "Ecco i miei dati:\n- Nome: Andrea Giuliano\n- Data di nascita: 28/11/1992\n- Orario: 12:45\n- Luogo: Catania, Italia\n- Tipo di analisi: 2. Numerologica + Astrologica simbolica\n\nConfermo tutti i dati inseriti. Procedi con la stesura dell'intero report a 14 sezioni in italiano."
+                content: "Ecco i miei dati:\n- Nome: Elena Solaris\n- Data di nascita: 21/07/1995\n- Orario: 10:30\n- Luogo: Firenze, Italia\n- Tipo di analisi: 2. Numerologica + Astrologica simbolica\n\nConfermo tutti i dati inseriti. Procedi con la stesura dell'intero report a 14 sezioni in italiano."
             }
         ],
         temperature: 0.5,

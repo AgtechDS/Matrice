@@ -132,7 +132,7 @@ function calculateCompleteMatrix(fullName, birthDateStr) {
     }
 
     return {
-        name: fullName || 'Andrea Giuliano',
+        name: fullName || 'Elena Solaris',
         birthDate: { day, month, year, formatted: `${day}/${month}/${year}` },
         numerology: {
             lifePath,

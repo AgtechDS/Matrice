@@ -1,6 +1,6 @@
 # Sintesi Esecutiva — Analisi Numerologica & Archetipica
 
-**Soggetto:** Andrea Giuliano | **Nascita:** 28/11/1992 (Catania, 12:45)  
+**Soggetto:** Elena Solaris | **Nascita:** 21/07/1995 (Firenze, 12:45)  
 **Profilo Essenziale:** *Pioniere della Visione & Maestro dell'Armonia (1-5-9-11-33/6)*
 
 ---

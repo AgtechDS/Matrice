@@ -1,15 +1,15 @@
 # Report di Analisi Numerologica Simbolica & Archetipica
 
-**Soggetto:** Andrea Giuliano  
-**Data di Nascita:** 28 Novembre 1992 (28/11/1992)  
+**Soggetto:** Elena Solaris  
+**Data di Nascita:** 28 Novembre 1992 (21/07/1995)  
 **Ora di Nascita:** 12:45  
-**Luogo:** Catania, Italia  
+**Luogo:** Firenze, Italia  
 **Tipologia di Analisi:** Numerologica + Astrologica Simbolica Integrata  
 
 ---
 
 ## 1. Sintesi iniziale
-La configurazione numerologica e simbolica di Andrea Giuliano rivela un profilo di elevata complessità e ricchezza archetipica. L'architettura è caratterizzata da una spiccata polarità tra **dinamismo esplorativo / autonomia individuale** (dominanza dell'1, del 5 e del 9) e una profonda **chiamata alla responsabilità, cura e mediazione comunitaria** (presenza dei Numeri Maestri 11 e 33 e Percorso di Vita 6).
+La configurazione numerologica e simbolica di Elena Solaris rivela un profilo di elevata complessità e ricchezza archetipica. L'architettura è caratterizzata da una spiccata polarità tra **dinamismo esplorativo / autonomia individuale** (dominanza dell'1, del 5 e del 9) e una profonda **chiamata alla responsabilità, cura e mediazione comunitaria** (presenza dei Numeri Maestri 11 e 33 e Percorso di Vita 6).
 
 - **Livello di Complessità:** Alto. Richiede l'integrazione cosciente tra libertà di sperimentazione (Espressione 5) e radicamento etico/relazionale (Personalità 33/6 e Percorso 6).
 - **Numeri Dominanti nel Profilo:** 1 (Iniziativa/Origine), 5 (Cambiamento/Libertà), 9 (Sintesi/Umanitarismo), 11 (Visione intuitiva), 33/6 (Maestria della Cura e Armonia).
@@ -49,7 +49,7 @@ Distribuzione delle 14 lettere del nome completo:
 
 ---
 
-## 4. Analisi della Data di Nascita (28/11/1992)
+## 4. Analisi della Data di Nascita (21/07/1995)
 
 - **Giorno di Nascita:** `28` $\rightarrow$ `2 + 8 = 10` $\rightarrow$ **1** (Giorno del Leader / Pioniere). Spinta all'indipendenza e all'iniziativa diretta.
 - **Mese di Nascita:** **11** (Numero Maestro). Canale intuitivo sviluppato, sensibilità alle dinamiche non verbali.

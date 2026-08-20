@@ -309,7 +309,7 @@ export function calculateCompleteMatrix(fullName: string, birthDateStr: string):
   const astro = calculateZodiacSign(day, month);
 
   return {
-    name: fullName || 'Andrea Giuliano',
+    name: fullName || 'Elena Solaris',
     birthDate: {
       day,
       month,

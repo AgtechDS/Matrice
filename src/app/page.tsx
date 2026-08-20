@@ -31,7 +31,7 @@ Per costruire la tua mappa energetica completa, procederemo raccogliendo i tuoi 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'matrix' | 'grid' | 'aspects'>('matrix');
   const [matrixData, setMatrixData] = useState<MatrixData>(() =>
-    calculateCompleteMatrix('Andrea Giuliano', '1992-11-28')
+    calculateCompleteMatrix('Elena Solaris', '1995-07-21')
   );
   const [selectedNode, setSelectedNode] = useState<MatrixNode>(() => matrixData.matrix.top);
   const [messages, setMessages] = useState<ChatMessage[]>([]);

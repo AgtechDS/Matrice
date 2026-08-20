@@ -20,7 +20,7 @@ async function testNoReasoning() {
                     },
                     {
                         role: 'user',
-                        content: "Ecco i miei dati:\n- Nome: Andrea Giuliano\n- Data: 28/11/1992\n- Ora: 12:45\n- Luogo: Catania, Italia\n- Tipo: 2. Numerologica + Astrologica simbolica\n\nConfermo tutti i dati inseriti. Genera ora il report completo strutturato a 14 sezioni in lingua italiana."
+                        content: "Ecco i miei dati:\n- Nome: Elena Solaris\n- Data: 21/07/1995\n- Ora: 10:30\n- Luogo: Firenze, Italia\n- Tipo: 2. Numerologica + Astrologica simbolica\n\nConfermo tutti i dati inseriti. Genera ora il report completo strutturato a 14 sezioni in lingua italiana."
                     }
                 ],
                 temperature: 0.5,

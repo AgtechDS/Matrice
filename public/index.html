@@ -57,6 +57,10 @@
             </div>
 
             <div class="header-actions">
+                <button class="btn-header" id="btn-start-tour" onclick="startOnboardingTour(true)" title="Avvia la guida interattiva con illuminazione">
+                    <i class="fa-solid fa-compass" style="color: var(--gold-bright);"></i>
+                    <span>Tour</span>
+                </button>
                 <button class="btn-header" id="btn-auth-header" onclick="openAuthModal()" title="Accedi per sincronizzare i tuoi crediti su tutti i dispositivi">
                     <i class="fa-solid fa-cloud" id="auth-header-icon" style="color: var(--cyan-accent);"></i>
                     <span id="auth-btn-label">Sincronizza</span>
@@ -338,12 +342,12 @@
                 </p>
                 <div class="form-group">
                     <label class="form-label">Nome Completo all'Anagrafe</label>
-                    <input type="text" class="form-control" id="wz-name" placeholder="Es. Andrea Giuliano">
+                    <input type="text" class="form-control" id="wz-name" placeholder="Es. Elena Solaris">
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="form-group">
                         <label class="form-label">Data di Nascita</label>
-                        <input type="date" class="form-control" id="wz-date" value="1992-11-28">
+                        <input type="date" class="form-control" id="wz-date" value="1995-07-21">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Orario di Nascita</label>
@@ -352,7 +356,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Città e Nazione di Nascita</label>
-                    <input type="text" class="form-control" id="wz-place" placeholder="Es. Roma, Italia">
+                    <input type="text" class="form-control" id="wz-place" placeholder="Es. Firenze, Italia">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Tipo di Analisi</label>
@@ -719,9 +723,29 @@
         </div>
     </div>
 
+    <!-- Interactive Onboarding Guided Tour Overlay -->
+    <div class="onboarding-overlay" id="onboarding-overlay">
+        <div class="onboarding-spotlight" id="onboarding-spotlight"></div>
+        <div class="onboarding-tooltip" id="onboarding-tooltip">
+            <div class="onboarding-header">
+                <span class="onboarding-step-badge" id="onboarding-step-badge">1 di 5</span>
+                <button class="onboarding-close-btn" onclick="closeOnboardingTour()" title="Chiudi">&times;</button>
+            </div>
+            <h4 class="onboarding-title" id="onboarding-title"><i class="fa-solid fa-wand-magic-sparkles text-gold"></i> Titolo Step</h4>
+            <p class="onboarding-desc" id="onboarding-desc">Descrizione dello step interattivo.</p>
+            <div class="onboarding-footer">
+                <button class="btn-onboarding-skip" onclick="closeOnboardingTour()">Salta Tour</button>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn-header" id="btn-onboarding-prev" style="padding: 6px 10px; font-size: 0.78rem;" onclick="prevOnboardingStep()">Indietro</button>
+                    <button class="btn-onboarding-next" id="btn-onboarding-next" onclick="nextOnboardingStep()">Avanti <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=17"></script>
-    <script src="js/api-client.js?v=17"></script>
-    <script src="js/app.js?v=17"></script>
+    <script src="js/matrix-calc.js?v=18"></script>
+    <script src="js/api-client.js?v=18"></script>
+    <script src="js/app.js?v=18"></script>
 </body>
 </html>

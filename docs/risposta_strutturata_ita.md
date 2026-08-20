@@ -6,7 +6,7 @@ La configurazione simbolica emersa dai dati forniti rivela una struttura comples
 
 * **Valore del nome (Andrea):** 25 → 7. Il 7 simboleggia l'indagine interiore, la ricerca di significato e la tendenza a filtrare le esperienze attraverso una lente analitica e riflessiva.
 * **Valore del cognome (Giuliano):** 43 → 7. Il 7 si ripete, rafforzando il tema della profondità, della riservatezza selettiva e della ricerca di verità che trascende l'apparenza.
-* **Valore completo (Andrea Giuliano):** 68 → 14 → 5. Il 5 è il numero del movimento, della curiosità, dell'adattabilità e della comunicazione. Indica una natura simbolica orientata all'esplorazione e alla trasformazione attraverso l'esperienza diretta.
+* **Valore completo (Elena Solaris):** 68 → 14 → 5. Il 5 è il numero del movimento, della curiosità, dell'adattabilità e della comunicazione. Indica una natura simbolica orientata all'esplorazione e alla trasformazione attraverso l'esperienza diretta.
 * **Numero dell'Espressività (Comportamento):** 5. Rappresenta la modalità con cui l'energia si manifesta nel mondo. Simboleggia flessibilità, bisogno di varietà, capacità di mediare tra contesti diversi e una spinta naturale verso il cambiamento.
 * **Numero dell'Anima (Desiderio Interiore):** 8. Calcolato dalle vocali (A-E-A-I-U-I-A-O = 35 → 8). Indica un orientamento interiore verso la struttura, l'equilibrio tra materiale e spirituale, la gestione delle risorse e il desiderio di lasciare un'impronta tangibile.
 * **Numero della Personalità:** 33 → 6. Calcolato dalle consonanti (N-D-R-G-L-N = 33 → 6). Il 33 è un numero maestro che, riducendosi a 6, simboleggia la cura, la responsabilità relazionale, l'armonia e la tendenza a fare da ponte tra gli altri. La personalità percepita dagli altri è spesso associata a affidabilità, equilibrio e un'aura di protezione.
@@ -15,7 +15,7 @@ La configurazione simbolica emersa dai dati forniti rivela una struttura comples
 
 ## 3. Frequenza delle lettere
 
-Analizzando le lettere di "ANDREA GIULIANO" secondo il sistema pitagorico, otteniamo la seguente distribuzione:
+Analizzando le lettere di "ELENA SOLARIS" secondo il sistema pitagorico, otteniamo la seguente distribuzione:
 * 1: 3 occorrenze
 * 2: 0 occorrenze
 * 3: 2 occorrenze

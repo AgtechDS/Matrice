@@ -21,7 +21,7 @@ async function testBoth() {
                         },
                         {
                             role: 'user',
-                            content: "Ecco i miei dati confermati:\n- Nome: Andrea Giuliano\n- Data: 28/11/1992\n- Ora: 12:45\n- Luogo: Catania\n- Tipo: 2. Numerologica + Astrologica simbolica\nGenera il report completo delle 14 sezioni in italiano."
+                            content: "Ecco i miei dati confermati:\n- Nome: Elena Solaris\n- Data: 21/07/1995\n- Ora: 10:30\n- Luogo: Firenze\n- Tipo: 2. Numerologica + Astrologica simbolica\nGenera il report completo delle 14 sezioni in italiano."
                         }
                     ],
                     temperature: 0.5,

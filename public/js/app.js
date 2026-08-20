@@ -868,10 +868,10 @@ function closeWizardModal() {
 }
 
 function fillSampleData() {
-    document.getElementById('wz-name').value = 'Andrea Giuliano';
-    document.getElementById('wz-date').value = '1992-11-28';
-    document.getElementById('wz-time').value = 'non disponibile';
-    document.getElementById('wz-place').value = 'Roma, Italia';
+    document.getElementById('wz-name').value = 'Elena Solaris';
+    document.getElementById('wz-date').value = '1995-07-21';
+    document.getElementById('wz-time').value = '10:30';
+    document.getElementById('wz-place').value = 'Firenze, Italia';
     document.getElementById('wz-type').value = '2. Numerologica + Astrologica simbolica';
 }
 
@@ -1110,8 +1110,8 @@ function copyReportMarkdown() {
 }
 
 function generateLocalReportFallback() {
-    let name = 'Andrea Giuliano';
-    let date = '1992-11-28';
+    let name = 'Elena Solaris';
+    let date = '1995-07-21';
     if (state.currentMatrixData) {
         name = state.currentMatrixData.name;
         date = `${state.currentMatrixData.birthDate.year}-${String(state.currentMatrixData.birthDate.month).padStart(2, '0')}-${String(state.currentMatrixData.birthDate.day).padStart(2, '0')}`;
@@ -1409,6 +1409,134 @@ async function initSupabaseAuth() {
     }
 }
 
+// --- Interactive Onboarding Guided Tour & Spotlight System ---
+
+const ONBOARDING_STEPS = [
+    {
+        targetId: 'btn-welcome-tts',
+        title: '🎙️ Ascolto Guidato & Voce Neurale',
+        desc: 'Clicca qui per ascoltare la guida vocale neurale che ti accompagnerà nell\'interpretazione dei tuoi 22 Arcani.'
+    },
+    {
+        targetId: 'btn-open-wizard',
+        title: '🌌 Calcola la Tua Mappa',
+        desc: 'Inserisci i tuoi dati anagrafici con il modulo guidato per costruire istantaneamente il tuo Ottagramma Sacro.'
+    },
+    {
+        targetId: 'btn-open-credits',
+        title: '💎 Portafoglio Consulti & Sponsor',
+        desc: 'Hai consulti a disposizione! Puoi ricaricare gratis guardando video sponsor o attivando il Pass Arcano.'
+    },
+    {
+        targetId: 'btn-auth-header',
+        title: '☁️ Sincronizzazione Multi-Dispositivo',
+        desc: 'Accedi con Google o Email per sincronizzare i tuoi crediti e letture tra Smartphone, Tablet e PC.'
+    },
+    {
+        targetId: 'chat-input',
+        title: '💬 Dialogo con l\'Oracolo',
+        desc: 'Scrivi qui le tue domande o usa i chip rapidi in basso per esplorare Karma, Denaro e Relazioni.'
+    }
+];
+
+let currentOnboardingIndex = 0;
+
+function startOnboardingTour(force = false) {
+    const done = localStorage.getItem('md_onboarding_done');
+    if (done && !force) return;
+
+    currentOnboardingIndex = 0;
+    const overlay = document.getElementById('onboarding-overlay');
+    if (overlay) overlay.classList.add('active');
+    renderOnboardingStep();
+}
+
+function renderOnboardingStep() {
+    const step = ONBOARDING_STEPS[currentOnboardingIndex];
+    if (!step) {
+        closeOnboardingTour();
+        return;
+    }
+
+    const targetEl = document.getElementById(step.targetId) || document.querySelector(step.targetId);
+    const spotlight = document.getElementById('onboarding-spotlight');
+    const tooltip = document.getElementById('onboarding-tooltip');
+    const badge = document.getElementById('onboarding-step-badge');
+    const titleEl = document.getElementById('onboarding-title');
+    const descEl = document.getElementById('onboarding-desc');
+    const prevBtn = document.getElementById('btn-onboarding-prev');
+    const nextBtn = document.getElementById('btn-onboarding-next');
+
+    if (badge) badge.textContent = `${currentOnboardingIndex + 1} di ${ONBOARDING_STEPS.length}`;
+    if (titleEl) titleEl.innerHTML = step.title;
+    if (descEl) descEl.textContent = step.desc;
+
+    if (prevBtn) {
+        prevBtn.style.display = currentOnboardingIndex === 0 ? 'none' : 'inline-block';
+    }
+
+    if (nextBtn) {
+        if (currentOnboardingIndex === ONBOARDING_STEPS.length - 1) {
+            nextBtn.innerHTML = '✨ Inizia Subito';
+        } else {
+            nextBtn.innerHTML = 'Avanti <i class="fa-solid fa-chevron-right"></i>';
+        }
+    }
+
+    if (targetEl && spotlight && tooltip) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const rect = targetEl.getBoundingClientRect();
+
+        // Position Spotlight with padding
+        const pad = 6;
+        spotlight.style.top = `${rect.top - pad}px`;
+        spotlight.style.left = `${rect.left - pad}px`;
+        spotlight.style.width = `${rect.width + pad * 2}px`;
+        spotlight.style.height = `${rect.height + pad * 2}px`;
+
+        // Position Tooltip smartly
+        const tooltipWidth = 320;
+        let tooltipTop = rect.bottom + 14;
+        let tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+
+        // Viewport boundaries
+        if (tooltipLeft < 15) tooltipLeft = 15;
+        if (tooltipLeft + tooltipWidth > window.innerWidth - 15) {
+            tooltipLeft = window.innerWidth - tooltipWidth - 15;
+        }
+
+        // If tooltip exceeds bottom of screen, position above target
+        if (tooltipTop + 180 > window.innerHeight) {
+            tooltipTop = Math.max(15, rect.top - 190);
+        }
+
+        tooltip.style.top = `${tooltipTop}px`;
+        tooltip.style.left = `${tooltipLeft}px`;
+    }
+}
+
+function nextOnboardingStep() {
+    if (currentOnboardingIndex < ONBOARDING_STEPS.length - 1) {
+        currentOnboardingIndex++;
+        renderOnboardingStep();
+    } else {
+        closeOnboardingTour();
+    }
+}
+
+function prevOnboardingStep() {
+    if (currentOnboardingIndex > 0) {
+        currentOnboardingIndex--;
+        renderOnboardingStep();
+    }
+}
+
+function closeOnboardingTour() {
+    localStorage.setItem('md_onboarding_done', 'true');
+    const overlay = document.getElementById('onboarding-overlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
 // Expose to window for inline onclicks
 window.openPrivacyModal = openPrivacyModal;
 window.closePrivacyModal = closePrivacyModal;
@@ -1429,6 +1557,10 @@ window.signInWithGoogle = signInWithGoogle;
 window.signInWithEmail = signInWithEmail;
 window.signUpWithEmail = signUpWithEmail;
 window.signOutUser = signOutUser;
+window.startOnboardingTour = startOnboardingTour;
+window.closeOnboardingTour = closeOnboardingTour;
+window.nextOnboardingStep = nextOnboardingStep;
+window.prevOnboardingStep = prevOnboardingStep;
 
 // --- Master Application Initialization ---
 function initApp() {
@@ -1441,6 +1573,7 @@ function initApp() {
     checkPaymentReturn();
     initGdprConsent();
     initSupabaseAuth();
+    setTimeout(() => startOnboardingTour(false), 900);
 }
 
 if (document.readyState === 'loading') {

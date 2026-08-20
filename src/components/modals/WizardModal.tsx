@@ -11,10 +11,10 @@ interface WizardModalProps {
 }
 
 export default function WizardModal({ isOpen, onClose, onSubmitData }: WizardModalProps) {
-  const [name, setName] = useState('Andrea Giuliano');
-  const [birthDate, setBirthDate] = useState('1992-11-28');
-  const [birthTime, setBirthTime] = useState('12:45');
-  const [birthPlace, setBirthPlace] = useState('Catania, Italia');
+  const [name, setName] = useState('Elena Solaris');
+  const [birthDate, setBirthDate] = useState('1995-07-21');
+  const [birthTime, setBirthTime] = useState('10:30');
+  const [birthPlace, setBirthPlace] = useState('Firenze, Italia');
   const [analysisType, setAnalysisType] = useState('2');
 
   if (!isOpen) return null;
@@ -76,7 +76,7 @@ export default function WizardModal({ isOpen, onClose, onSubmitData }: WizardMod
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="es. Andrea Giuliano"
+              placeholder="es. Elena Solaris"
               required
               className="w-full bg-black/50 border border-gold/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-gold"
             />

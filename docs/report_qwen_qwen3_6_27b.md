@@ -3,10 +3,10 @@
 Here's a thinking process:
 
 1.  **Analyze User Input:**
-   - Name: Andrea Giuliano
-   - Date: 28/11/1992
+   - Name: Elena Solaris
+   - Date: 21/07/1995
    - Time: 12:45
-   - Place: Catania
+   - Place: Firenze
    - Type: 2. Numerologica + Astrologica simbolica
    - Language: Italian
    - Request: Generate the complete report with all 14 sections as specified in the prompt.
@@ -26,7 +26,7 @@ Here's a thinking process:
 3.  **Data Processing & Calculations (Mental/Step-by-Step):**
    *Need to calculate numerological values based on Pythagorean system (A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=1, K=2, L=3, M=4, N=5, O=6, P=7, Q=8, R=9, S=1, T=2, U=3, V=4, W=5, X=6, Y=7, Z=8).*
 
-   **Name: Andrea Giuliano**
+   **Name: Elena Solaris**
    - A=1, N=5, D=4, R=9, E=5, A=1 -> Andrea: 1+5+4+9+5+1 = 25 -> 2+5 = 7
    - G=7, I=9, U=3, L=3, I=9, A=1, N=5, O=6 -> Giuliano: 7+9+3+3+9+1+5+6 = 43 -> 4+3 = 7
    - Full Name: 25 + 43 = 68 -> 6+8 = 14 -> 1+4 = 5
@@ -36,7 +36,7 @@ Here's a thinking process:
    - *Maturità:* Espressività (5) + Percorso Vita (calculated below)
    - *Equilibrio:* Based on date of birth (standard method: Day + Month, reduce, then add Day again, reduce). Let's calculate Day=28->10->1, Month=11. 1+11=12->3. 3+1=4. So Equilibrio = 4. (Alternative method varies, but I'll stick to a consistent one and explain it).
 
-   **Date: 28/11/1992**
+   **Date: 21/07/1995**
    - Day: 28 -> 2+8 = 10 -> 1
    - Month: 11 (Master Number, keep as 11 or reduce to 2? I'll note 11/2)
    - Year: 1992 -> 1+9+9+2 = 21 -> 3
@@ -46,7 +46,7 @@ Here's a thinking process:
    - *Karmic Debt:* 13, 14, 16, 19 in calculations? Full name sum was 68 (14->5). 14 is a karmic debt number. I'll note it.
    - *Talents/Sfide:* Derived from numbers.
 
-   **Frequency of Letters (Andrea Giuliano):**
+   **Frequency of Letters (Elena Solaris):**
    A(1): 3 times
    N(5): 2 times
    D(4): 1
@@ -85,7 +85,7 @@ Here's a thinking process:
    Rare: 4, 6, 7
    I'll explain symbolic meaning.
 
-   **Matrix (3x3):** Standard Lo Shu grid based on date 28/11/1992.
+   **Matrix (3x3):** Standard Lo Shu grid based on date 21/07/1995.
    Grid positions:
    4 9 2
    3 5 7
@@ -151,7 +151,7 @@ Here's a thinking process:
 
    **Astrological Integration (Type 2):**
    Sun: Sagittario (28 Nov 1992) -> Fire, mutable, expansion, truth-seeking.
-   Moon: Need to calculate approximate. Nov 28, 1992, 12:45 Catania. Moon was likely in Scorpio or Sagittarius. I'll note it symbolically without claiming precision, focusing on the archetypal blend: Fire/Water or Fire/Fire. I'll stick to symbolic integration: Sagittario (espansione, ricerca di significato) + numerologia (6, 5, 11). I'll weave astrological archetypes into the numerological framework as requested, emphasizing symbolic resonance rather than predictive astrology.
+   Moon: Need to calculate approximate. Nov 28, 1992, 12:45 Firenze. Moon was likely in Scorpio or Sagittarius. I'll note it symbolically without claiming precision, focusing on the archetypal blend: Fire/Water or Fire/Fire. I'll stick to symbolic integration: Sagittario (espansione, ricerca di significato) + numerologia (6, 5, 11). I'll weave astrological archetypes into the numerological framework as requested, emphasizing symbolic resonance rather than predictive astrology.
 
    **Metadata Simbolici:**
    I'll construct the profile based on the numbers: Core (6/11), Driver (5/1), Visione (9/11), Metodo (4/1), etc. All motivated by the calculations.
@@ -166,7 +166,7 @@ Here's a thinking process:
    I will carefully follow the 14-section structure. I'll ensure calculations are transparent, interpretations are symbolic and introspective, and the tone matches the prompt. I'll double-check numerology math.
 
    *Calculations Check:*
-   Name: Andrea Giuliano
+   Name: Elena Solaris
    A(1) N(5) D(4) R(9) E(5) A(1) = 25 -> 7
    G(7) I(9) U(3) L(3) I(9) A(1) N(5) O(6) = 43 -> 7
    Total: 68 -> 14 -> 5 (Espressività)

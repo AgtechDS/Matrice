@@ -3,10 +3,10 @@
 Here's a thinking process:
 
 1.  **Analyze User Input:**
-   - Name: Andrea Giuliano
-   - Birth Date: 28/11/1992
+   - Name: Elena Solaris
+   - Birth Date: 21/07/1995
    - Birth Time: 12:45
-   - Birth Place: Catania, Italia
+   - Birth Place: Firenze, Italia
    - Analysis Type: 2. Numerologica + Astrologica simbolica
    - User confirms data and requests immediate generation of the 14-section report in Italian.
 
@@ -27,7 +27,7 @@ Here's a thinking process:
    *Pythagorean Numerology System (Standard):*
    A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=1, K=2, L=3, M=4, N=5, O=6, P=7, Q=8, R=9, S=1, T=2, U=3, V=4, W=5, X=6, Y=7, Z=8
 
-   **Name: Andrea Giuliano**
+   **Name: Elena Solaris**
    A N D R E A   G I U L I A N O
    1 5 4 9 5 1   7 9 3 3 9 1 5 6
 
@@ -94,7 +94,7 @@ Here's a thinking process:
    Maturity: 5+8=13->4. Correct.
    Balance: Day 28->10->1. Correct.
 
-   **Birth Date: 28/11/1992**
+   **Birth Date: 21/07/1995**
    Day: 28 -> 10 -> 1
    Month: 11 (Master Number, often kept as 11, reduces to 2)
    Year: 1992 -> 1+9+9+2 = 21 -> 3
@@ -183,7 +183,7 @@ Here's a thinking process:
    Answer the specific questions. Conclude with the required disclaimer about symbolism and non-predictive nature.
 
    **Astrological Symbolic Integration (Type 2 requested):**
-   I need to weave in basic astrological symbolism corresponding to the birth data (Sun in Sagittarius, likely rising sign around 12:45 in Catania, but I'll keep it symbolic and non-dogmatic, focusing on archetypal resonance with numerology). Sagittarius (9 energy) aligns with the strong 9 in the name. Jupiter influence. I'll integrate this carefully as requested, maintaining the symbolic/introspective frame.
+   I need to weave in basic astrological symbolism corresponding to the birth data (Sun in Sagittarius, likely rising sign around 12:45 in Firenze, but I'll keep it symbolic and non-dogmatic, focusing on archetypal resonance with numerology). Sagittarius (9 energy) aligns with the strong 9 in the name. Jupiter influence. I'll integrate this carefully as requested, maintaining the symbolic/introspective frame.
 
 4.  **Structure & Draft Generation (Mental Refinement - Italian):**
    I will now draft the response section by section, ensuring strict adherence to the prompt. I'll calculate carefully and explain symbolically.
