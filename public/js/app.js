@@ -965,41 +965,7 @@ function closeCreditsModal() {
 }
 
 function watchRewardedAd() {
-    const btn = document.getElementById('btn-watch-ad');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Caricamento Sponsor Google...';
-    }
-
-    // Initialize Google AdSense Rewarded Slot
-    if (window.adsbygoogle) {
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({
-                params: {
-                    google_ad_client: 'ca-pub-7028010056444247',
-                    enable_page_level_ads: true
-                }
-            });
-        } catch (e) {
-            console.log('Google AdSense trigger:', e);
-        }
-    }
-
-    setTimeout(() => {
-        const current = getUserCredits();
-        setUserCredits(current + 1);
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-        }
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> +1 Consulto Accreditato!';
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-clapperboard"></i> Guarda Video (+1)';
-            }, 3500);
-        }
-        alert('✨ Sponsor completato!\nTi è stato accreditato +1 Consulto Gratuito sulla Matrice del Destino.');
-    }, 2500);
+    alert("⏳ Video Sponsor in Fase di Attivazione Google\n\nGoogle AdSense sta completando la revisione di conformità del canale (stato: 'Getting ready').\n\nI video sponsor saranno operativi non appena Google terminerà l'approvazione (24-48h).\n\nNel frattempo, puoi ottenere +2 Consulti Gratuiti condividendo il tuo link 'Invita un Amico' o attivare un Pass!");
 }
 
 async function buyPremiumPass(planType = 'pass_5') {
@@ -1053,21 +1019,70 @@ function checkPaymentReturn() {
 }
 
 function copyReferralLink() {
-    const link = `https://matrice-agtechds.vercel.app/?ref=${Math.random().toString(36).substring(7)}`;
-    navigator.clipboard.writeText(link).then(() => {
+    let userRef = localStorage.getItem('md_user_ref');
+    if (!userRef) {
+        userRef = 'm_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('md_user_ref', userRef);
+    }
+    const currentOrigin = window.location.origin || 'https://matrice-jade.vercel.app';
+    const link = `${currentOrigin}/?ref=${userRef}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Matrice del Destino — Calcola la tua Mappa Archetipica',
+            text: '✨ Scopri la tua Matrice del Destino e calcola il tuo Ottagramma Sacro con l\'Oracolo Archetipico!',
+            url: link
+        }).then(() => {
+            awardReferralBonus();
+        }).catch(() => {
+            copyLinkFallback(link);
+        });
+    } else {
+        copyLinkFallback(link);
+    }
+}
+
+function copyLinkFallback(link) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(() => {
+            awardReferralBonus();
+        }).catch(() => {
+            prompt('Copia il tuo link invito:', link);
+            awardReferralBonus();
+        });
+    } else {
+        prompt('Copia il tuo link invito:', link);
+        awardReferralBonus();
+    }
+}
+
+function awardReferralBonus() {
+    const current = getUserCredits();
+    setUserCredits(current + 2);
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
+    }
+    alert('🎉 Link Invito pronto & condiviso!\n\nTi sono stati accreditati +2 Consulti Gratuiti sulla Matrice del Destino.');
+}
+
+function checkReferralEntry() {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref && !localStorage.getItem('md_referred_by')) {
+        localStorage.setItem('md_referred_by', ref);
         const current = getUserCredits();
-        setUserCredits(current + 2);
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
-        }
-        alert('🎉 Link Invito copiato negli appunti!\nTi sono stati accreditati +2 Consulti Omaggio.');
-    });
+        setUserCredits(Math.max(2, current + 1));
+        setTimeout(() => {
+            alert('🎁 Benvenuto da parte di un amico!\nHai ricevuto +1 Consulto Bonus omaggio per iniziare la tua lettura.');
+        }, 1500);
+    }
 }
 
 window.openCreditsModal = openCreditsModal;
 window.closeCreditsModal = closeCreditsModal;
 window.watchRewardedAd = watchRewardedAd;
 window.buyPremiumPass = buyPremiumPass;
+window.copyReferralLink = copyReferralLink;
 window.copyReferralLink = copyReferralLink;
 window.checkPaymentReturn = checkPaymentReturn;
 
@@ -1625,6 +1640,7 @@ function initApp() {
     initChatInputs();
     updateCreditsDisplay();
     checkPaymentReturn();
+    checkReferralEntry();
     initGdprConsent();
     initSupabaseAuth();
     setTimeout(() => startOnboardingTour(false), 800);

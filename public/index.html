@@ -395,18 +395,29 @@
                 </div>
 
                 <div class="recharge-options-grid">
-                    <!-- Option 1: Rewarded Ad (Free) -->
-                    <div class="recharge-card free-option">
-                        <div class="recharge-badge free">100% Gratuito</div>
-                        <div class="recharge-icon"><i class="fa-solid fa-circle-play"></i></div>
+                    <!-- Option 1: Rewarded Ad (In Standby / Google Review) -->
+                    <div class="recharge-card free-option" style="opacity: 0.88; border-color: rgba(234, 179, 8, 0.3);">
+                        <div class="recharge-badge" style="background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4);"><i class="fa-solid fa-hourglass-half"></i> In Approvazione Google</div>
+                        <div class="recharge-icon" style="color: #facc15;"><i class="fa-solid fa-circle-play"></i></div>
                         <h4 class="recharge-title">Sblocco Sponsor</h4>
-                        <p class="recharge-desc">Guarda un breve video promozionale di 15s per ricaricare +1 Consulto istantaneo.</p>
-                        <button class="btn-recharge btn-free" id="btn-watch-ad" onclick="watchRewardedAd()">
-                            <i class="fa-solid fa-clapperboard"></i> Guarda Video (+1)
+                        <p class="recharge-desc">Verifica Google AdSense in corso (24-48h). Il video sponsor sarà attivo al termine della revisione.</p>
+                        <button class="btn-recharge btn-free" id="btn-watch-ad" style="background: rgba(255,255,255,0.06); border: 1px dashed rgba(223, 177, 91, 0.4); color: var(--gold-bright);" onclick="watchRewardedAd()">
+                            <i class="fa-solid fa-clock"></i> Sponsor in Standby
                         </button>
                     </div>
 
-                    <!-- Option 2: Premium Pass 5 -->
+                    <!-- Option 2: Referral (Active Free Alternative) -->
+                    <div class="recharge-card referral-option" style="border: 1px solid rgba(16, 185, 129, 0.5); background: rgba(16, 185, 129, 0.04);">
+                        <div class="recharge-badge" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700;">⭐ 100% Attivo & Gratuito</div>
+                        <div class="recharge-icon" style="color: #34d399;"><i class="fa-solid fa-users"></i></div>
+                        <h4 class="recharge-title">Invita un Amico (+2)</h4>
+                        <p class="recharge-desc">Condividi il tuo link oracolare con amici o sui social: ricevi subito <strong>+2 Consulti Omaggio</strong> per ogni condivisione!</p>
+                        <button class="btn-recharge btn-referral" style="background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; font-weight: 700; box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);" onclick="copyReferralLink()">
+                            <i class="fa-solid fa-share-nodes"></i> Condividi & Ricevi +2
+                        </button>
+                    </div>
+
+                    <!-- Option 3: Premium Pass 5 -->
                     <div class="recharge-card premium-option">
                         <div class="recharge-badge premium">Più Scelto</div>
                         <div class="recharge-icon"><i class="fa-solid fa-crown text-gold"></i></div>
@@ -417,7 +428,7 @@
                         </button>
                     </div>
 
-                    <!-- Option 3: Premium Pass 15 -->
+                    <!-- Option 4: Premium Pass 15 -->
                     <div class="recharge-card premium-option" style="border-color: rgba(212, 175, 55, 0.5);">
                         <div class="recharge-badge premium" style="background: #38bdf8; color: #000;">Best Value</div>
                         <div class="recharge-icon"><i class="fa-solid fa-wand-magic-sparkles" style="color: #38bdf8;"></i></div>
@@ -425,17 +436,6 @@
                         <p class="recharge-desc">15 Consulti + Sinastria di Coppia + Report PDF Completo + Accesso Prioritario.</p>
                         <button class="btn-recharge btn-premium" style="background: linear-gradient(135deg, #38bdf8, #d4af37);" onclick="buyPremiumPass('pass_15')">
                             <i class="fa-brands fa-stripe"></i> Paga 4.49€
-                        </button>
-                    </div>
-
-                    <!-- Option 4: Referral -->
-                    <div class="recharge-card referral-option">
-                        <div class="recharge-badge referral">Bonus Amici</div>
-                        <div class="recharge-icon"><i class="fa-solid fa-users"></i></div>
-                        <h4 class="recharge-title">Invita un Amico</h4>
-                        <p class="recharge-desc">Condividi il tuo link personale: ricevi +2 Consulti per ogni mappa generata.</p>
-                        <button class="btn-recharge btn-referral" onclick="copyReferralLink()">
-                            <i class="fa-solid fa-share-nodes"></i> Copia Link (+2)
                         </button>
                     </div>
                 </div>
@@ -749,8 +749,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=21"></script>
-    <script src="js/api-client.js?v=21"></script>
-    <script src="js/app.js?v=21"></script>
+    <script src="js/matrix-calc.js?v=22"></script>
+    <script src="js/api-client.js?v=22"></script>
+    <script src="js/app.js?v=22"></script>
 </body>
 </html>
