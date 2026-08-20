@@ -1,7 +1,7 @@
 # 🌌 Matrice del Destino — Sacred Oracle (STATUS_APP)
 
 > **Ultimo Aggiornamento**: 2026-08-20  
-> **Versione**: 2.2.0 (Supabase Cloud Sync, GDPR/AI Act 2026, Stripe & AdSense Monetization)  
+> **Versione**: 2.3.0 (Voice Assistant Guided Tour & Pipeline, Supabase Cloud Sync, GDPR/AI Act 2026)  
 > **Stato Globale**: 🟢 **OPERATIVO & VERIFICATO (100%)**
 
 ---
@@ -12,6 +12,7 @@
 | :--- | :--- |
 | **Applicazione** | Matrice del Destino — Oracolo Archetipico & Numerologia Sacra |
 | **UI/UX Design** | MIT-Grade Neumorfismo 2.0, Deep Obsidian Dark Mode, Responsive Mobile/Tablet |
+| **Guided Onboarding** | Tour interattivo a 5 step con **Spotlight Dorato Pulsante** e **Guida Vocale Neurale** sincronizzata (`/audio/tour_step*.wav`) |
 | **Ambiente Locale** | `http://localhost:3000` (Node.js Native HTTP Server / Next.js) |
 | **Target Cloud** | Vercel Serverless (`api/*.js` + Static CDN) — Live: `https://matrice-jade.vercel.app` |
 | **Database & Auth** | **Supabase Postgres (EU West 1)** con Row Level Security (RLS) & Google/Email OAuth |
