@@ -1439,7 +1439,46 @@ const ONBOARDING_STEPS = [
     }
 ];
 
-let currentOnboardingIndex = 0;
+// --- Voice Assistant Guided Tour & Audio Controller ---
+
+let tourAudioPlayer = null;
+let isTourAudioMuted = false;
+
+function playTourAudioForStep(stepIndex) {
+    if (isTourAudioMuted) return;
+
+    if (tourAudioPlayer) {
+        tourAudioPlayer.pause();
+        tourAudioPlayer.currentTime = 0;
+    }
+
+    const audioSrc = `/audio/tour_step${stepIndex + 1}.wav`;
+    tourAudioPlayer = new Audio(audioSrc);
+
+    const soundIndicator = document.getElementById('onboarding-audio-status');
+    if (soundIndicator) soundIndicator.innerHTML = '<i class="fa-solid fa-volume-high text-gold" style="animation: pulse 1s infinite;"></i> <span>Voce Guida Attiva</span>';
+
+    tourAudioPlayer.play().catch(err => {
+        console.log("Tour audio autoplay interaction required:", err);
+        if (soundIndicator) soundIndicator.innerHTML = '<i class="fa-solid fa-volume-xmark" style="color: var(--text-muted);"></i> <span style="font-size: 0.72rem; color: var(--gold-bright); cursor: pointer;" onclick="resumeTourAudio()">Ascolta Voce 🔊</span>';
+    });
+
+    tourAudioPlayer.onended = () => {
+        if (soundIndicator) soundIndicator.innerHTML = '<i class="fa-solid fa-check text-gold"></i> <span>Ascolto completato</span>';
+    };
+}
+
+function resumeTourAudio() {
+    isTourAudioMuted = false;
+    playTourAudioForStep(currentOnboardingIndex);
+}
+
+function stopTourAudio() {
+    if (tourAudioPlayer) {
+        tourAudioPlayer.pause();
+        tourAudioPlayer.currentTime = 0;
+    }
+}
 
 function startOnboardingTour(force = false) {
     const done = localStorage.getItem('md_onboarding_done');
@@ -1482,6 +1521,9 @@ function renderOnboardingStep() {
             nextBtn.innerHTML = 'Avanti <i class="fa-solid fa-chevron-right"></i>';
         }
     }
+
+    // Play Voice Assistant Audio for current step
+    playTourAudioForStep(currentOnboardingIndex);
 
     if (targetEl && spotlight && tooltip) {
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1533,8 +1575,22 @@ function prevOnboardingStep() {
 
 function closeOnboardingTour() {
     localStorage.setItem('md_onboarding_done', 'true');
+    stopTourAudio();
     const overlay = document.getElementById('onboarding-overlay');
     if (overlay) overlay.classList.remove('active');
+
+    // Pipeline: Once tour is finished, scroll to welcome chat message and play welcome voice!
+    const welcomeTtsBtn = document.getElementById('btn-welcome-tts');
+    const chatWorkspace = document.querySelector('.chat-workspace');
+    if (chatWorkspace) {
+        chatWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (welcomeTtsBtn) {
+        setTimeout(() => {
+            welcomeTtsBtn.click();
+        }, 500);
+    }
 }
 
 window.addEventListener('resize', () => {
@@ -1567,6 +1623,7 @@ window.startOnboardingTour = startOnboardingTour;
 window.closeOnboardingTour = closeOnboardingTour;
 window.nextOnboardingStep = nextOnboardingStep;
 window.prevOnboardingStep = prevOnboardingStep;
+window.resumeTourAudio = resumeTourAudio;
 
 // --- Master Application Initialization ---
 function initApp() {
@@ -1574,12 +1631,11 @@ function initApp() {
     initBackgroundCanvas();
     initTabs();
     initChatInputs();
-    setupWelcomeAutoplay();
     updateCreditsDisplay();
     checkPaymentReturn();
     initGdprConsent();
     initSupabaseAuth();
-    setTimeout(() => startOnboardingTour(false), 900);
+    setTimeout(() => startOnboardingTour(false), 800);
 }
 
 if (document.readyState === 'loading') {

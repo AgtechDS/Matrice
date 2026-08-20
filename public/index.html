@@ -27,7 +27,7 @@
     <!-- Supabase JS Client for Cloud Sync & Authentication -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css?v=19">
+    <link rel="stylesheet" href="css/style.css?v=20">
 </head>
 <body>
     <!-- Background Canvas for dynamic sacred geometry particles -->
@@ -728,7 +728,12 @@
         <div class="onboarding-spotlight" id="onboarding-spotlight"></div>
         <div class="onboarding-tooltip" id="onboarding-tooltip">
             <div class="onboarding-header">
-                <span class="onboarding-step-badge" id="onboarding-step-badge">1 di 5</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="onboarding-step-badge" id="onboarding-step-badge">1 di 5</span>
+                    <span id="onboarding-audio-status" style="font-size: 0.72rem; color: var(--gold-bright); display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-volume-high text-gold"></i> <span>Voce Guida</span>
+                    </span>
+                </div>
                 <button class="onboarding-close-btn" onclick="closeOnboardingTour()" title="Chiudi">&times;</button>
             </div>
             <h4 class="onboarding-title" id="onboarding-title"><i class="fa-solid fa-wand-magic-sparkles text-gold"></i> Titolo Step</h4>
@@ -744,8 +749,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=19"></script>
-    <script src="js/api-client.js?v=19"></script>
-    <script src="js/app.js?v=19"></script>
+    <script src="js/matrix-calc.js?v=20"></script>
+    <script src="js/api-client.js?v=20"></script>
+    <script src="js/app.js?v=20"></script>
 </body>
 </html>
