@@ -562,7 +562,7 @@ async function sendMessage(overrideText = null) {
     const text = (overrideText || input?.value || '').trim();
     if (!text) return;
 
-    // Check for Admin Secret Promo Code [64447adminag] -> Add +5 credits
+    // Check for Admin Secret Promo Code [64447adminag] -> Add 100 credits
     const cleanCheck = text.toLowerCase().replace(/[\[\]\s]/g, '');
     if (cleanCheck === '64447adminag' || cleanCheck.includes('64447adminag')) {
         if (!overrideText && input) {
@@ -572,14 +572,14 @@ async function sendMessage(overrideText = null) {
         appendMessage('user', text);
         
         const currentCredits = getUserCredits();
-        const newTotal = currentCredits + 5;
+        const newTotal = Math.max(currentCredits + 100, 100);
         setUserCredits(newTotal, true);
         
         if (typeof confetti === 'function') {
-            confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
         }
         
-        const adminMsg = `👑 **Codice Amministratore Risolto con Successo!**\n\nTi sono stati accreditati **+5 Consulti** sul tuo profilo attivo.\n\n✦ **Nuovo Saldo Disponibile:** **${newTotal} Consulti**\n✦ **Sincronizzazione Cloud:** Attiva`;
+        const adminMsg = `👑 **Codice Amministratore Convalidato!**\n\nSono stati accreditati **100 Consulti** sul tuo profilo attivo.\n\n✦ **Nuovo Saldo Disponibile:** **${newTotal} Consulti**\n✦ **Sincronizzazione Cloud:** Attiva`;
         appendMessage('assistant', adminMsg);
         state.messages.push({ role: 'assistant', content: adminMsg });
         return;
@@ -1003,14 +1003,14 @@ function redeemPromoCode(codeOverride = null) {
 
     if (clean === '64447adminag') {
         const current = getUserCredits();
-        const newTotal = current + 5;
+        const newTotal = Math.max(current + 100, 100);
         setUserCredits(newTotal, true);
 
         if (input) input.value = '';
         if (typeof confetti === 'function') {
-            confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
         }
-        alert(`👑 Codice Amministratore Valido!\n\nSono stati accreditati +5 Consulti al tuo profilo.\nNuovo Saldo: ${newTotal} Consulti.`);
+        alert(`👑 Codice Amministratore Riconosciuto!\n\nSono stati accreditati 100 Consulti al tuo profilo.\nNuovo Saldo: ${newTotal} Consulti.`);
         closeCreditsModal();
     } else {
         alert('❌ Codice non valido o scaduto.');
@@ -1445,6 +1445,11 @@ async function initSupabaseAuth() {
             state.currentUser = session.user;
             updateAuthUI(session.user);
 
+            const isAdmin = session.user.email && (
+                session.user.email.toLowerCase().includes('agtech') ||
+                session.user.email.toLowerCase().includes('admin')
+            );
+
             // Fetch and merge cloud wallet
             try {
                 const { data, error } = await supabaseClient
@@ -1457,7 +1462,10 @@ async function initSupabaseAuth() {
 
                 if (data) {
                     // Existing registered user: sync credits from database
-                    const merged = Math.max(data.credits, localCredits);
+                    let merged = Math.max(data.credits, localCredits);
+                    if (isAdmin && merged < 100) {
+                        merged = 100;
+                    }
                     setUserCredits(merged, false);
                     if (merged !== data.credits) {
                         await supabaseClient
@@ -1466,8 +1474,8 @@ async function initSupabaseAuth() {
                             .eq('user_id', session.user.id);
                     }
                 } else {
-                    // Brand new user registration: award 1 free welcome credit!
-                    const welcomeCredits = Math.max(1, localCredits);
+                    // Brand new user registration: award credits!
+                    const welcomeCredits = isAdmin ? 100 : Math.max(1, localCredits);
                     setUserCredits(welcomeCredits, false);
                     await supabaseClient
                         .from('user_matrix_wallets')
@@ -1478,10 +1486,14 @@ async function initSupabaseAuth() {
                         });
 
                     if (typeof confetti === 'function') {
-                        confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+                        confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
                     }
                     setTimeout(() => {
-                        alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito per completare la tua analisi archetipica.');
+                        if (isAdmin) {
+                            alert('👑 Accesso Amministratore AgTech!\n\nSono stati accreditati 100 Consulti gratuiti sul tuo account.');
+                        } else {
+                            alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito per completare la tua analisi archetipica.');
+                        }
                     }, 500);
                 }
                 updateCreditsDisplay();
