@@ -820,6 +820,16 @@ DEVI CALCOLARE E ANALIZZARE LA MATRICE CONGIUNTA TRA I DUE PARTNER INDICATI NEL 
 Struttura con: Scopo Spirituale dell'Incontro, Punti di Affinità, Zone di Frizione e Consigli di Coppia.`;
                     break;
 
+                case 'meditazione':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: AUDIO-MEDITAZIONE GUIDATA ORACOLARE (2 CREDITI).
+DEVI SCRIVERE UN TESTO DI MEDITAZIONE GUIDATA ESPERIENZIALE E TRASFORMATIVA (durata lettura 2-3 minuti), PERSONALIZZATA PER ${userData.name}.
+Integra:
+- L'elemento del Segno Solare (${calc.zodiacSign.element} - ${calc.zodiacSign.name})
+- Il Cuore Energetico (Arcano ${calc.nodeE} - ${calc.arcE.name})
+- Frequenza di Nascita (Arcano ${calc.nodeA} - ${calc.arcA.name})
+Usa pause poetiche narrative, respiro guidato e visualizzazioni della Geometria Sacra per sbloccare centratura e pace interiore.`;
+                    break;
+
                 case 'matrice_completa':
                     specificInstruction = `🔴 RICHIESTA CONSULTA: REPORT COMPLETO A 14 SEZIONI.
 DEVI GENERARE L'INTERO REPORT A 14 SEZIONI PER ${userData.name} (${calc.zodiacSign.name} ${calc.zodiacSign.symbol}, Ascendente ${calc.ascendant.formatted}) IN MODO COMPLETO, PROFONDO E SENZA TRONCATURE.`;

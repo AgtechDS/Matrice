@@ -219,6 +219,9 @@ function detectConsultationType(messages) {
     if (lastUserMsg.includes('sinastria') || lastUserMsg.includes('matrice congiunta') || lastUserMsg.includes('partner 1') || lastUserMsg.includes('partner 2')) {
         return 'sinastria';
     }
+    if (lastUserMsg.includes('meditazione guidata') || lastUserMsg.includes('audio-meditazione') || lastUserMsg.includes('meditazione')) {
+        return 'meditazione';
+    }
     if (lastUserMsg.includes('14 sezioni') || lastUserMsg.includes('report completo') || lastUserMsg.includes('modulo guidato') || lastUserMsg.includes('ecco i miei dati completi')) {
         return 'matrice_completa';
     }
@@ -1067,6 +1070,16 @@ Dati esatti:
                         specificInstruction = `🔴 RICHIESTA CONSULTA: SINASTRIA DI COPPIA & MATRICE CONGIUNTA.
 DEVI CALCOLARE E ANALIZZARE LA MATRICE CONGIUNTA TRA I DUE PARTNER INDICATI NEL MESSAGGIO.
 Struttura con: Scopo Spirituale dell'Incontro, Punti di Affinità, Zone di Frizione e Consigli di Coppia.`;
+                        break;
+
+                    case 'meditazione':
+                        specificInstruction = `🔴 RICHIESTA CONSULTA: AUDIO-MEDITAZIONE GUIDATA ORACOLARE (2 CREDITI).
+DEVI SCRIVERE UN TESTO DI MEDITAZIONE GUIDATA ESPERIENZIALE E TRASFORMATIVA (durata lettura 2-3 minuti), PERSONALIZZATA PER ${userData.name}.
+Integra:
+- L'elemento del Segno Solare (${calc.zodiacSign.element} - ${calc.zodiacSign.name})
+- Il Cuore Energetico (Arcano ${calc.nodeE} - ${calc.arcE.name})
+- Frequenza di Nascita (Arcano ${calc.nodeA} - ${calc.arcA.name})
+Usa pause poetiche narrative, respiro guidato e visualizzazioni della Geometria Sacra per sbloccare centratura e pace interiore.`;
                         break;
 
                     case 'matrice_completa':
