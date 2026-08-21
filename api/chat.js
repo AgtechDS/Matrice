@@ -129,16 +129,7 @@ export default async function handler(req) {
         
         let activeApiKey = body.apiKey || process.env.LLMAPI_KEY || process.env.TOKENROUTER_API_KEY || '';
         let activeModel = body.model || process.env.LLM_MODEL || process.env.TOKENROUTER_MODEL || 'deepseek-v4-flash-0731';
-        let activeBaseUrl = body.baseUrl || process.env.LLM_BASE_URL || process.env.TOKENROUTER_BASE_URL || 'https://api.llmapi.ai/v1';
-
-        // Auto-detect Groq Key
-        const isGroq = activeApiKey.startsWith('gsk_');
-        if (isGroq) {
-            activeBaseUrl = 'https://api.groq.com/openai/v1';
-            if (activeModel.includes('deepseek') || activeModel.includes('tokenrouter')) {
-                activeModel = 'qwen/qwen3.6-27b';
-            }
-        }
+        let activeBaseUrl = (body.baseUrl || process.env.LLM_BASE_URL || process.env.TOKENROUTER_BASE_URL || 'https://api.llmapi.ai/v1').replace(/\/+$/, '');
 
         const now = new Date();
         const currentYear = now.getFullYear();
@@ -155,20 +146,14 @@ Procedi punto per punto da "## 1. Sintesi iniziale" fino a "## 14. Sintesi Final
             finalMessages.unshift({ role: 'system', content: sysPrompt });
         }
 
-        // Groq has 8000 TPM limit -> 3400 max_tokens stays safe. LLMAPI has high limits -> 6000 max_tokens.
-        let maxTokens = isGroq ? 3400 : 6000;
-
+        // DeepSeek allows massive token output -> 8000 max_tokens to ensure complete 14-section generation
         const payload = {
             model: activeModel,
             messages: finalMessages,
             temperature: temperature,
             stream: stream,
-            max_tokens: maxTokens
+            max_tokens: 8000
         };
-
-        if (isGroq || activeModel.includes('qwen') || activeModel.includes('deepseek')) {
-            payload.reasoning_effort = 'none';
-        }
 
         if (activeApiKey) {
             try {
@@ -182,20 +167,6 @@ Procedi punto per punto da "## 1. Sintesi iniziale" fino a "## 14. Sintesi Final
                     },
                     body: JSON.stringify(payload)
                 });
-
-                // If Groq had a rate limit / TPM error, immediately retry with safe fallback
-                if (!upstreamRes.ok && isGroq) {
-                    payload.max_tokens = 2600;
-                    payload.model = 'llama-3.3-70b-versatile';
-                    upstreamRes = await fetch(`${activeBaseUrl}/chat/completions`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${activeApiKey}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                }
 
                 if (upstreamRes.ok) {
                     if (stream) {
@@ -211,6 +182,8 @@ Procedi punto per punto da "## 1. Sintesi iniziale" fino a "## 14. Sintesi Final
                         const data = await upstreamRes.json();
                         return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
                     }
+                } else {
+                    console.warn(`Upstream DeepSeek error (${upstreamRes.status}):`, await upstreamRes.text());
                 }
             } catch (fetchErr) {
                 console.warn("Upstream fetch error:", fetchErr.message);

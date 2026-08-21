@@ -241,16 +241,7 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        let maxTokens = 3400;
-        if (apiKey.startsWith('gsk_')) {
-            baseUrl = 'https://api.groq.com/openai/v1';
-            if (model.includes('deepseek') || model.includes('tokenrouter')) {
-                model = 'qwen/qwen3.6-27b';
-            }
-            maxTokens = 3400;
-        } else if (baseUrl.includes('openrouter.ai') || baseUrl.includes('tokenrouter.com') || baseUrl.includes('llmapi.ai')) {
-            maxTokens = 6000;
-        }
+        let maxTokens = 8000;
 
         try {
             let finalMessages = [...messages];
@@ -269,10 +260,6 @@ const server = http.createServer(async (req, res) => {
                 max_tokens: maxTokens
             };
 
-            if (baseUrl.includes('groq.com') || model.includes('qwen') || model.includes('gpt-oss')) {
-                payload.reasoning_effort = 'none';
-            }
-
             let response = await fetch(`${baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
@@ -281,20 +268,6 @@ const server = http.createServer(async (req, res) => {
                 },
                 body: JSON.stringify(payload)
             });
-
-            if (!response.ok && baseUrl.includes('groq.com')) {
-                console.warn("Groq returned error, retrying with safe fallback payload...");
-                payload.max_tokens = 2600;
-                payload.model = 'llama-3.3-70b-versatile';
-                response = await fetch(`${baseUrl}/chat/completions`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-            }
 
             if (response.ok) {
                 if (stream) {
