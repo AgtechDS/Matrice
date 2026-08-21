@@ -317,27 +317,22 @@ export default async function handler(req) {
 
     try {
         const body = await req.json().catch(() => ({}));
-        const { messages, stream = true, temperature = 0.6 } = body;
-        
-        let activeApiKey = body.apiKey || process.env.LLMAPI_KEY || process.env.TOKENROUTER_API_KEY || 'llmapi_17acd03b348ba3984473006be0ab0ccac001b934f826ade8b26edbc23125cdf5';
+        const PRIMARY_LLMAPI_KEY = 'llmapi_17acd03b348ba3984473006be0ab0ccac001b934f826ade8b26edbc23125cdf5';
+        let activeApiKey = PRIMARY_LLMAPI_KEY;
+        if (body.apiKey && body.apiKey.trim()) {
+            activeApiKey = body.apiKey.trim();
+        } else if (process.env.LLMAPI_KEY && !process.env.LLMAPI_KEY.startsWith('gsk_')) {
+            activeApiKey = process.env.LLMAPI_KEY;
+        }
+
         if (activeApiKey.startsWith('llmllmapi_')) {
             activeApiKey = activeApiKey.replace('llmllmapi_', 'llmapi_');
         }
-        let activeModel = body.model || process.env.LLM_MODEL || process.env.TOKENROUTER_MODEL || 'deepseek-v4-flash-0731';
-        let activeBaseUrl = (body.baseUrl || process.env.LLM_BASE_URL || process.env.TOKENROUTER_BASE_URL || 'https://api.llmapi.ai/v1').replace(/\/+$/, '');
+
+        let activeBaseUrl = 'https://api.llmapi.ai/v1';
+        let activeModel = 'deepseek-v4-flash-0731';
 
         const userData = extractUserDataFromMessages(messages);
-
-        if (activeApiKey.startsWith('llmapi_') || activeBaseUrl.includes('llmapi.ai')) {
-            activeBaseUrl = 'https://api.llmapi.ai/v1';
-            activeModel = 'deepseek-v4-flash-0731';
-        } else if (activeApiKey.startsWith('gsk_')) {
-            activeBaseUrl = 'https://api.groq.com/openai/v1';
-            activeModel = 'openai/gpt-oss-120b';
-        } else if (activeApiKey.startsWith('sk-') && !activeBaseUrl.includes('openai') && !activeBaseUrl.includes('openrouter')) {
-            activeBaseUrl = 'https://api.deepseek.com';
-            activeModel = 'deepseek-chat';
-        }
 
         const now = new Date();
         const currentYear = now.getFullYear();

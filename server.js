@@ -528,26 +528,20 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        if (!apiKey) {
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: { message: 'Nessuna API Key configurata.' } }));
-            return;
+        const PRIMARY_LLMAPI_KEY = 'llmapi_17acd03b348ba3984473006be0ab0ccac001b934f826ade8b26edbc23125cdf5';
+        apiKey = PRIMARY_LLMAPI_KEY;
+        if (body.apiKey && body.apiKey.trim()) {
+            apiKey = body.apiKey.trim();
+        } else if (process.env.LLMAPI_KEY && !process.env.LLMAPI_KEY.startsWith('gsk_')) {
+            apiKey = process.env.LLMAPI_KEY;
         }
 
         if (apiKey.startsWith('llmllmapi_')) {
             apiKey = apiKey.replace('llmllmapi_', 'llmapi_');
         }
 
-        if (apiKey.startsWith('llmapi_') || baseUrl.includes('llmapi.ai')) {
-            baseUrl = 'https://api.llmapi.ai/v1';
-            model = 'deepseek-v4-flash-0731';
-        } else if (apiKey.startsWith('gsk_')) {
-            baseUrl = 'https://api.groq.com/openai/v1';
-            model = 'openai/gpt-oss-120b';
-        } else if (apiKey.startsWith('sk-') && !baseUrl.includes('openai') && !baseUrl.includes('openrouter')) {
-            baseUrl = 'https://api.deepseek.com';
-            model = 'deepseek-chat';
-        }
+        baseUrl = 'https://api.llmapi.ai/v1';
+        model = 'deepseek-v4-flash-0731';
 
         const userData = extractUserDataFromMessages(messages);
 
