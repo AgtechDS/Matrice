@@ -27,7 +27,7 @@
     <!-- Supabase JS Client for Cloud Sync & Authentication -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css?v=20">
+    <link rel="stylesheet" href="css/style.css?v=37">
 </head>
 <body>
     <!-- Background Canvas for dynamic sacred geometry particles -->
@@ -112,7 +112,7 @@
                 <div class="sidebar-content">
                     <!-- Tab 1: Octagram Visualizer -->
                     <div id="tab-octagram" class="tab-pane active">
-                        <div class="matrix-canvas-card">
+                        <div class="matrix-canvas-card reveal-on-scroll">
                             <svg id="matrix-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
                                     <!-- Glow Filters -->
@@ -211,22 +211,22 @@
                     <!-- Tab 2: Arcana & Aspects Cards -->
                     <div id="tab-aspects" class="tab-pane" style="display: none;">
                         <div class="aspects-grid" id="aspects-list">
-                            <div class="aspect-card" onclick="selectNode('top')">
+                            <div class="aspect-card reveal-on-scroll" onclick="selectNode('top')">
                                 <div class="aspect-title">Spirito / Risorse (Giorno)</div>
                                 <div class="aspect-value" id="val-day">-</div>
                                 <div class="aspect-subtitle" id="sub-day">In attesa dati</div>
                             </div>
-                            <div class="aspect-card" onclick="selectNode('left')">
+                            <div class="aspect-card reveal-on-scroll" onclick="selectNode('left')">
                                 <div class="aspect-title">Anima / Connessione (Mese)</div>
                                 <div class="aspect-value" id="val-month">-</div>
                                 <div class="aspect-subtitle" id="sub-month">In attesa dati</div>
                             </div>
-                            <div class="aspect-card" onclick="selectNode('right')">
+                            <div class="aspect-card reveal-on-scroll" onclick="selectNode('right')">
                                 <div class="aspect-title">Materia / Finanze (Anno)</div>
                                 <div class="aspect-value" id="val-year">-</div>
                                 <div class="aspect-subtitle" id="sub-year">In attesa dati</div>
                             </div>
-                            <div class="aspect-card" onclick="selectNode('bottom')">
+                            <div class="aspect-card reveal-on-scroll" onclick="selectNode('bottom')">
                                 <div class="aspect-title">Coda Karmica</div>
                                 <div class="aspect-value" id="val-karma">-</div>
                                 <div class="aspect-subtitle" id="sub-karma">In attesa dati</div>
@@ -241,12 +241,12 @@
                                 <div class="aspect-value" id="val-money">-</div>
                                 <div class="aspect-subtitle" id="sub-money">In attesa dati</div>
                             </div>
-                            <div class="aspect-card" onclick="selectNode('love')">
+                            <div class="aspect-card reveal-on-scroll" onclick="selectNode('love')">
                                 <div class="aspect-title">Canale Relazioni</div>
                                 <div class="aspect-value" id="val-love">-</div>
                                 <div class="aspect-subtitle" id="sub-love">In attesa dati</div>
                             </div>
-                            <div class="aspect-card">
+                            <div class="aspect-card reveal-on-scroll">
                                 <div class="aspect-title">Percorso di Vita</div>
                                 <div class="aspect-value" id="val-lifepath">-</div>
                                 <div class="aspect-subtitle" id="sub-lifepath">In attesa dati</div>
@@ -947,8 +947,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=36"></script>
-    <script src="js/api-client.js?v=36"></script>
-    <script src="js/app.js?v=36"></script>
+    <script src="js/matrix-calc.js?v=37"></script>
+    <script src="js/api-client.js?v=37"></script>
+    <script src="js/app.js?v=37"></script>
 </body>
 </html>

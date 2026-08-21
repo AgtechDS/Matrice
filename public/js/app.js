@@ -2072,6 +2072,30 @@ window.resetSession = resetSession;
 window.updateMatrixVisualization = updateMatrixVisualization;
 window.setMobileView = setMobileView;
 
+// --- MIT-Grade Scroll Reveal Animation System ---
+function initScrollReveal() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+            el.classList.add('revealed');
+        });
+        return;
+    }
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+        revealObserver.observe(el);
+    });
+}
+
 // --- Master Application Initialization ---
 function initApp() {
     console.log("🌌 Inizializzazione Matrice del Destino...");
@@ -2084,6 +2108,7 @@ function initApp() {
     initGdprConsent();
     initSupabaseAuth();
     loadUserProfile();
+    initScrollReveal();
     setTimeout(() => startOnboardingTour(false), 800);
 }
 
