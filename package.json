@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "echo 'Build successful'",
+    "build": "node -e \"import('fs').then(fs => { fs.cpSync('public', 'dist', { recursive: true }); console.log('✅ Build OK: public mirrored to dist'); });\"",
     "start": "node server.js",
     "server": "node server.js"
   },

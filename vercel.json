@@ -1,8 +1,5 @@
 {
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/ads.txt", "destination": "/api/ads-txt" },
-    { "source": "/robots.txt", "destination": "/api/robots" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
-  ]
+  "framework": null,
+  "outputDirectory": "public",
+  "trailingSlash": false
 }
