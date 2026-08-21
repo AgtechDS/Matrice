@@ -596,16 +596,16 @@ async function sendMessage(overrideText = null, creditCost = 1) {
         return;
     }
 
+    // Strict Gate: User must be synchronized/authenticated to consult the AI!
+    if (!checkAuthRequired('inviare messaggi e consultare l\'Oracolo')) {
+        return;
+    }
+
     // Check credits and registration status before starting
     const currentCredits = getUserCredits();
     if (currentCredits < creditCost) {
-        if (!state.currentUser) {
-            openAuthModal();
-            alert('✨ Registrati per Ricevere 1 Consulto Gratuito!\n\nPer calcolare la tua Matrice del Destino e ricevere l\'analisi oracolare completa, registrati o accedi con Google/Email in 5 secondi!');
-        } else {
-            openCreditsModal();
-            alert(`✦ Sono necessari ${creditCost} consulti per questa analisi (Saldo attuale: ${currentCredits}).\nRicarica gratuitamente condividendo il tuo link Invita un Amico (+2 Consulti) o attiva il Pass Arcano!`);
-        }
+        openCreditsModal();
+        alert('🪙 Crediti Esauriti\n\nNon hai crediti sufficienti per questo consulto. Puoi ottenere crediti gratuiti condividendo il tuo link invito o attivare un Pass Arcano!');
         return;
     }
 
@@ -972,6 +972,10 @@ function fillSampleData() {
 }
 
 function submitWizardData() {
+    if (!checkAuthRequired('calcolare la tua Matrice del Destino')) {
+        return;
+    }
+
     const name = document.getElementById('wz-name').value.trim();
     const date = document.getElementById('wz-date').value.trim();
     const time = document.getElementById('wz-time').value.trim() || 'non disponibile';
@@ -1012,13 +1016,15 @@ Ti confermo tutti i dati. Procedi con il report completo a 14 sezioni calcolando
 // --- Persistent Profile & Automatic Matrix System ---
 
 function saveUserProfile(userData, uploadToCloud = true) {
+    if (!state.currentUser) return; // Do not save profile data if user is not authenticated!
     if (!userData || !userData.name || !userData.date) return;
     try {
         localStorage.setItem('destiny_matrix_saved_profile', JSON.stringify(userData));
         updateUserProfileBanner(userData);
 
-        if (uploadToCloud && supabaseClient) {
+        if (uploadToCloud && supabaseClient && state.currentUser) {
             const payload = {
+                user_id: state.currentUser.id,
                 full_name: userData.name,
                 birth_date: userData.date,
                 birth_time: userData.time || 'non disponibile',
@@ -1027,9 +1033,6 @@ function saveUserProfile(userData, uploadToCloud = true) {
                 matrix_data: state.currentMatrixData || {},
                 updated_at: new Date().toISOString()
             };
-            if (state.currentUser && state.currentUser.id) {
-                payload.user_id = state.currentUser.id;
-            }
             supabaseClient
                 .from('user_matrix_profiles')
                 .insert(payload)
@@ -1044,6 +1047,10 @@ function saveUserProfile(userData, uploadToCloud = true) {
 }
 
 function loadUserProfile() {
+    if (!state.currentUser) {
+        clearUnauthenticatedState();
+        return;
+    }
     try {
         const raw = localStorage.getItem('destiny_matrix_saved_profile');
         if (raw) {
@@ -1070,6 +1077,8 @@ function loadUserProfile() {
                 updateMatrixVisualization(data.name, data.date);
                 updateUserProfileBanner(data);
             }
+        } else {
+            updateUserProfileBanner(null);
         }
     } catch (e) {
         console.warn('Profile load notice:', e);
@@ -1081,13 +1090,26 @@ function updateUserProfileBanner(userData) {
     const avatar = document.getElementById('banner-avatar');
     const nameEl = document.getElementById('banner-user-name');
     const detailsEl = document.getElementById('banner-user-details');
-    if (banner && userData && userData.name) {
+    if (!banner) return;
+
+    if (state.currentUser && userData && userData.name) {
         banner.style.display = 'flex';
-        if (avatar) avatar.textContent = userData.name.trim().charAt(0).toUpperCase() || 'U';
+        if (avatar) avatar.textContent = userData.name.trim().charAt(0).toUpperCase() || '✦';
         if (nameEl) nameEl.textContent = userData.name;
         if (detailsEl) {
             detailsEl.textContent = `(${userData.date}${userData.place ? ' — ' + userData.place : ''})`;
         }
+    } else if (state.currentUser) {
+        banner.style.display = 'flex';
+        const displayName = state.currentUser.user_metadata?.full_name || state.currentUser.email.split('@')[0];
+        if (avatar) avatar.textContent = displayName.charAt(0).toUpperCase();
+        if (nameEl) nameEl.textContent = displayName;
+        if (detailsEl) detailsEl.textContent = '(Profilo Cloud Sincronizzato)';
+    } else {
+        banner.style.display = 'flex';
+        if (avatar) avatar.innerHTML = '<i class="fa-solid fa-lock" style="font-size: 0.8rem; color: #38bdf8;"></i>';
+        if (nameEl) nameEl.textContent = 'Account Non Sincronizzato';
+        if (detailsEl) detailsEl.textContent = 'Accedi per attivare il tuo profilo';
     }
 }
 
@@ -1115,6 +1137,7 @@ function getActiveUserProfile() {
 
 // 1. Oroscopo del Giorno (1 credito)
 function startDailyHoroscope() {
+    if (!checkAuthRequired('calcolare l\'Oroscopo del Giorno')) return;
     const profile = getActiveUserProfile();
     if (!profile) {
         openWizardModal();
@@ -1128,6 +1151,7 @@ function startDailyHoroscope() {
 
 // 2. Guida Settimanale (3 crediti)
 function startWeeklyForecast() {
+    if (!checkAuthRequired('calcolare la Guida Settimanale')) return;
     const profile = getActiveUserProfile();
     if (!profile) {
         openWizardModal();
@@ -1140,6 +1164,7 @@ function startWeeklyForecast() {
 
 // 3. Focus Canale Amore (1 credito)
 function startLoveFocus() {
+    if (!checkAuthRequired('analizzare il Canale Amore')) return;
     const profile = getActiveUserProfile();
     if (!profile) {
         openWizardModal();
@@ -1152,6 +1177,7 @@ function startLoveFocus() {
 
 // 4. Focus Canale Denaro & Carriera (1 credito)
 function startMoneyFocus() {
+    if (!checkAuthRequired('analizzare il Canale Denaro')) return;
     const profile = getActiveUserProfile();
     if (!profile) {
         openWizardModal();
@@ -1164,6 +1190,7 @@ function startMoneyFocus() {
 
 // 5. Sinastria di Coppia (5 crediti)
 function openSynastryModal() {
+    if (!checkAuthRequired('calcolare la Sinastria di Coppia')) return;
     const profile = getActiveUserProfile();
     if (profile) {
         const synName1 = document.getElementById('syn-name-1');
@@ -1181,6 +1208,7 @@ function closeSynastryModal() {
 }
 
 function submitSynastryCalculation() {
+    if (!checkAuthRequired('calcolare la Sinastria di Coppia')) return;
     const name1 = document.getElementById('syn-name-1')?.value?.trim() || 'Partner 1';
     const date1 = document.getElementById('syn-date-1')?.value;
     const name2 = document.getElementById('syn-name-2')?.value?.trim() || 'Partner 2';
@@ -1199,6 +1227,7 @@ function submitSynastryCalculation() {
 
 // 6. Tema Natale & Analisi Zodiacale Completa MIT-Grade (10 crediti)
 function startFullZodiacAnalysis() {
+    if (!checkAuthRequired('calcolare il Tema Natale & Zodiaco')) return;
     const profile = getActiveUserProfile();
     if (!profile) {
         openWizardModal();
@@ -1211,6 +1240,7 @@ function startFullZodiacAnalysis() {
 
 // 7. Master Pinnacoli & Decennale (10 crediti)
 function startPinnaclesMaster() {
+    if (!checkAuthRequired('calcolare il Master Report Pinnacoli')) return;
     const profile = getActiveUserProfile();
     if (!profile) {
         openWizardModal();
@@ -1224,6 +1254,7 @@ function startPinnaclesMaster() {
 
 // 8. Audio-Meditazione Vocale AI (2 crediti)
 async function generateVoiceMeditation() {
+    if (!checkAuthRequired('generare l\'Audio-Meditazione')) return;
     const profile = getActiveUserProfile();
     if (!profile) {
         openWizardModal();
@@ -1236,6 +1267,7 @@ async function generateVoiceMeditation() {
 
 // 9. Esportazione PDF Luxury (3 crediti)
 function exportLuxuryPdf() {
+    if (!checkAuthRequired('esportare il PDF Luxury')) return;
     const credits = getUserCredits();
     if (credits < 3) {
         openCreditsModal();
@@ -1903,14 +1935,57 @@ async function signUpWithEmail() {
     }
 }
 
+// Strict Gate: Authentication & Sync Required Checker
+function checkAuthRequired(actionName = 'utilizzare la Matrice del Destino') {
+    if (!state.currentUser) {
+        openAuthModal();
+        showAuthMsg(`🔒 Accedi o Registrati per ${actionName}.\nI tuoi consulti e la tua matrice saranno protetti e sincronizzati sul cloud.`, 'info');
+        alert(`🔒 Accesso & Sincronizzazione Richiesti\n\nPer ${actionName} e accedere alle funzioni dell'Oracolo, accedi o registrati gratuitamente in 5 secondi!`);
+        return false;
+    }
+    return true;
+}
+
+function clearUnauthenticatedState() {
+    state.currentUser = null;
+    state.currentMatrixData = null;
+    localStorage.removeItem('destiny_matrix_saved_profile');
+    localStorage.removeItem('destiny_credits');
+    localStorage.setItem('destiny_credits', '0');
+    
+    // Clear inputs in wizard
+    const nameInp = document.getElementById('wz-name');
+    const dateInp = document.getElementById('wz-date');
+    const timeInp = document.getElementById('wz-time');
+    const placeInp = document.getElementById('wz-place');
+    if (nameInp) nameInp.value = '';
+    if (dateInp) dateInp.value = '';
+    if (timeInp) timeInp.value = '';
+    if (placeInp) placeInp.value = '';
+
+    // Clear synastry fields
+    const synName1 = document.getElementById('syn-name-1');
+    const synDate1 = document.getElementById('syn-date-1');
+    const synName2 = document.getElementById('syn-name-2');
+    const synDate2 = document.getElementById('syn-date-2');
+    if (synName1) synName1.value = '';
+    if (synDate1) synDate1.value = '';
+    if (synName2) synName2.value = '';
+    if (synDate2) synDate2.value = '';
+
+    updateMatrixVisualization('', '');
+    updateCreditsDisplay();
+    updateUserProfileBanner(null);
+}
+
 async function signOutUser() {
     if (supabaseClient) {
         await supabaseClient.auth.signOut();
-        state.currentUser = null;
-        updateAuthUI(null);
-        alert("Account disconnesso. I crediti rimangono salvati sul cloud e accessibili al prossimo login.");
-        closeAuthModal();
     }
+    clearUnauthenticatedState();
+    updateAuthUI(null);
+    alert("Account disconnesso con successo. I tuoi dati e consulti rimangono salvati in sicurezza sul cloud e saranno ripristinati al prossimo login.");
+    closeAuthModal();
 }
 
 function showAuthMsg(msg, type = 'info') {
@@ -1928,133 +2003,170 @@ function updateAuthUI(user) {
     const authHeaderIcon = document.getElementById('auth-header-icon');
     const loggedEmail = document.getElementById('auth-logged-email');
     const cloudDisplay = document.getElementById('cloud-credits-display');
+    const authBtn = document.getElementById('btn-auth-header');
 
     if (user) {
         if (unloggedView) unloggedView.style.display = 'none';
         if (loggedView) loggedView.style.display = 'block';
         if (loggedEmail) loggedEmail.textContent = user.email;
-        if (authBtnLabel) authBtnLabel.textContent = user.email.split('@')[0];
+        const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+        if (authBtnLabel) {
+            authBtnLabel.textContent = displayName;
+            authBtnLabel.style.color = 'var(--gold-bright)';
+            authBtnLabel.style.fontWeight = '700';
+        }
         if (authHeaderIcon) {
-            authHeaderIcon.className = 'fa-solid fa-cloud-check';
+            authHeaderIcon.className = 'fa-solid fa-circle-user';
             authHeaderIcon.style.color = 'var(--gold-bright)';
+        }
+        if (authBtn) {
+            authBtn.title = `Connesso come ${user.email} (Clicca per gestire account)`;
+            authBtn.style.borderColor = 'rgba(212,175,55,0.5)';
+            authBtn.style.background = 'rgba(212,175,55,0.12)';
         }
         if (cloudDisplay) cloudDisplay.textContent = getUserCredits();
     } else {
         if (unloggedView) unloggedView.style.display = 'block';
         if (loggedView) loggedView.style.display = 'none';
-        if (authBtnLabel) authBtnLabel.textContent = 'Sincronizza';
+        if (authBtnLabel) {
+            authBtnLabel.textContent = 'Sincronizza';
+            authBtnLabel.style.color = '';
+            authBtnLabel.style.fontWeight = '';
+        }
         if (authHeaderIcon) {
             authHeaderIcon.className = 'fa-solid fa-cloud';
             authHeaderIcon.style.color = 'var(--cyan-accent)';
         }
+        if (authBtn) {
+            authBtn.title = 'Accedi per sincronizzare i tuoi crediti su tutti i dispositivi';
+            authBtn.style.borderColor = '';
+            authBtn.style.background = '';
+        }
+    }
+}
+
+async function syncUserWalletAndProfile(user) {
+    if (!supabaseClient || !user) return;
+    const isAdmin = user.email && (
+        user.email.toLowerCase().includes('agtech') ||
+        user.email.toLowerCase().includes('admin')
+    );
+
+    try {
+        // 1. Fetch and merge cloud wallet
+        const { data: walletData } = await supabaseClient
+            .from('user_matrix_wallets')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        const localCredits = getUserCredits();
+
+        if (walletData) {
+            let merged = Math.max(walletData.credits || 0, localCredits);
+            if (isAdmin && merged < 100) {
+                merged = 100;
+            }
+            setUserCredits(merged, false);
+            if (merged !== walletData.credits) {
+                await supabaseClient
+                    .from('user_matrix_wallets')
+                    .update({ credits: merged, updated_at: new Date().toISOString() })
+                    .eq('user_id', user.id);
+            }
+        } else {
+            const welcomeCredits = isAdmin ? 100 : Math.max(1, localCredits);
+            setUserCredits(welcomeCredits, false);
+            await supabaseClient
+                .from('user_matrix_wallets')
+                .insert({
+                    user_id: user.id,
+                    email: user.email,
+                    credits: welcomeCredits
+                });
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+            }
+            setTimeout(() => {
+                if (isAdmin) {
+                    alert('👑 Accesso Amministratore AgTech!\n\nSono stati accreditati 100 Consulti gratuiti sul tuo account.');
+                } else {
+                    alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito per iniziare la tua lettura oracolare.');
+                }
+            }, 500);
+        }
+
+        // 2. Fetch and load saved matrix profile from Supabase
+        const { data: dbProfile } = await supabaseClient
+            .from('user_matrix_profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (dbProfile && dbProfile.full_name) {
+            console.log('☁️ Profilo matrice trovato su Supabase DB:', dbProfile.full_name);
+            saveUserProfile({
+                name: dbProfile.full_name,
+                date: dbProfile.birth_date,
+                time: dbProfile.birth_time || 'non disponibile',
+                place: dbProfile.birth_place || 'Italia',
+                type: dbProfile.analysis_type || '2. Numerologica + Astrologica simbolica'
+            }, false);
+            loadUserProfile();
+        } else {
+            updateUserProfileBanner(null);
+        }
+
+        updateCreditsDisplay();
+        updateAuthUI(user);
+    } catch (err) {
+        console.error('Wallet and profile sync error:', err);
     }
 }
 
 async function initSupabaseAuth() {
+    if (!supabaseClient) {
+        try {
+            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.warn('Supabase init retry notice:', e);
+        }
+    }
     if (!supabaseClient) return;
+
+    // Check initial session immediately
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session && session.user) {
+            state.currentUser = session.user;
+            updateAuthUI(session.user);
+            await syncUserWalletAndProfile(session.user);
+        } else {
+            state.currentUser = null;
+            clearUnauthenticatedState();
+            updateAuthUI(null);
+        }
+    } catch (e) {
+        console.warn('GetSession check notice:', e);
+    }
 
     // Listen for auth state changes
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
         if (session && session.user) {
             state.currentUser = session.user;
             updateAuthUI(session.user);
-
-            const isAdmin = session.user.email && (
-                session.user.email.toLowerCase().includes('agtech') ||
-                session.user.email.toLowerCase().includes('admin')
-            );
-
-            // Fetch and merge cloud wallet
-            try {
-                const { data, error } = await supabaseClient
-                    .from('user_matrix_wallets')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .maybeSingle();
-
-                const localCredits = getUserCredits();
-
-                if (data) {
-                    // Existing registered user: sync credits from database
-                    let merged = Math.max(data.credits, localCredits);
-                    if (isAdmin && merged < 100) {
-                        merged = 100;
-                    }
-                    setUserCredits(merged, false);
-                    if (merged !== data.credits) {
-                        await supabaseClient
-                            .from('user_matrix_wallets')
-                            .update({ credits: merged, updated_at: new Date().toISOString() })
-                            .eq('user_id', session.user.id);
-                    }
-                } else {
-                    // Brand new user registration: award credits!
-                    const welcomeCredits = isAdmin ? 100 : Math.max(1, localCredits);
-                    setUserCredits(welcomeCredits, false);
-                    await supabaseClient
-                        .from('user_matrix_wallets')
-                        .insert({
-                            user_id: session.user.id,
-                            email: session.user.email,
-                            credits: welcomeCredits
-                        });
-
-                    if (typeof confetti === 'function') {
-                        confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
-                    }
-                    setTimeout(() => {
-                        if (isAdmin) {
-                            alert('👑 Accesso Amministratore AgTech!\n\nSono stati accreditati 100 Consulti gratuiti sul tuo account.');
-                        } else {
-                            alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito per completare la tua analisi archetipica.');
-                        }
-                    }, 500);
-                }
-                // Also fetch and load saved matrix profile from Supabase
-                try {
-                    const { data: dbProfile } = await supabaseClient
-                        .from('user_matrix_profiles')
-                        .select('*')
-                        .eq('user_id', session.user.id)
-                        .order('updated_at', { ascending: false })
-                        .limit(1)
-                        .maybeSingle();
-
-                    if (dbProfile && dbProfile.full_name) {
-                        console.log('☁️ Profilo matrice trovato su Supabase DB:', dbProfile.full_name);
-                        saveUserProfile({
-                            name: dbProfile.full_name,
-                            date: dbProfile.birth_date,
-                            time: dbProfile.birth_time,
-                            place: dbProfile.birth_place,
-                            type: dbProfile.analysis_type
-                        }, false);
-                        loadUserProfile();
-                    }
-                } catch (profErr) {
-                    console.warn('Profile DB load notice:', profErr.message);
-                }
-
-                updateCreditsDisplay();
-            } catch (err) {
-                console.error('Wallet sync initialization error:', err);
-            }
+            await syncUserWalletAndProfile(session.user);
         } else {
             state.currentUser = null;
+            clearUnauthenticatedState();
             updateAuthUI(null);
         }
     });
-
-    // Check initial session
-    try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session && session.user) {
-            state.currentUser = session.user;
-            updateAuthUI(session.user);
-        }
-    } catch (e) {
-        console.warn('GetSession check notice:', e);
-    }
 }
 
 // --- Interactive Onboarding Guided Tour & Spotlight System ---
