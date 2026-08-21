@@ -228,6 +228,53 @@ function detectConsultationType(messages) {
     return 'dialogo_libero';
 }
 
+function calculateCurrentTransits(date = new Date()) {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const dayOfWeek = date.getDay();
+
+    const dayGovernors = [
+        { name: "Domenica", planet: "Sole ☀️", focus: "Vitalità solare, espressione del sé, leadership, chiarezza d'intenti" },
+        { name: "Lunedì", planet: "Luna 🌙", focus: "Intuizione emotiva, ascolto interiore, cura di sé, memoria archetipica" },
+        { name: "Martedì", planet: "Marte ♂️", focus: "Azione decisa, coraggio, superamento ostacoli, intraprendenza dinamica" },
+        { name: "Mercoledì", planet: "Mercurio ☿", focus: "Comunicazione brillante, accordi, commercio, chiarezza mentale" },
+        { name: "Giovedì", planet: "Giove ♃", focus: "Espansione spirituale, fortuna karmica, generosità, visione strategica" },
+        { name: "Venerdì", planet: "Venere ♀", focus: "Amore autentico, relazioni armoniose, senso estetico, bellezza e grazia" },
+        { name: "Sabato", planet: "Saturno ♄", focus: "Disciplina costruttiva, consolidamento, chiusura cicli, stabilità" }
+    ];
+
+    const currentGovernor = dayGovernors[dayOfWeek];
+
+    const baseNewMoon = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+    const daysSinceBase = (date.getTime() - baseNewMoon.getTime()) / (1000 * 60 * 60 * 24);
+    const cyclePosition = (daysSinceBase % 29.53058867 + 29.53058867) % 29.53058867;
+    const illumination = Math.round((1 - Math.cos((cyclePosition / 29.53058867) * 2 * Math.PI)) / 2 * 100);
+
+    let moonPhaseName = "Luna Nuova 🌑";
+    if (cyclePosition >= 1.84 && cyclePosition < 7.38) moonPhaseName = "Luna Crescente 🌒";
+    else if (cyclePosition >= 7.38 && cyclePosition < 9.22) moonPhaseName = "Primo Quarto 🌓";
+    else if (cyclePosition >= 9.22 && cyclePosition < 14.77) moonPhaseName = "Gibbosa Crescente 🌔";
+    else if (cyclePosition >= 14.77 && cyclePosition < 16.61) moonPhaseName = "Luna Piena 🌕";
+    else if (cyclePosition >= 16.61 && cyclePosition < 22.15) moonPhaseName = "Gibbosa Calante 🌖";
+    else if (cyclePosition >= 22.15 && cyclePosition < 23.99) moonPhaseName = "Ultimo Quarto 🌗";
+    else if (cyclePosition >= 23.99 && cyclePosition < 27.69) moonPhaseName = "Luna Calante 🌘";
+
+    const sunSign = calculateZodiacSign(day, month);
+
+    return {
+        dateStr: `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`,
+        dayName: currentGovernor.name,
+        dayGovernor: currentGovernor,
+        sunTransit: sunSign,
+        moonPhase: {
+            name: moonPhaseName,
+            illumination: `${illumination}%`,
+            ageDays: cyclePosition.toFixed(1)
+        }
+    };
+}
+
 function calculateCompleteMatrixData(fullName, birthDateStr, birthTimeStr = 'non disponibile') {
     const cleanName = (fullName || 'Utente').toUpperCase().trim();
     
@@ -336,7 +383,8 @@ function calculateCompleteMatrixData(fullName, birthDateStr, birthTimeStr = 'non
         p1, p2, p3, p4,
         c1, c2, c3, c4,
         trans1, trans2, trans3,
-        letterCounts
+        letterCounts,
+        currentTransits: calculateCurrentTransits()
     };
 }
 
@@ -869,11 +917,18 @@ Struttura la risposta in 8 sezioni monumentali:
 
                     case 'oroscopo_giorno':
                         specificInstruction = `🔴 RICHIESTA CONSULTA: OROSCOPO DEL GIORNO (${currentDateStr}).
-DEVI GENERARE L'OROSCOPO DEL GIORNO INTEGRANDO IL SEGNO ZODIACALE (${calc.zodiacSign.name} ${calc.zodiacSign.symbol}), L'ASCENDENTE (${calc.ascendant.formatted}) E IL GIORNO PERSONALE NUMEROLOGICO (Numero ${calc.personalDay} - Arcano ${calc.personalDay} ${calc.arcPersonalDay.name}). NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
+DEVI GENERARE L'OROSCOPO DEL GIORNO INTEGRANDO:
+- SEGNO ZODIACALE DEL SOGGETTO: ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Elemento ${calc.zodiacSign.element}, Governatore ${calc.zodiacSign.planet})
+- ASCENDENTE: ${calc.ascendant.formatted} (Governatore ${calc.ascendant.sign.planet})
+- GIORNO PERSONALE NUMEROLOGICO DI OGGI: Numero ${calc.personalDay} (Arcano ${calc.personalDay} - ${calc.arcPersonalDay.name})
+- CIELO ASTRONOMICO DI OGGI: Sole in ${calc.currentTransits.sunTransit.name} ${calc.currentTransits.sunTransit.symbol}, Fase Lunare: ${calc.currentTransits.moonPhase.name} (Luminosità ${calc.currentTransits.moonPhase.illumination}), Giorno della Settimana: ${calc.currentTransits.dayName} (Pianeta Governatore: ${calc.currentTransits.dayGovernor.planet} — Focus: ${calc.currentTransits.dayGovernor.focus}).
+NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
 Struttura:
 # 🌅 Oroscopo & Vibrazione Astrale del Giorno — ${currentDateStr}
-* **Soggetto:** ${userData.name} | **Segno:** ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} | **Ascendente:** ${calc.ascendant.formatted} | **Giorno Personale:** ${calc.personalDay} (${calc.arcPersonalDay.name})
-## 1. Clima Energetico & Transiti del Segno di Oggi
+* **Soggetto:** ${userData.name} | **Segno:** ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} | **Ascendente:** ${calc.ascendant.formatted}
+* **Cielo di Oggi:** Sole in ${calc.currentTransits.sunTransit.name} | ${calc.currentTransits.moonPhase.name} (${calc.currentTransits.moonPhase.illumination}) | Governatore del Giorno: ${calc.currentTransits.dayGovernor.planet}
+* **Giorno Personale:** ${calc.personalDay} (${calc.arcPersonalDay.name})
+## 1. Clima Energetico & Transiti Astrali di Oggi
 ## 2. Le 3 Grandi Opportunità Odierne (Professione, Relazioni, Spirito)
 ## 3. Ombre & Insidie Astrali da Evitare
 ## 4. Consiglio & Rituale Pratico d'Azione`;
@@ -881,9 +936,10 @@ Struttura:
 
                     case 'oroscopo_settimana':
                         specificInstruction = `🔴 RICHIESTA CONSULTA: GUIDA ORACOLARE SETTIMANALE (7 GIORNI).
-DEVI GENERARE LA PREVISIONE DEI 7 GIORNI DELLA SETTIMANA PER IL SEGNO ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Ascendente ${calc.ascendant.formatted}) GIORNO PER GIORNO. NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
-Dati chiave: Anno Personale = ${calc.personalYear} (${calc.arcPersonalYear.name}), Life Path = ${calc.lifePath}.
-Struttura con tema della settimana, mappa dei 7 giorni con Arcano quotidiano e focus, giorni più favorevoli e consiglio di sintesi.`;
+DEVI GENERARE LA PREVISIONE DEI 7 GIORNI DELLA SETTIMANA PER IL SEGNO ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Ascendente ${calc.ascendant.formatted}) GIORNO PER GIORNO.
+Dati chiave: Anno Personale = ${calc.personalYear} (${calc.arcPersonalYear.name}), Life Path = ${calc.lifePath}, Transito Solare = ${calc.currentTransits.sunTransit.name}, Fase Lunare = ${calc.currentTransits.moonPhase.name}.
+NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
+Struttura: Mappa dei 7 giorni con Arcano quotidiano, focus specifico (lavoro, amore, crescita), giorni più favorevoli e consiglio di sintesi.`;
                         break;
 
                     case 'amore_relazioni':
