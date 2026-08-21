@@ -553,7 +553,7 @@ function escapeHtml(text) {
 }
 
 // Send User Message
-async function sendMessage(overrideText = null) {
+async function sendMessage(overrideText = null, creditCost = 1) {
     if (typeof overrideText !== 'string') {
         overrideText = null;
     }
@@ -587,13 +587,13 @@ async function sendMessage(overrideText = null) {
 
     // Check credits and registration status before starting
     const currentCredits = getUserCredits();
-    if (currentCredits <= 0) {
+    if (currentCredits < creditCost) {
         if (!state.currentUser) {
             openAuthModal();
             alert('✨ Registrati per Ricevere 1 Consulto Gratuito!\n\nPer calcolare la tua Matrice del Destino e ricevere l\'analisi oracolare completa, registrati o accedi con Google/Email in 5 secondi!');
         } else {
             openCreditsModal();
-            alert('✦ Hai esaurito i consulti disponibili.\nRicarica gratuitamente condividendo il tuo link Invita un Amico (+2 Consulti) o attiva il Pass Arcano!');
+            alert(`✦ Sono necessari ${creditCost} consulti per questa analisi (Saldo attuale: ${currentCredits}).\nRicarica gratuitamente condividendo il tuo link Invita un Amico (+2 Consulti) o attiva il Pass Arcano!`);
         }
         return;
     }
@@ -750,11 +750,11 @@ async function sendMessage(overrideText = null) {
             // Also check if assistant response contains structured report info
             extractMatrixFromAssistantReport(finalText);
 
-            // Deduct 1 credit strictly upon valid response reception!
+            // Deduct required credits strictly upon valid response reception!
             const currentCredits = getUserCredits();
-            if (currentCredits > 0) {
-                setUserCredits(currentCredits - 1);
-                console.log(`✦ Consulto completato: crediti scalati da ${currentCredits} a ${currentCredits - 1}.`);
+            if (currentCredits >= creditCost) {
+                setUserCredits(currentCredits - creditCost);
+                console.log(`✦ Consulto completato: crediti scalati da ${currentCredits} a ${currentCredits - creditCost}.`);
             }
         },
         onError: (err) => {
@@ -907,8 +907,217 @@ function submitWizardData() {
 
 Ti confermo tutti i dati. Procedi con il report completo a 14 sezioni calcolando l'Anno Personale per l'anno in corso (${currentYear}) e la relativa proiezione decennale.`;
 
+    // Save user profile for persistence
+    saveUserProfile({ name, date, time, place, type });
+
     closeWizardModal();
     sendMessage(messageToAI);
+}
+
+// --- Persistent Profile & Automatic Matrix System ---
+
+function saveUserProfile(userData) {
+    if (!userData || !userData.name || !userData.date) return;
+    try {
+        localStorage.setItem('destiny_matrix_saved_profile', JSON.stringify(userData));
+        updateUserProfileBanner(userData);
+    } catch (e) {
+        console.warn('Profile save notice:', e);
+    }
+}
+
+function loadUserProfile() {
+    try {
+        const raw = localStorage.getItem('destiny_matrix_saved_profile');
+        if (raw) {
+            const data = JSON.parse(raw);
+            if (data && data.name && data.date) {
+                console.log('🌌 Caricamento profilo persistente:', data.name);
+                // Pre-fill wizard inputs
+                const nameInp = document.getElementById('wz-name');
+                const dateInp = document.getElementById('wz-date');
+                const timeInp = document.getElementById('wz-time');
+                const placeInp = document.getElementById('wz-place');
+                if (nameInp) nameInp.value = data.name;
+                if (dateInp) dateInp.value = data.date;
+                if (timeInp && data.time) timeInp.value = data.time;
+                if (placeInp && data.place) placeInp.value = data.place;
+
+                // Also pre-fill synastry partner 1
+                const synName1 = document.getElementById('syn-name-1');
+                const synDate1 = document.getElementById('syn-date-1');
+                if (synName1 && !synName1.value) synName1.value = data.name;
+                if (synDate1 && !synDate1.value) synDate1.value = data.date;
+
+                // Render full interactive matrix diagram
+                updateMatrixVisualization(data.name, data.date);
+                updateUserProfileBanner(data);
+            }
+        }
+    } catch (e) {
+        console.warn('Profile load notice:', e);
+    }
+}
+
+function updateUserProfileBanner(userData) {
+    const banner = document.getElementById('user-profile-banner');
+    const avatar = document.getElementById('banner-avatar');
+    const nameEl = document.getElementById('banner-user-name');
+    const detailsEl = document.getElementById('banner-user-details');
+    if (banner && userData && userData.name) {
+        banner.style.display = 'flex';
+        if (avatar) avatar.textContent = userData.name.trim().charAt(0).toUpperCase() || 'U';
+        if (nameEl) nameEl.textContent = userData.name;
+        if (detailsEl) {
+            detailsEl.textContent = `(${userData.date}${userData.place ? ' — ' + userData.place : ''})`;
+        }
+    }
+}
+
+function getActiveUserProfile() {
+    try {
+        const raw = localStorage.getItem('destiny_matrix_saved_profile');
+        if (raw) {
+            const data = JSON.parse(raw);
+            if (data && data.name && data.date) return data;
+        }
+    } catch (e) {}
+
+    const nameInp = document.getElementById('wz-name')?.value?.trim();
+    const dateInp = document.getElementById('wz-date')?.value;
+    const timeInp = document.getElementById('wz-time')?.value?.trim();
+    const placeInp = document.getElementById('wz-place')?.value?.trim();
+
+    if (nameInp && dateInp) {
+        return { name: nameInp, date: dateInp, time: timeInp, place: placeInp };
+    }
+    return null;
+}
+
+// --- Specialized Oracular Modules Handlers ---
+
+// 1. Oroscopo del Giorno (1 credito)
+function startDailyHoroscope() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data di nascita per calcolare l\'Oroscopo del Giorno!');
+        return;
+    }
+    const today = new Date().toLocaleDateString('it-IT');
+    const prompt = `Analisi Oroscopo del Giorno (${today}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nCalcola la mia vibrazione energetica per la giornata di oggi: Giorno Personale, transito degli Arcani odierni, clima universale, opportunità del giorno e consigli pratici di azione.`;
+    sendMessage(prompt, 1);
+}
+
+// 2. Guida Settimanale (3 crediti)
+function startWeeklyForecast() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data di nascita per calcolare la Guida Settimanale!');
+        return;
+    }
+    const prompt = `Guida Oracolare Settimanale (Previsione 7 Giorni):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nElabora la mappa oracolare dei 7 giorni della settimana corrente giorno per giorno. Per ciascun giorno indica l'Arcano guida, il focus principale (lavoro, amore, introspezione) e i giorni più favorevoli per firmare accordi o avviare iniziative.`;
+    sendMessage(prompt, 3);
+}
+
+// 3. Focus Canale Amore (1 credito)
+function startLoveFocus() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Focus Amore!');
+        return;
+    }
+    const prompt = `Focus Canale Amore & Relazioni di Coppia:\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nAnalizza in profondità il mio Canale dell'Amore (Nodo D + E) nella Matrice del Destino: chiarisci l'archetipo del partner karmico affine, le ferite emotive da sciogliere per attrarre amore autentico e i consigli pratici per vivere relazioni equilibrate e consapevoli.`;
+    sendMessage(prompt, 1);
+}
+
+// 4. Focus Canale Denaro & Carriera (1 credito)
+function startMoneyFocus() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Focus Denaro!');
+        return;
+    }
+    const prompt = `Focus Canale Denaro, Carriera & Abbondanza:\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nAnalizza in dettaglio il mio Canale del Denaro (Nodo C + E) nella Matrice del Destino: quali sono le mie professioni vocazionali, le credenze limitanti da sbloccare per attrarre prosperità materiale e la strategia ottimale per monetizzare i miei talenti innati.`;
+    sendMessage(prompt, 1);
+}
+
+// 5. Master Pinnacoli & Decennale (10 crediti)
+function startPinnaclesMaster() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Master Report Pinnacoli!');
+        return;
+    }
+    const currentYear = new Date().getFullYear();
+    const prompt = `Master Report: I 4 Pinnacoli Evolutivi, le 4 Sfide & Proiezione Decennale (${currentYear}-${currentYear + 10}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nProcedi con il Master Report avanzato: calcola le età esatte di transizione dei 4 Pinnacoli (formula 36 - LifePath), analizza ciascun Pinnacolo con i relativi archetipi, descrivi le 4 Sfide evolutive da superare e fornisci la proiezione decennale anno per anno con strategie pratiche.`;
+    sendMessage(prompt, 10);
+}
+
+// 6. Sinastria di Coppia (5 crediti)
+function openSynastryModal() {
+    const profile = getActiveUserProfile();
+    if (profile) {
+        const synName1 = document.getElementById('syn-name-1');
+        const synDate1 = document.getElementById('syn-date-1');
+        if (synName1 && !synName1.value) synName1.value = profile.name;
+        if (synDate1 && !synDate1.value) synDate1.value = profile.date;
+    }
+    const modal = document.getElementById('synastry-modal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeSynastryModal() {
+    const modal = document.getElementById('synastry-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function submitSynastryCalculation() {
+    const name1 = document.getElementById('syn-name-1')?.value?.trim() || 'Partner 1';
+    const date1 = document.getElementById('syn-date-1')?.value;
+    const name2 = document.getElementById('syn-name-2')?.value?.trim() || 'Partner 2';
+    const date2 = document.getElementById('syn-date-2')?.value;
+
+    if (!date1 || !date2) {
+        alert('Inserisci le date di nascita di entrambi i partner.');
+        return;
+    }
+
+    closeSynastryModal();
+
+    const prompt = `Analisi di Sinastria di Coppia & Matrice Congiunta:\n\nPartner 1: ${name1} (Nato/a il: ${date1})\nPartner 2: ${name2} (Nato/a il: ${date2})\n\nCalcola la nostra Matrice Congiunta (somma alchemica dei nodi dei 22 Arcani): scopo evolutivo e karmico del nostro incontro, punti di forza e affinità spirituale/mentale/fisica, zone di frizione e trappole comunicative da evitare, e consigli per consolidare l'unione.`;
+    sendMessage(prompt, 5);
+}
+
+// 7. Audio-Meditazione Vocale AI (2 crediti)
+async function generateVoiceMeditation() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima i tuoi dati per creare la tua Audio-Meditazione personalizzata!');
+        return;
+    }
+    const prompt = `Genera un testo di Meditazione Guidata Oracolare (2-3 minuti) su misura per me:\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\n\nCrea un viaggio meditativo profondo per connettermi al mio Centro Energetico e sbloccare la fiducia interiore, scritto con tono calmo, solenne e trasformativo.`;
+    sendMessage(prompt, 2);
+}
+
+// 8. Esportazione PDF Luxury (3 crediti)
+function exportLuxuryPdf() {
+    const credits = getUserCredits();
+    if (credits < 3) {
+        openCreditsModal();
+        alert('✦ Sono necessari 3 Consulti per esportare il Report PDF Luxury ad alta definizione.');
+        return;
+    }
+    setUserCredits(credits - 3, true);
+    openReportModal();
+    setTimeout(() => {
+        window.print();
+    }, 600);
 }
 
 // --- Supabase Cloud Sync & Authentication Setup ---
@@ -1737,6 +1946,18 @@ window.prevOnboardingStep = prevOnboardingStep;
 window.resumeTourAudio = resumeTourAudio;
 window.copyReportMarkdown = copyReportMarkdown;
 window.printReport = printReport;
+window.startDailyHoroscope = startDailyHoroscope;
+window.startWeeklyForecast = startWeeklyForecast;
+window.startLoveFocus = startLoveFocus;
+window.startMoneyFocus = startMoneyFocus;
+window.startPinnaclesMaster = startPinnaclesMaster;
+window.openSynastryModal = openSynastryModal;
+window.closeSynastryModal = closeSynastryModal;
+window.submitSynastryCalculation = submitSynastryCalculation;
+window.generateVoiceMeditation = generateVoiceMeditation;
+window.exportLuxuryPdf = exportLuxuryPdf;
+window.saveUserProfile = saveUserProfile;
+window.loadUserProfile = loadUserProfile;
 
 // --- Master Application Initialization ---
 function initApp() {
@@ -1749,6 +1970,7 @@ function initApp() {
     checkReferralEntry();
     initGdprConsent();
     initSupabaseAuth();
+    loadUserProfile();
     setTimeout(() => startOnboardingTour(false), 800);
 }
 

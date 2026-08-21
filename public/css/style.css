@@ -1838,5 +1838,207 @@ body {
     transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   🧊 Neumorphism 2.0 Dark Luxury — Hub Consulti Specializzati & Sinastria
+   ========================================================================== */
+
+.consults-hub-container {
+    margin: 18px 0 24px 0;
+    padding: 20px;
+    background: radial-gradient(circle at top, rgba(14, 33, 43, 0.7) 0%, rgba(6, 23, 30, 0.95) 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: 
+        8px 8px 20px #041015,
+        -6px -6px 18px #0d3443;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    position: relative;
+    overflow: hidden;
+}
+
+.consults-hub-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.consults-hub-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gold-bright);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+}
+
+.consults-hub-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.consults-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+}
+
+.neu-hub-card {
+    background: #08212b;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: 
+        5px 5px 12px #041117,
+        -4px -4px 10px #0e3b4d;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: pointer;
+}
+
+.neu-hub-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        7px 7px 16px #030d12,
+        -5px -5px 14px #124c63,
+        0 0 12px rgba(56, 189, 248, 0.2);
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.neu-hub-card:active {
+    transform: scale(0.98);
+    box-shadow: 
+        inset 4px 4px 8px #041117,
+        inset -4px -4px 8px #0e3b4d;
+}
+
+.neu-hub-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.neu-hub-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.5), inset -2px -2px 4px rgba(255,255,255,0.05);
+}
+
+.neu-hub-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: rgba(244, 162, 11, 0.15);
+    color: #f4a20b;
+    border: 1px solid rgba(244, 162, 11, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.neu-hub-badge.cyan {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.neu-hub-badge.emerald {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.neu-hub-badge.coral {
+    background: rgba(251, 157, 176, 0.15);
+    color: #fb9db0;
+    border-color: rgba(251, 157, 176, 0.35);
+}
+
+.neu-hub-card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #eaf6fb;
+    margin-bottom: 6px;
+}
+
+.neu-hub-card-desc {
+    font-size: 0.76rem;
+    color: #9cbacf;
+    line-height: 1.35;
+    margin-bottom: 12px;
+    flex-grow: 1;
+}
+
+.btn-neu-action {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(244, 162, 11, 0.08));
+    color: var(--gold-bright);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 2px 2px 6px #041117, -2px -2px 6px #0e3b4d;
+}
+
+.btn-neu-action:hover {
+    background: linear-gradient(135deg, var(--gold-primary), #f59e0b);
+    color: #06171e;
+    box-shadow: 0 0 14px rgba(244, 162, 11, 0.4);
+}
+
+/* User Profile Saved Bar */
+.user-profile-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    background: rgba(8, 33, 43, 0.8);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: var(--radius-md);
+    box-shadow: inset 2px 2px 6px #041015;
+}
+
+.user-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: #eaf6fb;
+}
+
+.user-profile-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #38bdf8, #d4af37);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #06171e;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
 
 

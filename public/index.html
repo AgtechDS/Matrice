@@ -285,6 +285,122 @@
                     </div>
                 </div>
 
+                <!-- Hub dei Consulti Rapidi (Neumorphism 2.0 Dark Luxury) -->
+                <div class="consults-hub-container" id="consults-hub">
+                    <div class="consults-hub-header">
+                        <div class="consults-hub-title">
+                            <i class="fa-solid fa-compass-drafting"></i> Hub Consulti & Moduli Oracolari
+                        </div>
+                        <div class="consults-hub-subtitle">
+                            Seleziona un'analisi verticale specializzata
+                        </div>
+                    </div>
+
+                    <!-- User Active Profile Quick Banner -->
+                    <div class="user-profile-banner" id="user-profile-banner" style="display: none;">
+                        <div class="user-profile-info">
+                            <div class="user-profile-avatar" id="banner-avatar">Z</div>
+                            <div>
+                                <strong id="banner-user-name" style="color: var(--gold-bright);">Zaira Agata Giuliano</strong>
+                                <span id="banner-user-details" style="color: var(--text-muted); margin-left: 6px; font-size: 0.76rem;">(17/08/1986 — Catania)</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #34d399; font-weight: 700;">
+                            <i class="fa-solid fa-sparkles"></i> Matrice Pronta
+                        </div>
+                    </div>
+
+                    <div class="consults-grid">
+                        <!-- 1. Oroscopo del Giorno -->
+                        <div class="neu-hub-card" onclick="startDailyHoroscope()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: #f4a20b;"><i class="fa-solid fa-sun"></i></div>
+                                <div class="neu-hub-badge">1 Credito</div>
+                            </div>
+                            <div class="neu-hub-card-title">Oroscopo del Giorno</div>
+                            <div class="neu-hub-card-desc">Transiti odierni e vibrazione del tuo Giorno Personale in tempo reale.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-play"></i> Consulta (1c)</button>
+                        </div>
+
+                        <!-- 2. Previsione Settimanale -->
+                        <div class="neu-hub-card" onclick="startWeeklyForecast()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: #38bdf8;"><i class="fa-solid fa-calendar-week"></i></div>
+                                <div class="neu-hub-badge cyan">3 Crediti</div>
+                            </div>
+                            <div class="neu-hub-card-title">Guida Settimanale</div>
+                            <div class="neu-hub-card-desc">Mappa strategica dei 7 giorni: focus decisioni, business e relazioni.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-calendar-days"></i> Analisi Week (3c)</button>
+                        </div>
+
+                        <!-- 3. Focus Canale Amore -->
+                        <div class="neu-hub-card" onclick="startLoveFocus()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: #fb9db0;"><i class="fa-solid fa-heart"></i></div>
+                                <div class="neu-hub-badge coral">1 Credito</div>
+                            </div>
+                            <div class="neu-hub-card-title">Focus Canale Amore</div>
+                            <div class="neu-hub-card-desc">Sblocco nodo relazionale, partner ideale e dissoluzione blocchi affettivi.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-heart-pulse"></i> Approfondisci (1c)</button>
+                        </div>
+
+                        <!-- 4. Focus Canale Denaro -->
+                        <div class="neu-hub-card" onclick="startMoneyFocus()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: #34d399;"><i class="fa-solid fa-coins"></i></div>
+                                <div class="neu-hub-badge emerald">1 Credito</div>
+                            </div>
+                            <div class="neu-hub-card-title">Focus Canale Denaro</div>
+                            <div class="neu-hub-card-desc">Talenti vocazionali, flusso di cassa e sblocco abbondanza materiale.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-vault"></i> Sblocca Denaro (1c)</button>
+                        </div>
+
+                        <!-- 5. Sinastria di Coppia -->
+                        <div class="neu-hub-card" onclick="openSynastryModal()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: #e879f9;"><i class="fa-solid fa-people-arrows"></i></div>
+                                <div class="neu-hub-badge" style="background: rgba(232, 121, 249, 0.15); color: #e879f9; border-color: rgba(232, 121, 249, 0.35);">5 Crediti</div>
+                            </div>
+                            <div class="neu-hub-card-title">Sinastria di Coppia</div>
+                            <div class="neu-hub-card-desc">Matrice Congiunta con partner: scopo karmico, affinità e sinergie.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-ring"></i> Calcola Coppia (5c)</button>
+                        </div>
+
+                        <!-- 6. Master Pinnacoli & Decennale -->
+                        <div class="neu-hub-card" onclick="startPinnaclesMaster()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: var(--gold-bright);"><i class="fa-solid fa-chart-line-up"></i></div>
+                                <div class="neu-hub-badge">10 Crediti</div>
+                            </div>
+                            <div class="neu-hub-card-title">Pinnacoli & Decennale</div>
+                            <div class="neu-hub-card-desc">I 4 Pinnacoli (età esatte di transizione), 4 Sfide e proiezione 2026-2036.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-gem"></i> Master Report (10c)</button>
+                        </div>
+
+                        <!-- 7. Audio-Meditazione Vocale AI -->
+                        <div class="neu-hub-card" onclick="generateVoiceMeditation()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: #38bdf8;"><i class="fa-solid fa-headphones"></i></div>
+                                <div class="neu-hub-badge cyan">2 Crediti</div>
+                            </div>
+                            <div class="neu-hub-card-title">Audio-Meditazione AI</div>
+                            <div class="neu-hub-card-desc">Sessione guidata personalizzata con Voce Neurale Gemini HD.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-volume-high"></i> Genera Audio (2c)</button>
+                        </div>
+
+                        <!-- 8. Esportazione PDF Luxury -->
+                        <div class="neu-hub-card" onclick="exportLuxuryPdf()">
+                            <div class="neu-hub-card-header">
+                                <div class="neu-hub-icon" style="color: #f4a20b;"><i class="fa-solid fa-file-pdf"></i></div>
+                                <div class="neu-hub-badge">3 Crediti</div>
+                            </div>
+                            <div class="neu-hub-card-title">Download PDF Luxury</div>
+                            <div class="neu-hub-card-desc">Fascicolo grafico A4 ad alta definizione con tutti i 14 capitoli pronto da stampare.</div>
+                            <button class="btn-neu-action"><i class="fa-solid fa-download"></i> Scarica PDF (3c)</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Quick Suggestions Bar -->
                 <div class="quick-suggestions" id="quick-suggestions">
                     <button class="chip" onclick="sendQuickPrompt('Ciao, vorrei fare la mia analisi della matrice del destino.')">✨ Inizia Analisi</button>
@@ -475,6 +591,62 @@
                 </button>
                 <button class="btn-header primary" onclick="printReport()">
                     <i class="fa-solid fa-print"></i> Stampa / PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Synastry / Couple Matrix Modal -->
+    <div class="modal-overlay" id="synastry-modal">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-heart-pulse text-gold"></i> Sinastria di Coppia & Matrice Relazionale</h3>
+                <button class="modal-close" onclick="closeSynastryModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div style="background: rgba(232, 121, 249, 0.08); border: 1px solid rgba(232, 121, 249, 0.25); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px; font-size: 0.82rem; color: #eaf6fb;">
+                    <i class="fa-solid fa-infinity" style="color: #e879f9;"></i> La <strong>Matrice Congiunta</strong> calcola la somma alchemica dei vostri nodi: scopo karmico del legame, compatibilità archetipica, trappole relazionali e punti di massima armonia.
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <!-- Partner 1 -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 12px; border-radius: var(--radius-sm);">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--gold-bright); margin-bottom: 8px;">
+                            <i class="fa-solid fa-user"></i> Tu / Partner 1
+                        </div>
+                        <div class="form-group" style="margin-bottom: 8px;">
+                            <label class="form-label" style="font-size: 0.75rem;">Nome</label>
+                            <input type="text" class="form-control" id="syn-name-1" placeholder="Nome" style="padding: 6px 10px; font-size: 0.82rem;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.75rem;">Data di Nascita</label>
+                            <input type="date" class="form-control" id="syn-date-1" style="padding: 6px 10px; font-size: 0.82rem;">
+                        </div>
+                    </div>
+
+                    <!-- Partner 2 -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 12px; border-radius: var(--radius-sm);">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: #e879f9; margin-bottom: 8px;">
+                            <i class="fa-solid fa-heart"></i> Partner 2
+                        </div>
+                        <div class="form-group" style="margin-bottom: 8px;">
+                            <label class="form-label" style="font-size: 0.75rem;">Nome Partner</label>
+                            <input type="text" class="form-control" id="syn-name-2" placeholder="Nome partner" style="padding: 6px 10px; font-size: 0.82rem;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.75rem;">Data di Nascita</label>
+                            <input type="date" class="form-control" id="syn-date-2" style="padding: 6px 10px; font-size: 0.82rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(8,33,43,0.9); border: 1px solid rgba(56,189,248,0.3); border-radius: var(--radius-sm); margin-bottom: 16px;">
+                    <span style="font-size: 0.82rem; color: #eaf6fb;"><i class="fa-solid fa-coins" style="color: var(--gold-bright);"></i> Costo Analisi Sinastria:</span>
+                    <strong style="color: var(--gold-bright); font-size: 0.88rem;">5 Consulti</strong>
+                </div>
+
+                <button class="btn-recharge btn-premium" style="width: 100%; padding: 12px; font-size: 0.9rem; background: linear-gradient(135deg, #e879f9, #38bdf8); color: #06171e; font-weight: 800;" onclick="submitSynastryCalculation()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Calcola Matrice di Coppia (5c)
                 </button>
             </div>
         </div>
@@ -767,8 +939,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=30"></script>
-    <script src="js/api-client.js?v=30"></script>
-    <script src="js/app.js?v=30"></script>
+    <script src="js/matrix-calc.js?v=31"></script>
+    <script src="js/api-client.js?v=31"></script>
+    <script src="js/app.js?v=31"></script>
 </body>
 </html>

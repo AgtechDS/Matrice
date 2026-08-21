@@ -284,13 +284,161 @@ ${generatePersonalYears(day, month)}
 La tua configurazione rivela una naturale inclinazione alla leadership etica e alla trasformazione creativa. La chiave evolutiva risiede nell'integrare la profondità intuitiva con azioni strutturate e costanti.`;
 }
 
+function calculateDailyHoroscope(birthDateStr, targetDate = new Date()) {
+    const parts = birthDateStr.split(/[-/.]/);
+    let day = 17, month = 8, year = 1986;
+    if (parts.length === 3) {
+        if (parts[0].length === 4) {
+            year = parseInt(parts[0], 10);
+            month = parseInt(parts[1], 10);
+            day = parseInt(parts[2], 10);
+        } else {
+            day = parseInt(parts[0], 10);
+            month = parseInt(parts[1], 10);
+            year = parseInt(parts[2], 10);
+        }
+    }
+
+    const tDay = targetDate.getDate();
+    const tMonth = targetDate.getMonth() + 1;
+    const tYear = targetDate.getFullYear();
+
+    const tYearSum = String(tYear).split('').reduce((s, d) => s + parseInt(d, 10), 0);
+    const personalYear = reduceToDigit(reduceToDigit(day) + reduceToDigit(month) + reduceToDigit(tYearSum));
+    const personalMonth = reduceToDigit(personalYear + reduceToDigit(tMonth));
+    const personalDay = reduceToDigit(personalMonth + reduceToDigit(tDay));
+
+    const arcDaily = ARCANA_DATA[reduceTo22(personalDay)] || ARCANA_DATA[1];
+    const arcUniversal = ARCANA_DATA[reduceTo22(reduceToDigit(tDay) + reduceToDigit(tMonth) + reduceToDigit(tYearSum))] || ARCANA_DATA[1];
+
+    return {
+        dateFormatted: `${String(tDay).padStart(2, '0')}/${String(tMonth).padStart(2, '0')}/${tYear}`,
+        personalYear,
+        personalMonth,
+        personalDay,
+        arcDaily,
+        arcUniversal,
+        title: `Oroscopo del Giorno — ${String(tDay).padStart(2, '0')}/${String(tMonth).padStart(2, '0')}/${tYear}`,
+        focus: `Vibrazione Personale: Arcano ${personalDay} (${arcDaily.name}) | Clima Universale: Arcano ${arcUniversal.name}`,
+        keywords: arcDaily.keywords
+    };
+}
+
+function calculateWeeklyForecast(birthDateStr, startDate = new Date()) {
+    const weekDays = [];
+    const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    
+    for (let i = 0; i < 7; i++) {
+        const curr = new Date(startDate);
+        curr.setDate(startDate.getDate() + i);
+        const horo = calculateDailyHoroscope(birthDateStr, curr);
+        weekDays.push({
+            dayName: dayNames[curr.getDay()],
+            ...horo
+        });
+    }
+
+    return weekDays;
+}
+
+function calculateSynastryMatrix(birthDate1, birthDate2, name1 = 'Partner 1', name2 = 'Partner 2') {
+    const mat1 = calculateCompleteMatrix(birthDate1, name1);
+    const mat2 = calculateCompleteMatrix(birthDate2, name2);
+
+    const synTop = reduceTo22(mat1.matrix.top.value + mat2.matrix.top.value);
+    const synLeft = reduceTo22(mat1.matrix.left.value + mat2.matrix.left.value);
+    const synRight = reduceTo22(mat1.matrix.right.value + mat2.matrix.right.value);
+    const synBottom = reduceTo22(mat1.matrix.bottom.value + mat2.matrix.bottom.value);
+    const synCenter = reduceTo22(synTop + synLeft + synRight + synBottom);
+
+    const synLove = reduceTo22(synBottom + synCenter);
+    const synMoney = reduceTo22(synRight + synCenter);
+
+    return {
+        partner1: { name: name1, date: birthDate1, matrix: mat1 },
+        partner2: { name: name2, date: birthDate2, matrix: mat2 },
+        synastry: {
+            top: { value: synTop, arcana: ARCANA_DATA[synTop] || ARCANA_DATA[1] },
+            left: { value: synLeft, arcana: ARCANA_DATA[synLeft] || ARCANA_DATA[1] },
+            right: { value: synRight, arcana: ARCANA_DATA[synRight] || ARCANA_DATA[1] },
+            bottom: { value: synBottom, arcana: ARCANA_DATA[synBottom] || ARCANA_DATA[1] },
+            center: { value: synCenter, arcana: ARCANA_DATA[synCenter] || ARCANA_DATA[1] },
+            love: { value: synLove, arcana: ARCANA_DATA[synLove] || ARCANA_DATA[1] },
+            money: { value: synMoney, arcana: ARCANA_DATA[synMoney] || ARCANA_DATA[1] }
+        }
+    };
+}
+
+function calculateAdvancedPinnacles(birthDateStr) {
+    const parts = birthDateStr.split(/[-/.]/);
+    let day = 17, month = 8, year = 1986;
+    if (parts.length === 3) {
+        if (parts[0].length === 4) {
+            year = parseInt(parts[0], 10);
+            month = parseInt(parts[1], 10);
+            day = parseInt(parts[2], 10);
+        } else {
+            day = parseInt(parts[0], 10);
+            month = parseInt(parts[1], 10);
+            year = parseInt(parts[2], 10);
+        }
+    }
+
+    const dayD = reduceToDigit(day);
+    const monthD = reduceToDigit(month);
+    const yearD = reduceToDigit(yearDigits(year));
+    const lifePath = reduceToDigit(dayD + monthD + yearD);
+
+    const p1Age = 36 - lifePath;
+    const p2Age = p1Age + 9;
+    const p3Age = p2Age + 9;
+
+    const p1 = reduceToDigit(dayD + monthD);
+    const p2 = reduceToDigit(dayD + yearD);
+    const p3 = reduceToDigit(p1 + p2);
+    const p4 = reduceToDigit(monthD + yearD);
+
+    const ch1 = Math.abs(dayD - monthD);
+    const ch2 = Math.abs(dayD - yearD);
+    const ch3 = Math.abs(ch1 - ch2);
+    const ch4 = Math.abs(monthD - yearD);
+
+    return {
+        lifePath,
+        pinnacles: [
+            { num: 1, value: p1, ageRange: `0 - ${p1Age} anni`, arcana: ARCANA_DATA[reduceTo22(p1)] || ARCANA_DATA[1] },
+            { num: 2, value: p2, ageRange: `${p1Age + 1} - ${p2Age} anni`, arcana: ARCANA_DATA[reduceTo22(p2)] || ARCANA_DATA[1] },
+            { num: 3, value: p3, ageRange: `${p2Age + 1} - ${p3Age} anni`, arcana: ARCANA_DATA[reduceTo22(p3)] || ARCANA_DATA[1] },
+            { num: 4, value: p4, ageRange: `${p3Age + 1}+ anni (Maestria)`, arcana: ARCANA_DATA[reduceTo22(p4)] || ARCANA_DATA[1] }
+        ],
+        challenges: [
+            { num: 1, value: ch1, desc: "Sfida relazionale ed espressione delle emozioni" },
+            { num: 2, value: ch2, desc: "Sfida dell'autonomia e della fiducia nelle proprie forze" },
+            { num: 3, value: ch3, desc: "Sfida cardine di sintesi e allineamento di vita" },
+            { num: 4, value: ch4, desc: "Sfida spirituale e superamento dei dogmi interiori" }
+        ]
+    };
+}
+
 if (typeof window !== 'undefined') {
     window.calculateCompleteMatrix = calculateCompleteMatrix;
     window.generateCompleteReport14Sections = generateCompleteReport14Sections;
+    window.calculateDailyHoroscope = calculateDailyHoroscope;
+    window.calculateWeeklyForecast = calculateWeeklyForecast;
+    window.calculateSynastryMatrix = calculateSynastryMatrix;
+    window.calculateAdvancedPinnacles = calculateAdvancedPinnacles;
     window.ARCANA_DATA = ARCANA_DATA;
     window.reduceTo22 = reduceTo22;
     window.reduceToDigit = reduceToDigit;
 }
-if (typeof module !== 'undefined') {
-    module.exports = { calculateCompleteMatrix, generateCompleteReport14Sections, ARCANA_DATA, reduceTo22, reduceToDigit };
-}
+export {
+    calculateCompleteMatrix,
+    generateCompleteReport14Sections,
+    calculateDailyHoroscope,
+    calculateWeeklyForecast,
+    calculateSynastryMatrix,
+    calculateAdvancedPinnacles,
+    ARCANA_DATA,
+    reduceTo22,
+    reduceToDigit
+};
