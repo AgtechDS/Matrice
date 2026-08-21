@@ -1228,6 +1228,24 @@ function startDailyHoroscope() {
     sendMessage(prompt, 1);
 }
 
+// 1b. Calcolo Ascendente Zodiacale & 1ª Casa (1 credito)
+function startAscendantCalculation() {
+    if (!checkAuthRequired('calcolare il tuo Ascendente')) return;
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data e orario di nascita per calcolare l\'Ascendente!');
+        return;
+    }
+    if (!profile.time || profile.time === 'non disponibile' || profile.time === 'non specificato') {
+        openWizardModal();
+        alert('ℹ️ Per calcolare l\'Ascendente con precisione al grado d\'arco, inserisci il tuo orario di nascita nel Modulo Guidato.');
+        return;
+    }
+    const prompt = `Calcolo Ascendente Zodiacale & 1ª Casa Astrologica (1 credito):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time}\nCittà e Nazione: ${profile.place || 'Italia'}\n\nCalcola l'Ascendente zodiacale esatto con gradi e minuti d'arco, il Pianeta Governatore dell'Ascendente, la maschera sociale ed energetica, l'influenza sulla 1ª Casa e l'interazione alchemica tra Segno Solare e Ascendente nella Matrice del Destino.`;
+    sendMessage(prompt, 1);
+}
+
 // 2. Guida Settimanale (3 crediti)
 function startWeeklyForecast() {
     if (!checkAuthRequired('calcolare la Guida Settimanale')) return;
@@ -2555,6 +2573,7 @@ window.resumeTourAudio = resumeTourAudio;
 window.copyReportMarkdown = copyReportMarkdown;
 window.printReport = printReport;
 window.startDailyHoroscope = startDailyHoroscope;
+window.startAscendantCalculation = startAscendantCalculation;
 window.startWeeklyForecast = startWeeklyForecast;
 window.startLoveFocus = startLoveFocus;
 window.startMoneyFocus = startMoneyFocus;

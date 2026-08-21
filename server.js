@@ -201,6 +201,9 @@ function detectConsultationType(messages) {
     if (lastUserMsg.includes('tema natale') || lastUserMsg.includes('calcolo zodiacale') || lastUserMsg.includes('analisi zodiacale') || lastUserMsg.includes('zodiaco mit') || lastUserMsg.includes('zodiacale')) {
         return 'tema_natale_zodiaco';
     }
+    if (lastUserMsg.includes('calcolo ascendente') || lastUserMsg.includes('calcola ascendente') || lastUserMsg.includes('ascendente zodiacale') || lastUserMsg.includes('il mio ascendente') || lastUserMsg.includes('1ª casa')) {
+        return 'calcolo_ascendente';
+    }
     if (lastUserMsg.includes('oroscopo del giorno') || lastUserMsg.includes('oroscopo di oggi') || lastUserMsg.includes('oroscopo giorno') || lastUserMsg.includes('vibrazione astrale') || (lastUserMsg.includes('oroscopo') && !lastUserMsg.includes('settiman'))) {
         return 'oroscopo_giorno';
     }
@@ -541,6 +544,37 @@ ${aspectsSummary}
 * **Nodo E (Cuore):** Arcano ${calc.nodeE} (${calc.arcE.name})
 * **Canale Denaro (C+E):** Arcano ${calc.nodeMoney} (${calc.arcMoney.name})
 * **Canale Amore (D+E):** Arcano ${calc.nodeLove} (${calc.arcLove.name})`;
+    }
+
+    if (consultType === 'calcolo_ascendente') {
+        return `# 🧭 Calcolo Ascendente Zodiacale & Maschera Energetica
+
+* **Soggetto:** ${calc.name} (Nascita: ${calc.formatted}, Ora: ${userData.time}, Luogo: ${userData.place})
+* **Segno Solare:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** (${calc.zodiacSign.element} — Governatore: ${calc.zodiacSign.planet})
+* **Ascendente Esatto:** **${calc.ascendant.formatted}** (Elemento: ${calc.ascendant.sign.element} — Governatore: ${calc.ascendant.sign.planet})
+* **Arcano dell'Ascendente:** **Arcano ${calc.ascendant.sign.arcana}** (${ARCANA_DATA[calc.ascendant.sign.arcana]?.name})
+
+---
+
+## 1. Natura dell'Ascendente, Gradi & Elemento
+L'Ascendente rappresenta la cuspide della **1ª Casa Astrologica**, il punto esatto dell'orizzonte orientale al momento della tua nascita. Con l'Ascendente in **${calc.ascendant.sign.name} ${calc.ascendant.sign.symbol}**, la tua energia esteriore è plasmata dall'elemento **${calc.ascendant.sign.element}** e dal pianeta governatore **${calc.ascendant.sign.planet}**.
+
+---
+
+## 2. La Maschera Sociale & Stile Relazionale
+L'Ascendente in ${calc.ascendant.sign.name} descrive il filtro attraverso cui il mondo ti percepisce e come affronti i nuovi inizi. È strettamente collegato all'archetipo dell'**Arcano ${calc.ascendant.sign.arcana} (${ARCANA_DATA[calc.ascendant.sign.arcana]?.name})**: leadership naturale, presenza carismatica e approccio distintivo.
+
+---
+
+## 3. Alchimia tra Segno Solare (${calc.zodiacSign.name}) e Ascendente (${calc.ascendant.sign.name})
+* **Il Sole (${calc.zodiacSign.name} - ${calc.zodiacSign.element}):** Il tuo nucleo interiore e motivazione d'anima.
+* **L'Ascendente (${calc.ascendant.sign.name} - ${calc.ascendant.sign.element}):** Il veicolo di azione e la frequenza con cui ti muovi nella realtà materiale.
+
+---
+
+## 4. Guida Evolutiva & Integrazione con la Matrice
+* **Pianeta Guida:** Canalizza l'archetipo di **${calc.ascendant.sign.planet}** per consolidare determinazione e sicurezza.
+* **Arcano di Nascita:** Integra la vibrazione dell'Arcano ${calc.nodeA} (${calc.arcA.name}) per allineare l'immagine esteriore allo scopo della tua vita.`;
     }
 
     if (consultType === 'oroscopo_giorno') {
@@ -1013,6 +1047,24 @@ Struttura la risposta in 8 sezioni monumentali:
 ## 6. Relazioni, Affinità Zodiacale & Canale d'Amore
 ## 7. Transiti Planetari Attuali (${currentYear}) & Clima Astrale
 ## 8. Verdetto Oracolare di Sintesi & Guida Evolutiva`;
+                        break;
+
+                    case 'calcolo_ascendente':
+                        specificInstruction = `🔴 RICHIESTA CONSULTA: CALCOLO ASCENDENTE ZODIACALE & 1ª CASA (1 CREDITO).
+DEVI GENERARE L'ANALISI APPROFONDITA DELL'ASCENDENTE ZODIACALE ESATTO PER ${userData.name}:
+- Segno Solare: ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Elemento ${calc.zodiacSign.element}, Governatore ${calc.zodiacSign.planet})
+- Ascendente Calcolato: ${calc.ascendant.formatted} (Governatore dell'Ascendente: ${calc.ascendant.sign.planet}, Elemento: ${calc.ascendant.sign.element})
+- Arcano Zodiacale dell'Ascendente: Arcano ${calc.ascendant.sign.arcana} (${ARCANA_DATA[calc.ascendant.sign.arcana]?.name})
+- Arcano di Nascita: ${calc.nodeA} (${calc.arcA.name}) | Centro Cuore: ${calc.nodeE} (${calc.arcE.name})
+NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
+Struttura la risposta con:
+# 🧭 Calcolo Ascendente Zodiacale & Maschera Energetica
+* **Soggetto:** ${userData.name} | **Segno Solare:** ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} | **Ascendente:** ${calc.ascendant.formatted}
+* **Pianeta Governatore:** ${calc.ascendant.sign.planet} | **Arcano Guida:** Arcano ${calc.ascendant.sign.arcana} (${ARCANA_DATA[calc.ascendant.sign.arcana]?.name})
+## 1. Natura dell'Ascendente, Gradi Esatti & Elemento
+## 2. La Maschera Sociale, Presenza Fisica & Prima Impressione
+## 3. Dinamica Alchemica: Segno Solare (Anima) vs Ascendente (Veicolo di Manifestazione)
+## 4. Orientamento della 1ª Casa Astrologica & Consigli Pratici di Allineamento`;
                         break;
 
                     case 'oroscopo_giorno':
