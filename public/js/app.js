@@ -1297,15 +1297,13 @@ try {
 // --- Credits & Wallet Management ---
 
 function getUserCredits() {
+    // Unauthenticated visitors ALWAYS have 0 credits
+    if (!state.currentUser) {
+        return 0;
+    }
     const raw = localStorage.getItem('destiny_credits');
     if (raw === null) {
-        // If user is not logged in, they start with 0 credits until registration!
-        if (!state.currentUser) {
-            localStorage.setItem('destiny_credits', '0');
-            return 0;
-        }
-        localStorage.setItem('destiny_credits', '1');
-        return 1;
+        return 0;
     }
     const val = parseInt(raw, 10);
     return isNaN(val) ? 0 : val;
@@ -1340,14 +1338,14 @@ function updateCreditsDisplay() {
     const modalEl = document.getElementById('modal-credits-display');
     
     let text = `${credits} Consulti`;
-    if (!state.currentUser && credits === 0) {
-        text = '0 Consulti (Accedi per +1)';
+    if (!state.currentUser) {
+        text = '0 Consulti (Accedi per iniziare)';
     } else if (credits === 1) {
         text = '1 Consulto';
     }
 
     if (badgeEl) badgeEl.textContent = text;
-    if (modalEl) modalEl.textContent = credits === 1 ? '1 Consulto' : `${credits} Consulti`;
+    if (modalEl) modalEl.textContent = !state.currentUser ? '0 Consulti (Accedi per iniziare)' : (credits === 1 ? '1 Consulto' : `${credits} Consulti`);
 }
 
 function openCreditsModal() {
@@ -2052,8 +2050,19 @@ function updateAuthUI(user) {
     if (user) {
         if (unloggedView) unloggedView.style.display = 'none';
         if (loggedView) loggedView.style.display = 'block';
-        if (loggedEmail) loggedEmail.textContent = user.email;
-        const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+        if (loggedEmail) loggedEmail.textContent = user.email || '';
+        
+        // Comprehensive metadata resolution for Google OAuth, identities, and email
+        const meta = user.user_metadata || {};
+        const identities = (user.identities && user.identities[0]) ? (user.identities[0].identity_data || {}) : {};
+        
+        let displayName = meta.full_name || 
+                          meta.name || 
+                          meta.user_name || 
+                          identities.full_name || 
+                          identities.name || 
+                          (user.email ? user.email.split('@')[0] : 'Profilo');
+
         if (authBtnLabel) {
             authBtnLabel.textContent = displayName;
             authBtnLabel.style.color = 'var(--gold-bright)';
@@ -2064,7 +2073,7 @@ function updateAuthUI(user) {
             authHeaderIcon.style.color = 'var(--gold-bright)';
         }
         if (authBtn) {
-            authBtn.title = `Connesso come ${user.email} (Clicca per gestire account)`;
+            authBtn.title = `Connesso come ${user.email || displayName} (Clicca per gestire account)`;
             authBtn.style.borderColor = 'rgba(212,175,55,0.5)';
             authBtn.style.background = 'rgba(212,175,55,0.12)';
         }
@@ -2097,29 +2106,26 @@ async function syncUserWalletAndProfile(user) {
     );
 
     try {
-        // 1. Fetch and merge cloud wallet
-        const { data: walletData } = await supabaseClient
+        // 1. Authoritative Cloud Wallet Fetch (never inherit stale unauthenticated local storage)
+        const { data: walletData, error: walletErr } = await supabaseClient
             .from('user_matrix_wallets')
             .select('*')
             .eq('user_id', user.id)
             .maybeSingle();
 
-        const localCredits = getUserCredits();
-
         if (walletData) {
-            let merged = Math.max(walletData.credits || 0, localCredits);
-            if (isAdmin && merged < 100) {
-                merged = 100;
-            }
-            setUserCredits(merged, false);
-            if (merged !== walletData.credits) {
+            let balance = typeof walletData.credits === 'number' ? walletData.credits : 0;
+            if (isAdmin && balance < 100) {
+                balance = 100;
                 await supabaseClient
                     .from('user_matrix_wallets')
-                    .update({ credits: merged, updated_at: new Date().toISOString() })
+                    .update({ credits: balance, updated_at: new Date().toISOString() })
                     .eq('user_id', user.id);
             }
+            setUserCredits(balance, false);
         } else {
-            const welcomeCredits = isAdmin ? 100 : Math.max(1, localCredits);
+            // New user registration / first Google sign in
+            const welcomeCredits = isAdmin ? 100 : 1;
             setUserCredits(welcomeCredits, false);
             await supabaseClient
                 .from('user_matrix_wallets')
@@ -2136,12 +2142,12 @@ async function syncUserWalletAndProfile(user) {
                 if (isAdmin) {
                     alert('👑 Accesso Amministratore AgTech!\n\nSono stati accreditati 100 Consulti gratuiti sul tuo account.');
                 } else {
-                    alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito per iniziare la tua lettura oracolare.');
+                    alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito di benvenuto per iniziare la tua lettura oracolare.');
                 }
             }, 500);
         }
 
-        // 2. Fetch and load saved matrix profile from Supabase
+        // 2. Fetch and load saved matrix profile from Supabase DB
         const { data: dbProfile } = await supabaseClient
             .from('user_matrix_profiles')
             .select('*')
@@ -2181,11 +2187,14 @@ async function initSupabaseAuth() {
             console.warn('Supabase init retry notice:', e);
         }
     }
-    if (!supabaseClient) return;
+    if (!supabaseClient) {
+        clearUnauthenticatedState();
+        return;
+    }
 
-    // Check initial session immediately
+    // Check initial session immediately (handles Google OAuth redirect token automatically)
     try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (session && session.user) {
             state.currentUser = session.user;
             updateAuthUI(session.user);
@@ -2197,9 +2206,12 @@ async function initSupabaseAuth() {
         }
     } catch (e) {
         console.warn('GetSession check notice:', e);
+        state.currentUser = null;
+        clearUnauthenticatedState();
+        updateAuthUI(null);
     }
 
-    // Listen for auth state changes
+    // Listen for auth state changes (Google OAuth redirect, Email login, Logout)
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
         if (session && session.user) {
             state.currentUser = session.user;
@@ -2512,7 +2524,7 @@ function initScrollReveal() {
 }
 
 // --- Master Application Initialization ---
-function initApp() {
+async function initApp() {
     console.log("🌌 Inizializzazione Matrice del Destino...");
     initBackgroundCanvas();
     initTabs();
@@ -2521,7 +2533,7 @@ function initApp() {
     checkPaymentReturn();
     checkReferralEntry();
     initGdprConsent();
-    initSupabaseAuth();
+    await initSupabaseAuth();
     loadUserProfile();
     initScrollReveal();
     setTimeout(() => startOnboardingTour(false), 800);
