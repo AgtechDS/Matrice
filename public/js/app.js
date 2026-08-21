@@ -191,26 +191,6 @@ function initBackgroundCanvas() {
     animate();
 }
 
-// --- Initialization ---
-document.addEventListener('DOMContentLoaded', async () => {
-    initBackgroundCanvas();
-    initTabs();
-    initChatInputs();
-    
-    // Fetch server configuration & system prompt
-    const config = await apiClient.getConfig();
-    if (config) {
-        state.systemPrompt = config.defaultSystemPrompt;
-        state.model = config.model || 'deepseek-v4-flash-0731';
-        state.baseUrl = config.baseUrl || 'https://api.llmapi.ai/v1';
-        state.provider = 'llmapi';
-    }
-
-    // Default starting message and autoplay welcome voice
-    resetSession();
-    setupWelcomeAutoplay();
-});
-
 // --- Tab Switching ---
 function initTabs() {
     const tabs = document.querySelectorAll('.tab-btn');
@@ -1545,6 +1525,30 @@ function notifyReferralLinkCopied() {
     alert('🔗 Link Invito copiato negli appunti!\n\nCondividilo con i tuoi amici o sui social:\nRiceverai +2 Consulti Omaggio non appena un amico accede alla Matrice del Destino tramite il tuo link!');
 }
 
+function shareReferralWhatsApp() {
+    let userRef = localStorage.getItem('md_user_ref');
+    if (!userRef) {
+        userRef = 'm_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('md_user_ref', userRef);
+    }
+    const currentOrigin = window.location.origin || 'https://matrice-jade.vercel.app';
+    const link = `${currentOrigin}/?ref=${userRef}`;
+    const text = encodeURIComponent(`✨ Scopri la tua Matrice del Destino e calcola il tuo Ottagramma Sacro con l'Oracolo Archetipico!\n${link}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+}
+
+function shareReferralTelegram() {
+    let userRef = localStorage.getItem('md_user_ref');
+    if (!userRef) {
+        userRef = 'm_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('md_user_ref', userRef);
+    }
+    const currentOrigin = window.location.origin || 'https://matrice-jade.vercel.app';
+    const link = encodeURIComponent(`${currentOrigin}/?ref=${userRef}`);
+    const text = encodeURIComponent(`✨ Scopri la tua Matrice del Destino e calcola il tuo Ottagramma Sacro con l'Oracolo Archetipico!`);
+    window.open(`https://t.me/share/url?url=${link}&text=${text}`, '_blank');
+}
+
 function checkReferralEntry() {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
@@ -2496,7 +2500,8 @@ window.watchRewardedAd = watchRewardedAd;
 window.copyReferralLink = copyReferralLink;
 window.shareReferralWhatsApp = shareReferralWhatsApp;
 window.shareReferralTelegram = shareReferralTelegram;
-window.initiateStripeCheckout = initiateStripeCheckout;
+window.buyPremiumPass = buyPremiumPass;
+window.redeemPromoCode = redeemPromoCode;
 window.openReportModal = openReportModal;
 window.closeReportModal = closeReportModal;
 window.selectNode = selectNode;
@@ -2537,6 +2542,21 @@ async function initApp() {
     initBackgroundCanvas();
     initTabs();
     initChatInputs();
+    
+    // Fetch server configuration & system prompt
+    try {
+        const config = await apiClient.getConfig();
+        if (config) {
+            state.systemPrompt = config.defaultSystemPrompt;
+            state.model = config.model || 'deepseek-v4-flash-0731';
+            state.baseUrl = config.baseUrl || 'https://api.llmapi.ai/v1';
+            state.provider = 'llmapi';
+        }
+    } catch (e) {
+        console.warn('Config fetch notice:', e);
+    }
+
+    resetSession();
     updateCreditsDisplay();
     checkPaymentReturn();
     checkReferralEntry();
