@@ -320,6 +320,7 @@ export default async function handler(req) {
 
     try {
         const body = await req.json().catch(() => ({}));
+        const { messages, stream = true, temperature = 0.6 } = body;
         const PRIMARY_LLMAPI_KEY = 'llmapi_17acd03b348ba3984473006be0ab0ccac001b934f826ade8b26edbc23125cdf5';
         let activeApiKey = PRIMARY_LLMAPI_KEY;
         if (body.apiKey && body.apiKey.trim()) {
