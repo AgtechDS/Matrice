@@ -66,7 +66,7 @@
                     <span id="auth-btn-label">Sincronizza</span>
                 </button>
                 <button class="btn-header" id="btn-open-wizard" title="Inserisci dati con modulo guidato">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Calcola Mappa
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Modulo Guidato
                 </button>
                 <button class="btn-header" onclick="switchSidebarTab('tab-consults')" title="Hub Moduli e Consulti Oracolari" style="border-color: rgba(244, 162, 11, 0.4); background: rgba(244, 162, 11, 0.12);">
                     <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--gold-bright);"></i> Moduli
@@ -397,7 +397,7 @@
                                 <p>Per costruire la tua mappa energetica completa, procederemo raccogliendo i tuoi dati un passo alla volta.</p>
                                 <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 12px 0;">
                                 <p><strong>Domanda 1:</strong><br><em>Qual è il tuo nome completo riportato all'anagrafe?</em></p>
-                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;"><em>(Puoi rispondere direttamente qui in chat o cliccare su <strong>Calcola Mappa</strong> in alto per inserire tutti i dati insieme!)</em></p>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;"><em>(Puoi rispondere direttamente qui in chat o cliccare su <strong>Modulo Guidato</strong> in alto per inserire tutti i dati insieme!)</em></p>
                             </div>
                             <div class="message-actions">
                                 <button class="btn-tts" id="btn-welcome-tts" onclick="toggleSpeech(this.parentElement.previousElementSibling.innerText, this, '/audio/welcome.wav')">
@@ -457,7 +457,7 @@
     <div class="modal-overlay" id="wizard-modal">
         <div class="modal-card">
             <div class="modal-header">
-                <h3 class="modal-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Configurazione Rapida Profilo</h3>
+                <h3 class="modal-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Modulo Guidato — Configurazione Profilo</h3>
                 <button class="modal-close" onclick="closeWizardModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -947,8 +947,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=34"></script>
-    <script src="js/api-client.js?v=34"></script>
-    <script src="js/app.js?v=34"></script>
+    <script src="js/matrix-calc.js?v=35"></script>
+    <script src="js/api-client.js?v=35"></script>
+    <script src="js/app.js?v=35"></script>
 </body>
 </html>

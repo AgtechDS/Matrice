@@ -779,18 +779,80 @@ function sendQuickPrompt(text) {
 
 // --- Matrix Extraction & Visualizer Update ---
 function checkAndExtractDataForVisualizer(text) {
-    // Check if birthdate is present (e.g. 28/11/1992, 28-11-1992, 1992-11-28, o novembre 28, 1992)
-    const dateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
-    if (dateMatch) {
-        const day = parseInt(dateMatch[1], 10);
-        const month = parseInt(dateMatch[2], 10);
-        const year = parseInt(dateMatch[3], 10);
-        updateMatrixVisualization(text, `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
-    }
-}
+    if (!text || typeof text !== 'string') return;
 
-function extractMatrixFromAssistantReport(reportText) {
-    // If report contains calculated values, ensure visualizer is updated
+    let name = '';
+    let birthDateStr = '';
+    let time = '';
+    let place = '';
+
+    // 1. Extract Name
+    const nameMatch = text.match(/(?:Nome(?:\s+completo)?|Nome\s*e\s*Cognome|Mi chiamo|Nome\s*:|Soggetto\s*:|per\s+)\s*[:=]?\s*([A-Za-zÀ-ÿ\s'-]{2,60})/i);
+    if (nameMatch && nameMatch[1]) {
+        name = nameMatch[1].trim().split('\n')[0].replace(/(?:Data.*|Orario.*|Città.*|Tipo.*|Anno.*)/i, '').trim();
+    }
+
+    // 2. Extract Date (YYYY-MM-DD, YYYY/MM/DD, DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY)
+    const ymdMatch = text.match(/(?:Data(?:\s+di\s+nascita)?|Nato il|Nata il)?\s*[:=]?\s*(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/i);
+    const dmyMatch = text.match(/(?:Data(?:\s+di\s+nascita)?|Nato il|Nata il)?\s*[:=]?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/i);
+
+    if (ymdMatch) {
+        const year = parseInt(ymdMatch[1], 10);
+        const month = parseInt(ymdMatch[2], 10);
+        const day = parseInt(ymdMatch[3], 10);
+        if (year >= 1900 && year <= 2030 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+    } else if (dmyMatch) {
+        const day = parseInt(dmyMatch[1], 10);
+        const month = parseInt(dmyMatch[2], 10);
+        const year = parseInt(dmyMatch[3], 10);
+        if (year >= 1900 && year <= 2030 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+    }
+
+    // 3. Extract Time
+    const timeMatch = text.match(/(?:Orario(?:\s+di\s+nascita)?|Ora|Ore)\s*[:=]?\s*([0-9]{1,2}[:.][0-9]{2}|non\s+disponibile|non\s+specificato)/i);
+    if (timeMatch && timeMatch[1]) {
+        time = timeMatch[1].trim();
+    }
+
+    // 4. Extract Place
+    const placeMatch = text.match(/(?:Città(?:\s+e\s+nazione)?|Luogo(?:\s+di\s+nascita)?|Nato a|Nata a)\s*[:=]?\s*([A-Za-zÀ-ÿ\s,.'-]{2,50})/i);
+    if (placeMatch && placeMatch[1]) {
+        place = placeMatch[1].trim().split('\n')[0].replace(/(?:Tipo.*|Anno.*|Orario.*)/i, '').trim();
+    }
+
+    // If a birth date or valid name is found, sync everything!
+    if (birthDateStr) {
+        const finalName = name || (state.activeProfile ? state.activeProfile.name : 'Consultante');
+        updateMatrixVisualization(finalName, birthDateStr);
+        
+        // Save to active profile storage
+        const profileObj = {
+            name: finalName,
+            date: birthDateStr,
+            time: time || 'non disponibile',
+            place: place || 'Italia',
+            type: '2. Numerologica + Astrologica simbolica',
+            timestamp: Date.now()
+        };
+        state.activeProfile = profileObj;
+        localStorage.setItem('matrice_profile_data', JSON.stringify(profileObj));
+        
+        // Sync wizard inputs
+        const wzName = document.getElementById('wz-name');
+        const wzDate = document.getElementById('wz-date');
+        const wzTime = document.getElementById('wz-time');
+        const wzPlace = document.getElementById('wz-place');
+        if (wzName && name) wzName.value = name;
+        if (wzDate) wzDate.value = birthDateStr;
+        if (wzTime && time) wzTime.value = time;
+        if (wzPlace && place) wzPlace.value = place;
+
+        console.log("✅ Profilo Matrice sincronizzato ed estratto con successo:", profileObj);
+    }
 }
 
 function updateMatrixVisualization(fullName, birthDateStr) {

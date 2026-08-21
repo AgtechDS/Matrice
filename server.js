@@ -516,6 +516,49 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+function extractUserDataFromMessages(messages) {
+    let name = 'Consultante';
+    let date = '';
+    let time = 'non disponibile';
+    let place = 'Italia';
+    let type = '2. Numerologica + Astrologica simbolica';
+
+    if (!Array.isArray(messages)) return { name, date, time, place, type };
+
+    const fullText = messages.map(m => m.content || '').join('\n');
+
+    const nameMatch = fullText.match(/(?:Nome(?:\s+completo)?|Nome\s*e\s*Cognome|Mi chiamo|Nome\s*:|Soggetto\s*:|per\s+)\s*[:=]?\s*([A-Za-zÀ-ÿ\s'-]{2,60})/i);
+    if (nameMatch && nameMatch[1]) {
+        name = nameMatch[1].trim().split('\n')[0].replace(/(?:Data.*|Orario.*|Città.*|Tipo.*|Anno.*)/i, '').trim();
+    }
+
+    const ymdMatch = fullText.match(/(?:Data(?:\s+di\s+nascita)?|Nato il|Nata il)?\s*[:=]?\s*(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/i);
+    const dmyMatch = fullText.match(/(?:Data(?:\s+di\s+nascita)?|Nato il|Nata il)?\s*[:=]?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/i);
+
+    if (ymdMatch) {
+        date = `${ymdMatch[1]}-${String(ymdMatch[2]).padStart(2, '0')}-${String(ymdMatch[3]).padStart(2, '0')}`;
+    } else if (dmyMatch) {
+        date = `${dmyMatch[3]}-${String(dmyMatch[2]).padStart(2, '0')}-${String(dmyMatch[1]).padStart(2, '0')}`;
+    }
+
+    const timeMatch = fullText.match(/(?:Orario(?:\s+di\s+nascita)?|Ora|Ore)\s*[:=]?\s*([0-9]{1,2}[:.][0-9]{2}|non\s+disponibile|non\s+specificato)/i);
+    if (timeMatch && timeMatch[1]) {
+        time = timeMatch[1].trim();
+    }
+
+    const placeMatch = fullText.match(/(?:Città(?:\s+e\s+nazione)?|Luogo(?:\s+di\s+nascita)?|Nato a|Nata a)\s*[:=]?\s*([A-Za-zÀ-ÿ\s,.'-]{2,50})/i);
+    if (placeMatch && placeMatch[1]) {
+        place = placeMatch[1].trim().split('\n')[0].replace(/(?:Tipo.*|Anno.*|Orario.*)/i, '').trim();
+    }
+
+    const typeMatch = fullText.match(/(?:Tipo(?:\s+di\s+analisi(?:\s+scelta)?)?)\s*[:=]?\s*([^\n]+)/i);
+    if (typeMatch && typeMatch[1]) {
+        type = typeMatch[1].trim();
+    }
+
+    return { name, date, time, place, type };
+}
+
     // API: /api/chat
     if (pathname === '/api/chat' && req.method === 'POST') {
         const body = await parseBody(req);
@@ -547,13 +590,21 @@ const server = http.createServer(async (req, res) => {
 
         let maxTokens = 6000;
 
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentDateStr = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+
         try {
             let finalMessages = [...messages];
             if (!finalMessages.some(m => m.role === 'system')) {
-                const sysPrompt = getSystemPrompt();
-                if (sysPrompt) {
-                    finalMessages.unshift({ role: 'system', content: sysPrompt });
-                }
+                const dateInfo = userData.date ? `Data di Nascita: ${userData.date}` : 'Data: indicata nel messaggio';
+                const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino e degli Archetipi Numerologici (metodo Ladini dei 22 Arcani e Numerologia Pitagorica). 
+Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analitico e solenne.
+🔴 DATI UFFICIALI SOGGETTO: Nome: ${userData.name}, ${dateInfo}, Ora: ${userData.time}, Luogo: ${userData.place}, Tipo: ${userData.type}.
+🔴 ANNO E DATA CORRENTE: Oggi è il ${currentDateStr} e l'anno solare di riferimento è il ${currentYear}.
+DEVI GENERARE L'INTERO REPORT COMPLETO A 14 SEZIONI PER ${userData.name} SENZA INTERROMPERTI O TRONCARE IL TESTO.
+Usa esattamente i dati anagrafici del soggetto forniti per tutti i calcoli numerologici e gli Arcani corrispondenti.`;
+                finalMessages.unshift({ role: 'system', content: sysPrompt });
             }
 
             const payload = {
