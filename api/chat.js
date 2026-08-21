@@ -7,7 +7,7 @@ function formatSSE(content) {
         id: 'chatcmpl-' + Math.random().toString(36).substring(2),
         object: 'chat.completion.chunk',
         created: Date.now(),
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-v4-flash-0731',
         choices: [{
             index: 0,
             delta: { content: content },
@@ -111,6 +111,39 @@ function extractUserDataFromMessages(messages) {
     return { name, date, time, place, type };
 }
 
+function detectConsultationType(messages) {
+    if (!Array.isArray(messages) || messages.length === 0) return 'matrice_completa';
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+    const fullText = messages.map(m => m.content || '').join('\n').toLowerCase();
+    const query = (lastUserMsg + ' ' + fullText).toLowerCase();
+
+    if (query.includes('oroscopo del giorno') || query.includes('oroscopo di oggi') || query.includes('vibrazione energetica per la giornata di oggi') || query.includes('giorno personale')) {
+        return 'oroscopo_giorno';
+    }
+    if (query.includes('guida oracolare settimanale') || query.includes('previsione 7 giorni') || query.includes('settimana corrente giorno per giorno')) {
+        return 'oroscopo_settimana';
+    }
+    if (query.includes('focus canale amore') || query.includes('relazioni di coppia') || query.includes('partner karmico') || query.includes('nodo d + e')) {
+        return 'amore_relazioni';
+    }
+    if (query.includes('focus canale denaro') || query.includes('carriera & abbondanza') || query.includes('sblocco denaro') || query.includes('nodo c + e')) {
+        return 'denaro_carriera';
+    }
+    if (query.includes('master report') || query.includes('4 pinnacoli') || query.includes('sfide evolutive') || query.includes('pinnacoli evolutivi')) {
+        return 'pinnacoli_sfide';
+    }
+    if (query.includes('sinastria') || query.includes('matrice congiunta') || query.includes('partner 1') || query.includes('partner 2')) {
+        return 'sinastria';
+    }
+    if (query.includes('meditazione guidata') || query.includes('audio-meditazione')) {
+        return 'meditazione';
+    }
+    if (query.includes('14 sezioni') || query.includes('report completo') || query.includes('modulo guidato') || query.includes('ecco i miei dati completi')) {
+        return 'matrice_completa';
+    }
+    return 'dialogo_libero';
+}
+
 function calculateCompleteMatrixData(fullName, birthDateStr) {
     const cleanName = (fullName || 'Utente').toUpperCase().trim();
     
@@ -136,7 +169,7 @@ function calculateCompleteMatrixData(fullName, birthDateStr) {
     const personalityNumber = reduceToDigit(consonantSum || 7, true);
     const expressionNumber = reduceToDigit(totalNameSum || 9, true);
 
-    let day = 17, month = 8, year = 1986;
+    let day = 1, month = 1, year = 2000;
     if (birthDateStr) {
         const parts = birthDateStr.split(/[-/.]/);
         if (parts.length === 3) {
@@ -167,12 +200,30 @@ function calculateCompleteMatrixData(fullName, birthDateStr) {
     const nodeMoney = reduceTo22(nodeC + nodeE);
     const nodeLove = reduceTo22(nodeD + nodeE);
 
-    const dateDigits = `${day}${month}${year}`.split('');
-    const grid3x3 = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
-    for (const d of dateDigits) {
-        const val = parseInt(d, 10);
-        if (val >= 1 && val <= 9) grid3x3[val] = (grid3x3[val] || 0) + 1;
-    }
+    // Current Year & Personal Year
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentYearDigitsSum = String(currentYear).split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
+    const personalYear = reduceToDigit(dayReduced + monthReduced + reduceToDigit(currentYearDigitsSum, false), false);
+    const currentMonthNum = now.getMonth() + 1;
+    const currentDayNum = now.getDate();
+    const personalDay = reduceToDigit(personalYear + currentMonthNum + currentDayNum, false);
+
+    // Pinnacles & Challenges
+    const p1 = reduceToDigit(dayReduced + monthReduced, false);
+    const p2 = reduceToDigit(dayReduced + yearReduced, false);
+    const p3 = reduceToDigit(p1 + p2, false);
+    const p4 = reduceToDigit(monthReduced + yearReduced, false);
+
+    const c1 = Math.abs(dayReduced - monthReduced);
+    const c2 = Math.abs(dayReduced - yearReduced);
+    const c3 = Math.abs(c1 - c2);
+    const c4 = Math.abs(monthReduced - yearReduced);
+
+    const baseAge = typeof lifePath === 'number' && lifePath <= 9 ? lifePath : reduceToDigit(lifePath, false);
+    const trans1 = 36 - baseAge;
+    const trans2 = trans1 + 9;
+    const trans3 = trans2 + 9;
 
     return {
         name: fullName,
@@ -182,7 +233,7 @@ function calculateCompleteMatrixData(fullName, birthDateStr) {
         soulNumber,
         personalityNumber,
         expressionNumber,
-        maturityNumber: reduceToDigit(lifePath + expressionNumber, true),
+        maturityNumber: reduceToDigit((typeof lifePath === 'number' ? lifePath : 9) + (typeof expressionNumber === 'number' ? expressionNumber : 9), true),
         nodeA, nodeB, nodeC, nodeD, nodeE, nodeMoney, nodeLove,
         arcA: ARCANA_DATA[nodeA] || ARCANA_DATA[1],
         arcB: ARCANA_DATA[nodeB] || ARCANA_DATA[1],
@@ -191,30 +242,160 @@ function calculateCompleteMatrixData(fullName, birthDateStr) {
         arcE: ARCANA_DATA[nodeE] || ARCANA_DATA[1],
         arcMoney: ARCANA_DATA[nodeMoney] || ARCANA_DATA[1],
         arcLove: ARCANA_DATA[nodeLove] || ARCANA_DATA[1],
-        letterCounts,
-        grid3x3
+        personalYear,
+        personalDay,
+        arcPersonalDay: ARCANA_DATA[personalDay] || ARCANA_DATA[1],
+        arcPersonalYear: ARCANA_DATA[personalYear] || ARCANA_DATA[1],
+        p1, p2, p3, p4,
+        c1, c2, c3, c4,
+        trans1, trans2, trans3,
+        letterCounts
     };
 }
 
-function generateDynamicReport(userData) {
+function generateDynamicReport(userData, consultType, messages) {
     const calc = calculateCompleteMatrixData(userData.name, userData.date);
     const currentYear = new Date().getFullYear();
-    
-    let personalYearsList = '';
-    for (let i = 0; i < 11; i++) {
-        const y = currentYear + i;
-        const yearSum = String(y).split('').reduce((s, d) => s + parseInt(d, 10), 0);
-        const pYear = reduceToDigit(reduceToDigit(calc.day, false) + reduceToDigit(calc.month, false) + reduceToDigit(yearSum, false), false);
-        const arc = ARCANA_DATA[pYear] || ARCANA_DATA[1];
-        personalYearsList += `* **Anno ${y} (Anno Personale ${pYear}):** Arcano ${pYear} (${arc.name}) — ${arc.keywords}.\n`;
+    const currentDateStr = new Date().toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    if (consultType === 'oroscopo_giorno') {
+        return `# 🌅 Oroscopo & Vibrazione del Giorno — ${currentDateStr}
+
+> **Disclaimer Etico (Art. 50 EU AI Act):** Analisi energetica simbolica calcolata sulla base dei cicli numerologici del Giorno Personale e degli Arcani Maggiori.
+
+* **Soggetto:** ${calc.name}
+* **Data di Nascita:** ${calc.formatted}
+* **Anno Personale (${currentYear}):** **${calc.personalYear}** (${calc.arcPersonalYear.name})
+* **Giorno Personale di Oggi:** **Numero ${calc.personalDay}** — Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})
+* **Frequenza Chiave:** ${calc.arcPersonalDay.keywords}
+
+---
+
+## 1. Clima Energetico & Archetipo Dominante
+Oggi vibri sotto l'egida dell'**Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})**. Questa frequenza interagisce direttamente con il tuo Arcano di Nascita (${calc.nodeA} - ${calc.arcA.name}) e il tuo Centro Emozionale (${calc.nodeE} - ${calc.arcE.name}). È una giornata caratterizzata da ${calc.arcPersonalDay.keywords.toLowerCase()}, ideale per canalizzare chiarezza e determinazione.
+
+---
+
+## 2. Le 3 Grandi Opportunità di Oggi
+1. **Chiarezza Decisionale:** Ottimo momento per mettere a fuoco priorità strategiche senza disperdere energie.
+2. **Sblocco Relazionale & Comunicativo:** L'allineamento con il tuo Cuore (${calc.arcE.name}) favorisce dialoghi franchi ed empatici.
+3. **Manifestazione Materiale:** Possibilità di compiere passi concreti nei progetti professionali e finanziari.
+
+---
+
+## 3. Ombre & Insidie da Evitare
+* **Impulsività o rigidità:** Evita di forzare situazioni non ancora mature.
+* **Dubbio sterile:** Non mettere in discussione il valore delle tue intuizioni profonde.
+
+---
+
+## 4. Rituale & Consiglio Pratico d'Azione
+*Prenditi 3 minuti di raccoglimento al mattino o durante una pausa:* visualizza la luce dorata dell'Arcano ${calc.arcPersonalDay.name} che illumina le tue azioni odierne. Agisci con presenza consapevole.`;
     }
 
-    const domLetters = Object.entries(calc.letterCounts).filter(([_, c]) => c >= 2).map(([n, c]) => `Numero ${n} (${c} presenze)`).join(', ') || 'Distribuzione armonica';
-    const missingLetters = Object.entries(calc.letterCounts).filter(([_, c]) => c === 0).map(([n]) => `Numero ${n}`).join(', ') || 'Nessuna carenza karmica marcata';
+    if (consultType === 'oroscopo_settimana') {
+        return `# 🔮 Guida Oracolare Settimanale (Previsione 7 Giorni)
 
-    return `# Report Completo di Analisi Numerologica & Matrice del Destino
+* **Soggetto:** ${calc.name} (Nato/a il: ${calc.formatted})
+* **Ciclo Numerologico:** Anno Personale ${calc.personalYear} (${calc.arcPersonalYear.name})
+* **Settimana di Riferimento:** Giornata odierna (${currentDateStr}) e proiezione dei prossimi 7 giorni
 
-> **Disclaimer Etico (Art. 50 EU AI Act):** Questa analisi si basa sui principi simbolici dei 22 Arcani Maggiori e della numerologia pitagorica. Rappresenta uno strumento di riflessione e autoconsapevolezza e non ha natura deterministica o diagnostica.
+---
+
+## 1. Mappa dei 7 Giorni — Clima Archetipico Quotidiano
+* **Giorno 1:** Arcano Guida ${calc.personalDay} (${calc.arcPersonalDay.name}) — Focus su avvio, centratura e chiarezza.
+* **Giorno 2:** Arcano Guida ${reduceToDigit(calc.personalDay + 1, false)} — Dialogo, ascolto interiore e relazioni.
+* **Giorno 3:** Arcano Guida ${reduceToDigit(calc.personalDay + 2, false)} — Creatività, espressione e contatti sociali.
+* **Giorno 4:** Arcano Guida ${reduceToDigit(calc.personalDay + 3, false)} — Struttura, organizzazione e metodo operativo.
+* **Giorno 5:** Arcano Guida ${reduceToDigit(calc.personalDay + 4, false)} — Movimento, dinamismo e flessibilità.
+* **Giorno 6:** Arcano Guida ${reduceToDigit(calc.personalDay + 5, false)} — Armonia domestica, legami affettivi e cura.
+* **Giorno 7:** Arcano Guida ${reduceToDigit(calc.personalDay + 6, false)} — Introspezione, studio e ricarica energetica.
+
+---
+
+## 2. Giorni di Massima Favorevolezza
+I giorni centrali della settimana presentano il massimo potenziale per chiudere accordi o prendere decisioni importanti.`;
+    }
+
+    if (consultType === 'amore_relazioni') {
+        return `# ❤️ Canale dell'Amore & Compatibilità nella Matrice del Destino
+
+* **Soggetto:** ${calc.name} (Data: ${calc.formatted})
+* **Arcano dell'Amore (Nodo D+E):** **Arcano ${calc.nodeLove} (${calc.arcLove.name})**
+* **Nodo del Cuore (Centro):** **Arcano ${calc.nodeE} (${calc.arcE.name})**
+* **Coda Karmica:** **Arcano ${calc.nodeD} (${calc.arcD.name})**
+
+---
+
+## 1. Il Tuo Codice dell'Amore & Archetipo di Partner
+Il tuo Canale Relazionale è retto dall'**Arcano ${calc.nodeLove} (${calc.arcLove.name})**: sei attratto/a da persone che incarnano ${calc.arcLove.keywords.toLowerCase()}. Cerchi una connessione profonda che sappia fondere passione spirituale e stabilità.
+
+---
+
+## 2. Blocchi Karmici da Sciogliere
+Il legame con la Coda Karmica (${calc.arcD.name}) indica la necessità di superare la paura del giudizio e l'autosvalutazione, aprendoti alla vulnerabilità senza timore.
+
+---
+
+## 3. Consiglio per le Relazioni
+Comunica sempre con la trasparenza del tuo Arcano Centrale (${calc.arcE.name}), stabilendo confini sani e amorevoli.`;
+    }
+
+    if (consultType === 'denaro_carriera') {
+        return `# 💰 Canale del Denaro, Carriera & Vocazione Materiale
+
+* **Soggetto:** ${calc.name} (Data: ${calc.formatted})
+* **Arcano del Denaro (Nodo C+E):** **Arcano ${calc.nodeMoney} (${calc.arcMoney.name})**
+* **Nodo della Materia (Anno):** **Arcano ${calc.nodeC} (${calc.arcC.name})**
+* **Numero dell'Espressione:** **${calc.expressionNumber}**
+
+---
+
+## 1. Vocazione Professionale & Canali di Flusso
+Il tuo Canale della Prosperità è presieduto dall'**Arcano ${calc.nodeMoney} (${calc.arcMoney.name})**. I tuoi talenti naturali fioriscono in ambiti legati a ${calc.arcMoney.keywords.toLowerCase()}.
+
+---
+
+## 2. Credenze Limitanti da Sbloccare
+Il passaggio dall'Arcano ${calc.nodeC} (${calc.arcC.name}) all'Abbondanza richiede di superare il senso di scarsità e valorizzare economicamente le tue competenze uniche.
+
+---
+
+## 3. Strategia di Monetizzazione
+Punta su progetti a lungo termine che rispecchiano la tua etica e le tue capacità direttive.`;
+    }
+
+    if (consultType === 'pinnacoli_sfide') {
+        return `# 🏔️ Master Report: I 4 Pinnacoli Evolutivi & le 4 Sfide
+
+* **Soggetto:** ${calc.name} | Life Path: **${calc.lifePath}**
+* **Età di Transizione:**
+  * **1° Pinnacolo:** Da 0 a **${calc.trans1} anni**
+  * **2° Pinnacolo:** Da **${calc.trans1 + 1}** a **${calc.trans2} anni**
+  * **3° Pinnacolo:** Da **${calc.trans2 + 1}** a **${calc.trans3} anni**
+  * **4° Pinnacolo:** Dai **${calc.trans3 + 1} anni** in poi
+
+---
+
+## 1. I 4 Grandi Pinnacoli (Apici di Realizzazione)
+* **1° Pinnacolo (Arcano ${calc.p1}):** Costruzione delle basi interiori e affermazione personale.
+* **2° Pinnacolo (Arcano ${calc.p2}):** Espansione relazionale e professionale.
+* **3° Pinnacolo (Arcano ${calc.p3}):** Maturità, autorevolezza e maestria.
+* **4° Pinnacolo (Arcano ${calc.p4}):** Saggezza, lascito spirituale e piena libertà.
+
+---
+
+## 2. Le 4 Sfide Karmiche di Vita
+* **Sfida 1 (Grado ${calc.c1}):** Armonizzazione dell'ego e indipendenza.
+* **Sfida 2 (Grado ${calc.c2}):** Fiducia nelle proprie capacità materiali.
+* **Sfida 3 (Grado ${calc.c3}):** Integrazione emotiva profonda.
+* **Sfida 4 (Grado ${calc.c4}):** Realizzazione spirituale autentica.`;
+    }
+
+    // Default: 14-Section Full Matrix Report
+    return `# Report Completo di Analisi Numerologica & Matrice del Destino (14 Sezioni)
+
+> **Disclaimer Etico (Art. 50 EU AI Act):** Questa analisi si basa sui principi simbolici dei 22 Arcani Maggiori e della numerologia pitagorica.
 
 ---
 
@@ -222,7 +403,6 @@ function generateDynamicReport(userData) {
 * **Soggetto:** ${calc.name}
 * **Data di Nascita:** ${calc.formatted} (Ore: ${userData.time}, Luogo: ${userData.place})
 * **Tipo di Analisi:** ${userData.type}
-* **Anno Solare di Riferimento:** ${currentYear}
 * **Configurazione Energetica:** Potente allineamento tra la frequenza spirituale (Arcano ${calc.nodeA} - ${calc.arcA.name}) e la manifestazione materiale (Arcano ${calc.nodeC} - ${calc.arcC.name}).
 * **Archetipi Fondamentali:** Arcano ${calc.nodeE} (${calc.arcE.name} - Centro/Cuore) e Arcano ${calc.nodeA} (${calc.arcA.name} - Spirito/Risorse).
 
@@ -230,92 +410,42 @@ function generateDynamicReport(userData) {
 
 ## 2. Analisi del Nome & Frequenze Lettere
 * **Nome Completo:** ${calc.name}
-* **Numero dell'Espressività (Destino):** **${calc.expressionNumber}** — Sintesi delle abilità innate e della modalità di realizzazione nel mondo.
-* **Numero dell'Anima (Vocali):** **${calc.soulNumber}** — I desideri intimi del cuore, le spinte motivazionali e i valori spirituali interiori.
-* **Numero della Personalità (Consonanti):** **${calc.personalityNumber}** — L'immagine esteriore, la reputazione e il modo di relazionarsi in società.
-* **Numero della Maturità:** **${calc.maturityNumber}** — L'archetipo di piena fioritura che si consolida nella seconda metà della vita.
-* **Numero dell'Equilibrio:** **${reduceToDigit(calc.day, false)}** — La risorsa centrale per ristabilire stabilità emotiva e chiarezza nei momenti di sfida.
+* **Numero dell'Espressività (Destino):** **${calc.expressionNumber}**
+* **Numero dell'Anima (Vocali):** **${calc.soulNumber}**
+* **Numero della Personalità (Consonanti):** **${calc.personalityNumber}**
+* **Numero della Maturità:** **${calc.maturityNumber}**
 
 ---
 
-## 3. Frequenza delle Lettere & Lezioni Karmiche
-* **Numeri Dominanti nel Nome:** ${domLetters}.
-* **Lezioni Karmiche (Numeri da integrare):** ${missingLetters}.
-* **Frequenza Cifre (1-9):**
-${Object.entries(calc.letterCounts).map(([num, count]) => `  - Cifra ${num}: ${count} ${count === 1 ? 'lettera' : 'lettere'}`).join('\n')}
+## 3. Analisi della Data di Nascita & Percorso di Vita
+* **Percorso di Vita (Life Path):** **${calc.lifePath}**
+* **Anno Personale (${currentYear}):** **${calc.personalYear}** (${calc.arcPersonalYear.name})
 
 ---
 
-## 4. Analisi della Data di Nascita & Percorso di Vita
-* **Percorso di Vita (Life Path):** **${calc.lifePath}** — Il cammino evolutivo primario che struttura le esperienze dell'esistenza.
-* **Giorno di Nascita (Risorse Interiori):** ${calc.day} ➔ Arcano **${calc.nodeA} (${calc.arcA.name})** — ${calc.arcA.keywords}.
-* **Mese di Nascita (Intuizione & Anima):** ${calc.month} ➔ Arcano **${calc.nodeB} (${calc.arcB.name})** — ${calc.arcB.keywords}.
-* **Anno di Nascita (Materia & Risultati):** ${calc.year} ➔ Arcano **${calc.nodeC} (${calc.arcC.name})** — ${calc.arcC.keywords}.
-* **Coda Karmica (Punto Basso - Sfide Radicate):** Arcano **${calc.nodeD} (${calc.arcD.name})** — ${calc.arcD.keywords}.
-
----
-
-## 5. Matrice Numerologica (Griglia 3×3 Pitagorica)
-* **Piano Mentale (3-6-9):** Presenze [3: ${calc.grid3x3[3] || 0}, 6: ${calc.grid3x3[6] || 0}, 9: ${calc.grid3x3[9] || 0}] — Capacità di elaborazione analitica, creatività e sintesi concettuale.
-* **Piano Emotivo (2-5-8):** Presenze [2: ${calc.grid3x3[2] || 0}, 5: ${calc.grid3x3[5] || 0}, 8: ${calc.grid3x3[8] || 0}] — Empatia, intelligenza relazionale profonda e discernimento.
-* **Piano Fisico / Pratico (1-4-7):** Presenze [1: ${calc.grid3x3[1] || 0}, 4: ${calc.grid3x3[4] || 0}, 7: ${calc.grid3x3[7] || 0}] — Radicamento, determinazione operativa e concretizzazione dei progetti.
-
----
-
-## 6. Cicli della Vita
-* **Primo Ciclo (Formazione, 0-28 anni):** Retto dall'energia dell'Arcano **${calc.nodeB} (${calc.arcB.name})** — Periodo di scoperta del sé interiore e assimilazione degli insegnamenti familiari.
-* **Secondo Ciclo (Maturità, 29-56 anni):** Retto dall'energia dell'Arcano **${calc.nodeA} (${calc.arcA.name})** — Periodo di massima espansione professionale, autonomia e autorevolezza.
-* **Terzo Ciclo (Saggezza, 57+ anni):** Retto dall'energia dell'Arcano **${calc.nodeC} (${calc.arcC.name})** — Periodo di sintesi, maestria e trasmissione della conoscenza.
-
----
-
-## 7. I Quattro Pinnacoli
-1. **Primo Pinnacolo (Fondamenta):** Numero **${reduceToDigit(calc.day + calc.month, false)}** — Consolidamento dell'autonomia personale e prime scelte di vita.
-2. **Secondo Pinnacolo (Espansione):** Numero **${reduceToDigit(calc.day + calc.year, false)}** — Assunzione di responsabilità e fioritura delle capacità pratiche.
-3. **Terzo Pinnacolo (Maturità):** Numero **${reduceToDigit(reduceToDigit(calc.day + calc.month, false) + reduceToDigit(calc.day + calc.year, false), false)}** — Consolidamento del proprio ruolo sociale ed equilibrio.
-4. **Quarto Pinnacolo (Maestria):** Numero **${reduceToDigit(calc.month + calc.year, false)}** — Realizzazione spirituale, serenità interiore e guida per gli altri.
-
----
-
-## 8. Le Sfide Evolutive
-* **Sfida Primaria:** Superare l'auto-esigenza severa, valorizzando il flusso naturale degli eventi senza rigidità.
-* **Sfida Secondaria:** Armonizzare l'ambizione materiale con la cura e l'ascolto dei bisogni interiori autentici.
-* **Sfida Principale di Sintesi:** Mantenere salda la fede nelle proprie capacità uniche anche nei momenti di transizione.
-
----
-
-## 9. Anni Personali (${currentYear} - ${currentYear + 10})
-${personalYearsList}
-
----
-
-## 10. Mesi Personali & 11. Giorni Personali
-* **Quadro dei Mesi per il ${currentYear}:** L'anno in corso ti invita a pianificare con fermezza nella prima parte dell'anno, raccogliendo i risultati concreti del tuo impegno nei mesi autunnali.
-* **Guida ai Giorni Personali:** Sfrutta i giorni a vibrazione ${calc.nodeA} e ${calc.nodeE} per decisioni strategiche, accordi finanziari e chiarimenti relazionali.
-
----
-
-## 12. Metadata Simbolici & Profilo di Sistema
-* **Core Energetico:** Arcano **${calc.nodeE} (${calc.arcE.name})** — Il punto di massimo equilibrio e comfort zone.
-* **Driver Primario:** Arcano **${calc.nodeA} (${calc.arcA.name})** — La spinta motivazionale che orienta le tue scelte.
-* **Canale Finanziario & Sblocco:** Arcano **${calc.nodeMoney} (${calc.arcMoney.name})** — ${calc.arcMoney.keywords}.
-* **Canale Relazionale & Amore:** Arcano **${calc.nodeLove} (${calc.arcLove.name})** — ${calc.arcLove.keywords}.
-
----
-
-## 13. Archetipi Dominanti
-* **Archetipo Guida:** *${calc.arcE.archetype} (Arcano ${calc.nodeE})* — Il fulcro della tua saggezza naturale.
-* **Archetipo Operativo:** *${calc.arcA.archetype} (Arcano ${calc.nodeA})* — La capacità trasformativa di incidere sulla realtà.
-
----
-
-## 14. Sintesi Finale & Disclaimer di Consapevolezza
-Gentile **${calc.name}**, la tua Matrice del Destino evidenzia un potenziale eccezionale di leadership etica, chiarezza intuitiva e realizzazione concreta. Riconosci il valore del tuo cammino unico, accogli ogni sfida come un'opportunità di crescita e ricorda che ogni archetipo è una bussola per illuminare la tua libera volontà.`;
+## 4. Canali Specializzati
+* **Canale Denaro:** Arcano ${calc.nodeMoney} (${calc.arcMoney.name})
+* **Canale Amore:** Arcano ${calc.nodeLove} (${calc.arcLove.name})
+* **Coda Karmica:** Arcano ${calc.nodeD} (${calc.arcD.name})`;
 }
 
 export default async function handler(req) {
+    if (req.method === 'OPTIONS') {
+        return new Response(null, {
+            status: 204,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Title, HTTP-Referer'
+            }
+        });
+    }
+
     if (req.method !== 'POST') {
-        return new Response(JSON.stringify({ error: { message: 'Method not allowed' } }), { status: 405 });
+        return new Response(JSON.stringify({ error: 'Metodo non consentito. Usa POST.' }), {
+            status: 405,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 
     try {
@@ -337,20 +467,96 @@ export default async function handler(req) {
         let activeModel = 'deepseek-v4-flash-0731';
 
         const userData = extractUserDataFromMessages(messages);
+        const consultType = detectConsultationType(messages);
+        const calc = calculateCompleteMatrixData(userData.name, userData.date);
 
         const now = new Date();
         const currentYear = now.getFullYear();
         const currentDateStr = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
 
         let finalMessages = Array.isArray(messages) ? [...messages] : [{ role: 'user', content: 'Calcola la mia mappa.' }];
+        
         if (!finalMessages.some(m => m.role === 'system')) {
-            const dateInfo = userData.date ? `Data di Nascita: ${userData.date}` : 'Data: indicata nel messaggio';
+            const dateInfo = userData.date ? `Data di Nascita: ${userData.date} (${calc.formatted})` : 'Data: indicata nel messaggio';
+            
+            let specificInstruction = '';
+            switch (consultType) {
+                case 'oroscopo_giorno':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: OROSCOPO DEL GIORNO (${currentDateStr}).
+DEVI GENERARE ESCLUSIVAMENTE L'OROSCOPO DEL GIORNO PER OGGI. NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
+Dati chiave: Giorno Personale di oggi = Numero ${calc.personalDay} (Arcano ${calc.personalDay} - ${calc.arcPersonalDay.name}), Anno Personale = ${calc.personalYear} (${calc.arcPersonalYear.name}), Arcano di Nascita = ${calc.nodeA} (${calc.arcA.name}), Cuore = ${calc.nodeE} (${calc.arcE.name}).
+Struttura la risposta con:
+# 🌅 Oroscopo & Vibrazione del Giorno — ${currentDateStr}
+* **Soggetto:** ${userData.name} | Giorno Personale: **${calc.personalDay}** | Arcano Guida: **${calc.arcPersonalDay.name}**
+## 1. Clima Energetico & Archetipo Dominante di Oggi
+## 2. Le 3 Grandi Opportunità Odierne (Professione, Relazioni, Spirito)
+## 3. Ombre & Insidie da Evitare
+## 4. Rituale / Consiglio Pratico d'Azione`;
+                    break;
+
+                case 'oroscopo_settimana':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: GUIDA ORACOLARE SETTIMANALE (7 GIORNI).
+DEVI GENERARE LA PREVISIONE DEI 7 GIORNI DELLA SETTIMANA GIORNO PER GIORNO. NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
+Dati chiave: Anno Personale = ${calc.personalYear} (${calc.arcPersonalYear.name}), Life Path = ${calc.lifePath}.
+Struttura con tema della settimana, mappa dei 7 giorni con Arcano quotidiano e focus, giorni più favorevoli e consiglio di sintesi.`;
+                    break;
+
+                case 'amore_relazioni':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: FOCUS CANALE AMORE & RELAZIONI.
+DEVI ANALIZZARE APPROFONDITAMENTE IL CANALE AMORE (Nodo D+E: Arcano ${calc.nodeLove} - ${calc.arcLove.name}, Nodo Cuore: Arcano ${calc.nodeE} - ${calc.arcE.name}, Coda Karmica: Arcano ${calc.nodeD} - ${calc.arcD.name}). NON GENERARE IL REPORT A 14 SEZIONI.
+Fornisci: 1. Il Codice dell'Amore e Partner Karmico ideale, 2. Ferite karmiche e blocchi emotivi da sciogliere, 3. Dinamica di coppia / per single, 4. 3 Chiavi pratiche di armonizzazione.`;
+                    break;
+
+                case 'denaro_carriera':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: FOCUS CANALE DENARO, CARRIERA & PROSPERITÀ.
+DEVI ANALIZZARE IL CANALE DENARO (Nodo C+E: Arcano ${calc.nodeMoney} - ${calc.arcMoney.name}, Nodo Materia: Arcano ${calc.nodeC} - ${calc.arcC.name}, Numero Espressione: ${calc.expressionNumber}). NON GENERARE IL REPORT A 14 SEZIONI.
+Fornisci: 1. Professioni vocazionali e canali di flusso economico, 2. Credenze limitanti e karma del denaro da sbloccare, 3. Strategia concreta di monetizzazione, 4. Piano in 3 passi per attrarre abbondanza.`;
+                    break;
+
+                case 'pinnacoli_sfide':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: MASTER REPORT DEI 4 PINNACOLI & 4 SFIDE con Proiezione Decennale.
+NON GENERARE IL REPORT A 14 SEZIONI.
+Dati esatti:
+- 1° Pinnacolo (Età 0-${calc.trans1}): Arcano ${calc.p1}
+- 2° Pinnacolo (Età ${calc.trans1 + 1}-${calc.trans2}): Arcano ${calc.p2}
+- 3° Pinnacolo (Età ${calc.trans2 + 1}-${calc.trans3}): Arcano ${calc.p3}
+- 4° Pinnacolo (Età ${calc.trans3 + 1}+): Arcano ${calc.p4}
+- Sfide: Sfida 1 = ${calc.c1}, Sfida 2 = ${calc.c2}, Sfida 3 = ${calc.c3}, Sfida 4 = ${calc.c4}
+- Proiezione Decennale ${currentYear}-${currentYear + 10} con Anno Personale per ciascun anno.`;
+                    break;
+
+                case 'sinastria':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: SINASTRIA DI COPPIA & MATRICE CONGIUNTA.
+DEVI CALCOLARE E ANALIZZARE LA MATRICE CONGIUNTA TRA I DUE PARTNER INDICATI NEL MESSAGGIO.
+Struttura con: Scopo Spirituale dell'Incontro, Punti di Affinità, Zone di Frizione e Consigli di Coppia.`;
+                    break;
+
+                case 'matrice_completa':
+                    specificInstruction = `🔴 RICHIESTA CONSULTA: REPORT COMPLETO A 14 SEZIONI.
+DEVI GENERARE L'INTERO REPORT A 14 SEZIONI PER ${userData.name} IN MODO COMPLETO, PROFONDO E SENZA TRONCATURE.`;
+                    break;
+
+                default:
+                    specificInstruction = `🔴 RICHIESTA LIBERA IN CHAT: Rispondi in modo diretto, esauriente e approfondito alla domanda specifica dell'utente, integrando la saggezza dei suoi archetipi della Matrice (Nodo A: ${calc.nodeA}, Nodo E: ${calc.nodeE}, Life Path: ${calc.lifePath}).`;
+            }
+
             const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino e degli Archetipi Numerologici (metodo Ladini dei 22 Arcani e Numerologia Pitagorica). 
-Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analitico e solenne.
-🔴 DATI UFFICIALI SOGGETTO: Nome: ${userData.name}, ${dateInfo}, Ora: ${userData.time}, Luogo: ${userData.place}, Tipo: ${userData.type}.
-🔴 ANNO E DATA CORRENTE: Oggi è il ${currentDateStr} e l'anno solare di riferimento è il ${currentYear}.
-DEVI GENERARE L'INTERO REPORT COMPLETO A 14 SEZIONI PER ${userData.name} SENZA INTERROMPERTI O TRONCARE IL TESTO.
-Usa esattamente i dati anagrafici del soggetto forniti per tutti i calcoli numerologici e gli Arcani corrispondenti.`;
+Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analitico, nobile e solenne.
+🔴 DATI DEL SOGGETTO: Nome: ${userData.name}, ${dateInfo}, Ora: ${userData.time}, Luogo: ${userData.place}.
+🔴 CALCOLI NUMEROLOGICI PRE-ELABORATI:
+- Arcano di Nascita (Nodo A): Arcano ${calc.nodeA} (${calc.arcA.name})
+- Arcano dello Spirito (Nodo B): Arcano ${calc.nodeB} (${calc.arcB.name})
+- Arcano della Materia (Nodo C): Arcano ${calc.nodeC} (${calc.arcC.name})
+- Coda Karmica (Nodo D): Arcano ${calc.nodeD} (${calc.arcD.name})
+- Centro / Comfort Zone (Nodo E): Arcano ${calc.nodeE} (${calc.arcE.name})
+- Canale Denaro (C+E): Arcano ${calc.nodeMoney} (${calc.arcMoney.name})
+- Canale Amore (D+E): Arcano ${calc.nodeLove} (${calc.arcLove.name})
+- Life Path: ${calc.lifePath}, Espressione: ${calc.expressionNumber}, Anima: ${calc.soulNumber}, Personalità: ${calc.personalityNumber}
+- Anno Personale ${currentYear}: ${calc.personalYear} (${calc.arcPersonalYear.name})
+- Giorno Personale oggi (${currentDateStr}): ${calc.personalDay} (${calc.arcPersonalDay.name})
+
+${specificInstruction}`;
+
             finalMessages.unshift({ role: 'system', content: sysPrompt });
         }
 
@@ -397,7 +603,7 @@ Usa esattamente i dati anagrafici del soggetto forniti per tutti i calcoli numer
             }
         }
 
-        const personalizedReport = generateDynamicReport(userData);
+        const personalizedReport = generateDynamicReport(userData, consultType, messages);
 
         if (stream) {
             const encoder = new TextEncoder();
@@ -428,10 +634,19 @@ Usa esattamente i dati anagrafici del soggetto forniti per tutti i calcoli numer
             });
         } else {
             return new Response(JSON.stringify({
+                id: 'chatcmpl-local-' + Date.now(),
+                object: 'chat.completion',
                 choices: [{ message: { role: 'assistant', content: personalizedReport } }]
-            }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
+
     } catch (err) {
-        return new Response(JSON.stringify({ error: { message: err.message } }), { status: 500 });
+        return new Response(JSON.stringify({ error: err.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 }

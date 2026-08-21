@@ -988,11 +988,33 @@ Ti confermo tutti i dati. Procedi con il report completo a 14 sezioni calcolando
 
 // --- Persistent Profile & Automatic Matrix System ---
 
-function saveUserProfile(userData) {
+function saveUserProfile(userData, uploadToCloud = true) {
     if (!userData || !userData.name || !userData.date) return;
     try {
         localStorage.setItem('destiny_matrix_saved_profile', JSON.stringify(userData));
         updateUserProfileBanner(userData);
+
+        if (uploadToCloud && supabaseClient) {
+            const payload = {
+                full_name: userData.name,
+                birth_date: userData.date,
+                birth_time: userData.time || 'non disponibile',
+                birth_place: userData.place || 'Italia',
+                analysis_type: userData.type || '2. Numerologica + Astrologica simbolica',
+                matrix_data: state.currentMatrixData || {},
+                updated_at: new Date().toISOString()
+            };
+            if (state.currentUser && state.currentUser.id) {
+                payload.user_id = state.currentUser.id;
+            }
+            supabaseClient
+                .from('user_matrix_profiles')
+                .insert(payload)
+                .then(({ error }) => {
+                    if (error) console.warn('Supabase profile sync notice:', error.message);
+                    else console.log('☁️ Profilo matrice sincronizzato su Supabase DB con successo.');
+                });
+        }
     } catch (e) {
         console.warn('Profile save notice:', e);
     }
@@ -1499,8 +1521,13 @@ function initGdprConsent() {
     const banner = document.getElementById('gdpr-banner');
     if (!consent && banner) {
         banner.classList.add('active');
-    } else if (consent === 'all') {
-        updateGoogleConsent(true);
+        banner.style.display = 'block';
+    } else if (banner) {
+        banner.classList.remove('active');
+        banner.style.display = 'none';
+        if (consent === 'all') {
+            updateGoogleConsent(true);
+        }
     }
 }
 
@@ -1519,14 +1546,20 @@ function acceptAllCookies() {
     localStorage.setItem('md_gdpr_consent', 'all');
     updateGoogleConsent(true);
     const banner = document.getElementById('gdpr-banner');
-    if (banner) banner.classList.remove('active');
+    if (banner) {
+        banner.classList.remove('active');
+        banner.style.display = 'none';
+    }
 }
 
 function rejectOptionalCookies() {
     localStorage.setItem('md_gdpr_consent', 'essential_only');
     updateGoogleConsent(false);
     const banner = document.getElementById('gdpr-banner');
-    if (banner) banner.classList.remove('active');
+    if (banner) {
+        banner.classList.remove('active');
+        banner.style.display = 'none';
+    }
 }
 
 function toggleGdprPreferencesPanel() {
@@ -1538,6 +1571,7 @@ function openGdprPreferences() {
     closeCookieModal();
     const banner = document.getElementById('gdpr-banner');
     if (banner) {
+        banner.style.display = 'block';
         banner.classList.add('active');
         const panel = document.getElementById('gdpr-preferences-panel');
         if (panel) panel.classList.add('active');
@@ -1777,6 +1811,31 @@ async function initSupabaseAuth() {
                         }
                     }, 500);
                 }
+                // Also fetch and load saved matrix profile from Supabase
+                try {
+                    const { data: dbProfile } = await supabaseClient
+                        .from('user_matrix_profiles')
+                        .select('*')
+                        .eq('user_id', session.user.id)
+                        .order('updated_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (dbProfile && dbProfile.full_name) {
+                        console.log('☁️ Profilo matrice trovato su Supabase DB:', dbProfile.full_name);
+                        saveUserProfile({
+                            name: dbProfile.full_name,
+                            date: dbProfile.birth_date,
+                            time: dbProfile.birth_time,
+                            place: dbProfile.birth_place,
+                            type: dbProfile.analysis_type
+                        }, false);
+                        loadUserProfile();
+                    }
+                } catch (profErr) {
+                    console.warn('Profile DB load notice:', profErr.message);
+                }
+
                 updateCreditsDisplay();
             } catch (err) {
                 console.error('Wallet sync initialization error:', err);
