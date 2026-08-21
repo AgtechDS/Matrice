@@ -634,7 +634,8 @@ const MIME_TYPES = {
     '.wav': 'audio/wav',
     '.mp3': 'audio/mpeg',
     '.webp': 'image/webp',
-    '.ico': 'image/x-icon'
+    '.ico': 'image/x-icon',
+    '.txt': 'text/plain; charset=utf-8'
 };
 
 async function parseBody(req) {
