@@ -213,6 +213,13 @@ function initTabs() {
     });
 }
 
+function switchSidebarTab(tabId) {
+    const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+    if (tabBtn) {
+        tabBtn.click();
+    }
+}
+
 const INITIAL_GREETING = `### Benvenuto nell'Analisi della Matrice del Destino 🌌
 
 Sono la tua guida all'interpretazione simbolica e numerologica archetipica dei **22 Arcani** e della **Matrice del Destino**.
@@ -1958,6 +1965,7 @@ window.generateVoiceMeditation = generateVoiceMeditation;
 window.exportLuxuryPdf = exportLuxuryPdf;
 window.saveUserProfile = saveUserProfile;
 window.loadUserProfile = loadUserProfile;
+window.switchSidebarTab = switchSidebarTab;
 
 // --- Master Application Initialization ---
 function initApp() {

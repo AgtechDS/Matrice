@@ -246,21 +246,22 @@ body {
 
 .tab-btn {
     flex: 1;
-    padding: 12px 14px;
+    padding: 10px 6px;
     background: transparent;
     border: none;
     color: var(--text-muted);
     font-family: var(--font-heading);
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     cursor: pointer;
     transition: all 0.2s ease;
     border-bottom: 2px solid transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
+    white-space: nowrap;
 }
 
 .tab-btn:hover {
