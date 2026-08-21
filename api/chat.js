@@ -319,19 +319,22 @@ export default async function handler(req) {
         const body = await req.json().catch(() => ({}));
         const { messages, stream = true, temperature = 0.6 } = body;
         
-        let activeApiKey = body.apiKey || process.env.LLMAPI_KEY || process.env.TOKENROUTER_API_KEY || '';
+        let activeApiKey = body.apiKey || process.env.LLMAPI_KEY || process.env.TOKENROUTER_API_KEY || 'llmapi_17acd03b348ba3984473006be0ab0ccac001b934f826ade8b26edbc23125cdf5';
+        if (activeApiKey.startsWith('llmllmapi_')) {
+            activeApiKey = activeApiKey.replace('llmllmapi_', 'llmapi_');
+        }
         let activeModel = body.model || process.env.LLM_MODEL || process.env.TOKENROUTER_MODEL || 'deepseek-v4-flash-0731';
         let activeBaseUrl = (body.baseUrl || process.env.LLM_BASE_URL || process.env.TOKENROUTER_BASE_URL || 'https://api.llmapi.ai/v1').replace(/\/+$/, '');
 
         const userData = extractUserDataFromMessages(messages);
 
-        const isGroq = activeApiKey.startsWith('gsk_');
-        const isDeepSeekOfficial = activeApiKey.startsWith('sk-') && !activeBaseUrl.includes('openai') && !activeBaseUrl.includes('openrouter');
-
-        if (isGroq) {
+        if (activeApiKey.startsWith('llmapi_') || activeBaseUrl.includes('llmapi.ai')) {
+            activeBaseUrl = 'https://api.llmapi.ai/v1';
+            activeModel = 'deepseek-v4-flash-0731';
+        } else if (activeApiKey.startsWith('gsk_')) {
             activeBaseUrl = 'https://api.groq.com/openai/v1';
             activeModel = 'openai/gpt-oss-120b';
-        } else if (isDeepSeekOfficial || activeBaseUrl.includes('deepseek.com')) {
+        } else if (activeApiKey.startsWith('sk-') && !activeBaseUrl.includes('openai') && !activeBaseUrl.includes('openrouter')) {
             activeBaseUrl = 'https://api.deepseek.com';
             activeModel = 'deepseek-chat';
         }

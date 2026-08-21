@@ -534,13 +534,17 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        const isGroq = apiKey.startsWith('gsk_');
-        const isDeepSeekOfficial = apiKey.startsWith('sk-') && !baseUrl.includes('openai') && !baseUrl.includes('openrouter');
+        if (apiKey.startsWith('llmllmapi_')) {
+            apiKey = apiKey.replace('llmllmapi_', 'llmapi_');
+        }
 
-        if (isGroq) {
+        if (apiKey.startsWith('llmapi_') || baseUrl.includes('llmapi.ai')) {
+            baseUrl = 'https://api.llmapi.ai/v1';
+            model = 'deepseek-v4-flash-0731';
+        } else if (apiKey.startsWith('gsk_')) {
             baseUrl = 'https://api.groq.com/openai/v1';
             model = 'openai/gpt-oss-120b';
-        } else if (isDeepSeekOfficial || baseUrl.includes('deepseek.com')) {
+        } else if (apiKey.startsWith('sk-') && !baseUrl.includes('openai') && !baseUrl.includes('openrouter')) {
             baseUrl = 'https://api.deepseek.com';
             model = 'deepseek-chat';
         }
