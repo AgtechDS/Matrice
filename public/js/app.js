@@ -229,8 +229,81 @@ Per costruire la tua mappa energetica completa, procederemo raccogliendo i tuoi 
 
 *(Puoi rispondere direttamente qui in chat o cliccare su **Modulo Guidato** in alto per inserire tutti i dati insieme!)*`;
 
+function getDynamicWelcomeGreeting(profile) {
+    if (!profile || !profile.name || !profile.date) {
+        return { text: INITIAL_GREETING, isCustom: false };
+    }
+
+    try {
+        const parts = profile.date.split(/[-/.]/);
+        let day = 1, month = 1, year = 2000;
+        if (parts.length === 3) {
+            if (parts[0].length === 4) {
+                year = parseInt(parts[0], 10);
+                month = parseInt(parts[1], 10);
+                day = parseInt(parts[2], 10);
+            } else {
+                day = parseInt(parts[0], 10);
+                month = parseInt(parts[1], 10);
+                year = parseInt(parts[2], 10);
+            }
+        }
+
+        const zodiacSign = typeof calculateZodiacSign === 'function' 
+            ? calculateZodiacSign(day, month) 
+            : { name: "Zodiaco", symbol: "✦", element: "Astrale" };
+
+        const ascendant = typeof calculateAscendant === 'function'
+            ? calculateAscendant(day, month, year, profile.time)
+            : { formatted: "In calcolo" };
+
+        const now = new Date();
+        const curDay = now.getDate();
+        const curMonth = now.getMonth() + 1;
+        const curYear = now.getFullYear();
+
+        const py = typeof reduceToDigit === 'function'
+            ? reduceToDigit(reduceToDigit(day) + reduceToDigit(month) + reduceToDigit(curYear))
+            : 1;
+
+        const pd = typeof reduceTo22 === 'function'
+            ? reduceTo22(reduceToDigit(curDay) + reduceToDigit(curMonth) + py)
+            : 1;
+
+        const pdArcana = (typeof ARCANA_DATA !== 'undefined' && ARCANA_DATA[pd]) ? ARCANA_DATA[pd].name : 'Iniziatore';
+        const transits = typeof calculateCurrentTransits === 'function' 
+            ? calculateCurrentTransits(now, zodiacSign.name, ascendant.sign ? ascendant.sign.name : null) 
+            : null;
+
+        const dayGov = transits ? transits.dayGovernor : { planet: 'Sole ☀️', focus: 'Vitalità solare e chiarezza' };
+        const dayName = transits ? transits.dayName : 'Oggi';
+        const moon = transits ? `${transits.moonPhase.name} (${transits.moonPhase.illumination})` : '';
+
+        const customGreeting = `### Bentornato/a, ${profile.name}! 🌌
+
+I tuoi grafici sacri della **Matrice del Destino**, i **22 Arcani** e la **Griglia Pitagorica 3×3** sono caricati e sincronizzati.
+
+* **Profilo Attivo:** **${profile.name}** (Nascita: ${profile.date}${profile.place ? ' — ' + profile.place : ''})
+* **Segno Solare:** **${zodiacSign.name} ${zodiacSign.symbol}** (${zodiacSign.element}) | **Ascendente:** **${ascendant.formatted}**
+* **Giorno Personale di Oggi:** **Numero ${pd}** — Arcano ${pd} (*${pdArcana}*)
+* **Clima Astrale di ${dayName}:** retto da **${dayGov.planet}** ${moon ? '| ' + moon : ''} — *${dayGov.focus}*
+
+> *Puoi esplorare i tuoi nodi interattivi nell'Ottagramma a sinistra, consultare il tuo **Oroscopo di Oggi (1c)** o avviare un approfondimento mirato con i pulsanti rapidi.*
+
+Come posso illuminare il tuo cammino evolutivo oggi?`;
+
+        return { text: customGreeting, isCustom: true };
+    } catch (e) {
+        console.warn('Welcome greeting computation error:', e);
+        return { text: INITIAL_GREETING, isCustom: false };
+    }
+}
+
 function resetSession() {
-    state.messages = [{ role: 'assistant', content: INITIAL_GREETING }];
+    const profile = getActiveUserProfile();
+    const { text: greetingText, isCustom } = getDynamicWelcomeGreeting(profile);
+
+    state.messages = [{ role: 'assistant', content: greetingText }];
     const chatContainer = document.getElementById('chat-messages');
     if (!chatContainer) return;
 
@@ -238,7 +311,7 @@ function resetSession() {
         <div class="message-wrapper assistant">
             <div class="message-avatar"><i class="fa-solid fa-sun"></i></div>
             <div class="message-bubble">
-                <div class="message-content">${typeof marked !== 'undefined' ? marked.parse(INITIAL_GREETING) : INITIAL_GREETING}</div>
+                <div class="message-content">${typeof marked !== 'undefined' ? marked.parse(greetingText) : greetingText}</div>
                 <div class="message-actions">
                     <button class="btn-tts" id="btn-welcome-tts">
                         <i class="fa-solid fa-volume-high"></i> <span>Ascolta Benvenuto</span>
@@ -250,7 +323,7 @@ function resetSession() {
 
     const ttsBtn = document.getElementById('btn-welcome-tts');
     if (ttsBtn) {
-        ttsBtn.onclick = () => toggleSpeech(INITIAL_GREETING, ttsBtn, '/audio/welcome.wav');
+        ttsBtn.onclick = () => toggleSpeech(greetingText, ttsBtn, isCustom ? null : '/audio/welcome.wav');
     }
 }
 
@@ -1070,6 +1143,11 @@ function loadUserProfile() {
                 // Render full interactive matrix diagram
                 updateMatrixVisualization(data.name, data.date);
                 updateUserProfileBanner(data);
+
+                // Refresh chat greeting with personalized status if in initial state
+                if (state.messages.length <= 1) {
+                    resetSession();
+                }
             }
         } else {
             updateUserProfileBanner(null);

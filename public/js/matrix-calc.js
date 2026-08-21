@@ -533,6 +533,157 @@ function detectConsultationType(messages) {
     return 'dialogo_libero';
 }
 
+function getZodiacDetailsFromLongitude(longitude) {
+    const norm = (longitude % 360 + 360) % 360;
+    const signIndex = Math.floor(norm / 30);
+    const degree = Math.floor(norm % 30);
+    const minutes = Math.floor((norm % 1) * 60);
+    const signsOrdered = [
+        { name: "Ariete", symbol: "♈", element: "Fuoco", modality: "Cardinale", planet: "Marte", arcana: 4 },
+        { name: "Toro", symbol: "♉", element: "Terra", modality: "Fisso", planet: "Venere", arcana: 5 },
+        { name: "Gemelli", symbol: "♊", element: "Aria", modality: "Mobile", planet: "Mercurio", arcana: 6 },
+        { name: "Cancro", symbol: "♋", element: "Acqua", modality: "Cardinale", planet: "Luna", arcana: 7 },
+        { name: "Leone", symbol: "♌", element: "Fuoco", modality: "Fisso", planet: "Sole", arcana: 19 },
+        { name: "Vergine", symbol: "♍", element: "Terra", modality: "Mobile", planet: "Mercurio", arcana: 9 },
+        { name: "Bilancia", symbol: "♎", element: "Aria", modality: "Cardinale", planet: "Venere", arcana: 8 },
+        { name: "Scorpione", symbol: "♏", element: "Acqua", modality: "Fisso", planet: "Plutone / Marte", arcana: 13 },
+        { name: "Sagittario", symbol: "♐", element: "Fuoco", modality: "Mobile", planet: "Giove", arcana: 14 },
+        { name: "Capricorno", symbol: "♑", element: "Terra", modality: "Cardinale", planet: "Saturno", arcana: 15 },
+        { name: "Acquario", symbol: "♒", element: "Aria", modality: "Fisso", planet: "Urano / Saturno", arcana: 17 },
+        { name: "Pesci", symbol: "♓", element: "Acqua", modality: "Mobile", planet: "Nettuno / Giove", arcana: 18 }
+    ];
+    const sign = signsOrdered[signIndex] || signsOrdered[0];
+    const decan = degree < 10 ? 1 : (degree < 20 ? 2 : 3);
+    return {
+        longitude: norm,
+        signIndex,
+        sign: sign.name,
+        symbol: sign.symbol,
+        degree,
+        minutes,
+        formatted: `${sign.name} ${sign.symbol} a ${degree}°${minutes}' (Decano ${decan})`,
+        element: sign.element,
+        planet: sign.planet,
+        decan
+    };
+}
+
+function calculateCurrentTransits(date = new Date(), natalSignName = null, natalAscSignName = null) {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const dayOfWeek = date.getDay();
+
+    const dayGovernors = [
+        { name: "Domenica", planet: "Sole ☀️", focus: "Vitalità solare, leadership, espressione del sé, chiarezza d'intenti" },
+        { name: "Lunedì", planet: "Luna 🌙", focus: "Intuizione emotiva, ascolto interiore, cura di sé, memoria archetipica" },
+        { name: "Martedì", planet: "Marte ♂️", focus: "Azione decisa, coraggio, superamento ostacoli, intraprendenza dinamica" },
+        { name: "Mercoledì", planet: "Mercurio ☿", focus: "Comunicazione brillante, accordi, commercio, chiarezza mentale" },
+        { name: "Giovedì", planet: "Giove ♃", focus: "Espansione spirituale, fortuna karmica, generosità, visione strategica" },
+        { name: "Venerdì", planet: "Venere ♀", focus: "Amore autentico, relazioni armoniose, senso estetico, bellezza e grazia" },
+        { name: "Sabato", planet: "Saturno ♄", focus: "Disciplina costruttiva, consolidamento, chiusura cicli, stabilità" }
+    ];
+
+    const currentGovernor = dayGovernors[dayOfWeek];
+
+    const d = (date.getTime() - Date.UTC(2000, 0, 1, 12, 0, 0)) / (1000 * 60 * 60 * 24);
+
+    const sunLon = (280.460 + 0.9856474 * d) % 360;
+    const moonLon = (218.316 + 13.176396 * d) % 360;
+    const mercuryLon = (252.25 + 4.09233 * d) % 360;
+    const venusLon = (181.98 + 1.60213 * d) % 360;
+    const marsLon = (355.43 + 0.52403 * d) % 360;
+    const jupiterLon = (34.35 + 0.08308 * d) % 360;
+    const saturnLon = (50.08 + 0.03346 * d) % 360;
+    const uranusLon = (314.05 + 0.01173 * d) % 360;
+    const neptuneLon = (304.35 + 0.00598 * d) % 360;
+    const plutoLon = (238.93 + 0.00396 * d) % 360;
+
+    const sun = getZodiacDetailsFromLongitude(sunLon);
+    const moon = getZodiacDetailsFromLongitude(moonLon);
+    const mercury = getZodiacDetailsFromLongitude(mercuryLon);
+    const venus = getZodiacDetailsFromLongitude(venusLon);
+    const mars = getZodiacDetailsFromLongitude(marsLon);
+    const jupiter = getZodiacDetailsFromLongitude(jupiterLon);
+    const saturn = getZodiacDetailsFromLongitude(saturnLon);
+    const uranus = getZodiacDetailsFromLongitude(uranusLon);
+    const neptune = getZodiacDetailsFromLongitude(neptuneLon);
+    const pluto = getZodiacDetailsFromLongitude(plutoLon);
+
+    const baseNewMoon = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+    const daysSinceBase = (date.getTime() - baseNewMoon.getTime()) / (1000 * 60 * 60 * 24);
+    const cyclePosition = (daysSinceBase % 29.53058867 + 29.53058867) % 29.53058867;
+    const illumination = Math.round((1 - Math.cos((cyclePosition / 29.53058867) * 2 * Math.PI)) / 2 * 100);
+
+    let moonPhaseName = "Luna Nuova 🌑";
+    if (cyclePosition >= 1.84 && cyclePosition < 7.38) moonPhaseName = "Luna Crescente 🌒";
+    else if (cyclePosition >= 7.38 && cyclePosition < 9.22) moonPhaseName = "Primo Quarto 🌓";
+    else if (cyclePosition >= 9.22 && cyclePosition < 14.77) moonPhaseName = "Gibbosa Crescente 🌔";
+    else if (cyclePosition >= 14.77 && cyclePosition < 16.61) moonPhaseName = "Luna Piena 🌕";
+    else if (cyclePosition >= 16.61 && cyclePosition < 22.15) moonPhaseName = "Gibbosa Calante 🌖";
+    else if (cyclePosition >= 22.15 && cyclePosition < 23.99) moonPhaseName = "Ultimo Quarto 🌗";
+    else if (cyclePosition >= 23.99 && cyclePosition < 27.69) moonPhaseName = "Luna Calante 🌘";
+
+    const aspects = [];
+    const signsOrdered = [
+        { name: "Ariete" }, { name: "Toro" }, { name: "Gemelli" }, { name: "Cancro" },
+        { name: "Leone" }, { name: "Vergine" }, { name: "Bilancia" }, { name: "Scorpione" },
+        { name: "Sagittario" }, { name: "Capricorno" }, { name: "Acquario" }, { name: "Pesci" }
+    ];
+    const natalSign = signsOrdered.find(s => s.name.toLowerCase() === (natalSignName || '').toLowerCase());
+    if (natalSign) {
+        const natalLon = signsOrdered.indexOf(natalSign) * 30 + 15;
+        const transitsList = [
+            { name: "Sole ☀️", lon: sun.longitude, desc: "Espressione vitale e centratura", transit: sun.formatted },
+            { name: "Luna 🌙", lon: moon.longitude, desc: "Flusso emotivo e intuizione", transit: moon.formatted },
+            { name: "Mercurio ☿", lon: mercury.longitude, desc: "Comunicazione e lucidità mentale", transit: mercury.formatted },
+            { name: "Venere ♀", lon: venus.longitude, desc: "Relazioni, affetto e bellezza", transit: venus.formatted },
+            { name: "Marte ♂️", lon: mars.longitude, desc: "Energia di spinta e determinazione", transit: mars.formatted },
+            { name: "Giove ♃", lon: jupiter.longitude, desc: "Crescita, espansione e fortuna", transit: jupiter.formatted },
+            { name: "Saturno ♄", lon: saturn.longitude, desc: "Struttura, disciplina e maturità", transit: saturn.formatted }
+        ];
+
+        for (const tr of transitsList) {
+            let diff = Math.abs(tr.lon - natalLon) % 360;
+            if (diff > 180) diff = 360 - diff;
+
+            if (diff <= 8) {
+                aspects.push({ planet: tr.name, type: "Congiunzione (0°)", quality: "Potenziante", transit: tr.transit, effect: `Allineamento e fusione tra il tuo Segno Solare e ${tr.name} (${tr.desc}).` });
+            } else if (Math.abs(diff - 60) <= 6) {
+                aspects.push({ planet: tr.name, type: "Sestile (60°)", quality: "Armonico / Stimolante", transit: tr.transit, effect: `Opportunità dinamiche e fluidità operativa con ${tr.name}.` });
+            } else if (Math.abs(diff - 90) <= 7) {
+                aspects.push({ planet: tr.name, type: "Quadratura (90°)", quality: "Sfida Evolutiva", transit: tr.transit, effect: `Tensione costruttiva con ${tr.name}: richiede disciplina e pazienza.` });
+            } else if (Math.abs(diff - 120) <= 8) {
+                aspects.push({ planet: tr.name, type: "Trigone (120°)", quality: "Massima Armonia", transit: tr.transit, effect: `Massima benedizione e facilità di realizzazione con ${tr.name}.` });
+            } else if (Math.abs(diff - 180) <= 8) {
+                aspects.push({ planet: tr.name, type: "Opposizione (180°)", quality: "Polarità / Confronto", transit: tr.transit, effect: `Momento di confronto costruttivo e polarità con ${tr.name}.` });
+            }
+        }
+    }
+
+    return {
+        dateStr: `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`,
+        dayName: currentGovernor.name,
+        dayGovernor: currentGovernor,
+        sunTransit: sun,
+        moonTransit: moon,
+        mercuryTransit: mercury,
+        venusTransit: venus,
+        marsTransit: mars,
+        jupiterTransit: jupiter,
+        saturnTransit: saturn,
+        uranusTransit: uranus,
+        neptuneTransit: neptune,
+        plutoTransit: pluto,
+        moonPhase: {
+            name: moonPhaseName,
+            illumination: `${illumination}%`,
+            ageDays: cyclePosition.toFixed(1)
+        },
+        aspects
+    };
+}
+
 if (typeof window !== 'undefined') {
     window.calculateCompleteMatrix = calculateCompleteMatrix;
     window.generateCompleteReport14Sections = generateCompleteReport14Sections;
@@ -542,6 +693,8 @@ if (typeof window !== 'undefined') {
     window.calculateAdvancedPinnacles = calculateAdvancedPinnacles;
     window.calculateZodiacSign = calculateZodiacSign;
     window.calculateAscendant = calculateAscendant;
+    window.calculateCurrentTransits = calculateCurrentTransits;
+    window.getZodiacDetailsFromLongitude = getZodiacDetailsFromLongitude;
     window.detectConsultationType = detectConsultationType;
     window.ZODIAC_SIGNS = ZODIAC_SIGNS;
     window.ARCANA_DATA = ARCANA_DATA;
@@ -557,6 +710,8 @@ if (typeof globalThis !== 'undefined') {
     globalThis.calculateAdvancedPinnacles = calculateAdvancedPinnacles;
     globalThis.calculateZodiacSign = calculateZodiacSign;
     globalThis.calculateAscendant = calculateAscendant;
+    globalThis.calculateCurrentTransits = calculateCurrentTransits;
+    globalThis.getZodiacDetailsFromLongitude = getZodiacDetailsFromLongitude;
     globalThis.detectConsultationType = detectConsultationType;
     globalThis.ZODIAC_SIGNS = ZODIAC_SIGNS;
     globalThis.ARCANA_DATA = ARCANA_DATA;
