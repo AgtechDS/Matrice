@@ -326,9 +326,14 @@ export default async function handler(req) {
         const userData = extractUserDataFromMessages(messages);
 
         const isGroq = activeApiKey.startsWith('gsk_');
+        const isDeepSeekOfficial = activeApiKey.startsWith('sk-') && !activeBaseUrl.includes('openai') && !activeBaseUrl.includes('openrouter');
+
         if (isGroq) {
             activeBaseUrl = 'https://api.groq.com/openai/v1';
-            activeModel = 'deepseek-r1-distill-llama-70b';
+            activeModel = 'openai/gpt-oss-120b';
+        } else if (isDeepSeekOfficial || activeBaseUrl.includes('deepseek.com')) {
+            activeBaseUrl = 'https://api.deepseek.com';
+            activeModel = 'deepseek-chat';
         }
 
         const now = new Date();
@@ -338,7 +343,7 @@ export default async function handler(req) {
         let finalMessages = Array.isArray(messages) ? [...messages] : [{ role: 'user', content: 'Calcola la mia mappa.' }];
         if (!finalMessages.some(m => m.role === 'system')) {
             const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino e degli Archetipi Numerologici. 
-Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA. 
+Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, solenne e rigoroso.
 🔴 DATI REALI SOGGETTO: Nome: ${userData.name}, Data di Nascita: ${userData.date}, Ora: ${userData.time}, Luogo: ${userData.place}.
 🔴 ANNO E DATA CORRENTE: Oggi è il ${currentDateStr} e l'anno solare di riferimento è il ${currentYear}.
 DEVI GENERARE L'INTERO REPORT COMPLETO A 14 SEZIONI PER ${userData.name} SENZA INTERROMPERTI O TRONCARE IL TESTO.
@@ -351,12 +356,8 @@ Procedi punto per punto da "## 1. Sintesi iniziale" fino a "## 14. Sintesi Final
             messages: finalMessages,
             temperature: temperature,
             stream: stream,
-            max_tokens: 8000
+            max_tokens: 6000
         };
-
-        if (isGroq || activeModel.includes('qwen') || activeModel.includes('deepseek')) {
-            payload.reasoning_effort = 'none';
-        }
 
         if (activeApiKey) {
             try {

@@ -534,9 +534,20 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        const isGroq = apiKey.startsWith('gsk_');
+        const isDeepSeekOfficial = apiKey.startsWith('sk-') && !baseUrl.includes('openai') && !baseUrl.includes('openrouter');
+
+        if (isGroq) {
+            baseUrl = 'https://api.groq.com/openai/v1';
+            model = 'openai/gpt-oss-120b';
+        } else if (isDeepSeekOfficial || baseUrl.includes('deepseek.com')) {
+            baseUrl = 'https://api.deepseek.com';
+            model = 'deepseek-chat';
+        }
+
         const userData = extractUserDataFromMessages(messages);
 
-        let maxTokens = 8000;
+        let maxTokens = 6000;
 
         try {
             let finalMessages = [...messages];

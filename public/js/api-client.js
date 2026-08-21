@@ -125,9 +125,10 @@ class ApiClient {
                             }
                             const delta = parsed.choices?.[0]?.delta;
                             if (delta) {
-                                if (delta.reasoning_content) {
-                                    reasoningText += delta.reasoning_content;
-                                    if (onReasoning) onReasoning(delta.reasoning_content, reasoningText);
+                                const reasoning = delta.reasoning_content || delta.reasoning || '';
+                                if (reasoning) {
+                                    reasoningText += reasoning;
+                                    if (onReasoning) onReasoning(reasoning, reasoningText);
                                 }
                                 if (delta.content) {
                                     fullText += delta.content;
