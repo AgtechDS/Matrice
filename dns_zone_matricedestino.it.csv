@@ -1,0 +1,14 @@
+authsmtp.matricedestino.it.	900	IN	CNAME	authsmtp.register.it.
+autoconfig.matricedestino.it.	900	IN	CNAME	tb-it.securemail.pro.
+ftp.matricedestino.it.	900	IN	CNAME	matricedestino.it.
+matricedestino.it.	900	IN	A	76.76.21.21
+matricedestino.it.	900	IN	MX	10 mail.register.it.
+matricedestino.it.	900	IN	NS	ns1.register.it.
+matricedestino.it.	900	IN	NS	ns2.register.it.
+matricedestino.it.	900	IN	SOA	ns1.register.it. hostmaster.register.it. 2026082102 10800 3600 604800 86400
+matricedestino.it.	900	IN	TXT	"v=spf1 include:spf.webapps.net ~all"
+pec.matricedestino.it.	900	IN	MX	10 mx.pec-email.com.
+pec.matricedestino.it.	900	IN	TXT	"v=spf1 include:spf.pec-email.com ~all"
+pop.matricedestino.it.	900	IN	CNAME	mail.register.it.
+www.matricedestino.it.	900	IN	CNAME	cname.vercel-dns.com.
+_autodiscover._tcp.matricedestino.it.	900	IN	SRV	10 10 443 ms-it.securemail.pro.
