@@ -1333,7 +1333,7 @@ function redeemPromoCode(codeOverride = null) {
 }
 
 function watchRewardedAd() {
-    alert("⏳ Video Sponsor in Fase di Attivazione Google\n\nGoogle AdSense sta completando la revisione di conformità del canale (stato: 'Getting ready').\n\nI video sponsor saranno operativi non appena Google terminerà l'approvazione (24-48h).\n\nNel frattempo, puoi ottenere +2 Consulti Gratuiti condividendo il tuo link 'Invita un Amico' o attivare un Pass!");
+    alert("⏳ Video Sponsor in Fase di Attivazione Google\n\nGoogle AdSense sta completando la revisione di conformità del canale (stato: 'Getting ready').\n\nI video sponsor saranno operativi non appena Google terminerà l'approvazione (24-48h).\n\nNel frattempo, puoi ottenere +2 Consulti Gratuiti per ogni amico che accede con il tuo link 'Invita un Amico' o attivare un Pass Arcano!");
 }
 
 async function buyPremiumPass(planType = 'pass_5') {
@@ -1396,6 +1396,14 @@ function copyReferralLink() {
         userRef = 'm_' + Math.random().toString(36).substring(2, 9);
         localStorage.setItem('md_user_ref', userRef);
     }
+
+    if (supabaseClient && state.currentUser) {
+        supabaseClient.from('user_matrix_wallets')
+            .update({ referral_code: userRef, updated_at: new Date().toISOString() })
+            .eq('user_id', state.currentUser.id)
+            .then(() => {});
+    }
+
     const currentOrigin = window.location.origin || 'https://matrice-jade.vercel.app';
     const link = `${currentOrigin}/?ref=${userRef}`;
 
@@ -1405,7 +1413,7 @@ function copyReferralLink() {
             text: '✨ Scopri la tua Matrice del Destino e calcola il tuo Ottagramma Sacro con l\'Oracolo Archetipico!',
             url: link
         }).then(() => {
-            awardReferralBonus();
+            notifyReferralLinkCopied();
         }).catch(() => {
             copyLinkFallback(link);
         });
@@ -1417,36 +1425,57 @@ function copyReferralLink() {
 function copyLinkFallback(link) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(() => {
-            awardReferralBonus();
+            notifyReferralLinkCopied();
         }).catch(() => {
             prompt('Copia il tuo link invito:', link);
-            awardReferralBonus();
+            notifyReferralLinkCopied();
         });
     } else {
         prompt('Copia il tuo link invito:', link);
-        awardReferralBonus();
+        notifyReferralLinkCopied();
     }
 }
 
-function awardReferralBonus() {
-    const current = getUserCredits();
-    setUserCredits(current + 2);
-    if (typeof confetti === 'function') {
-        confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
-    }
-    alert('🎉 Link Invito pronto & condiviso!\n\nTi sono stati accreditati +2 Consulti Gratuiti sulla Matrice del Destino.');
+function notifyReferralLinkCopied() {
+    alert('🔗 Link Invito copiato negli appunti!\n\nCondividilo con i tuoi amici o sui social:\nRiceverai +2 Consulti Omaggio non appena un amico accede alla Matrice del Destino tramite il tuo link!');
 }
 
 function checkReferralEntry() {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
-    if (ref && !localStorage.getItem('md_referred_by')) {
+    const myOwnRef = localStorage.getItem('md_user_ref');
+
+    if (ref && ref !== myOwnRef && !localStorage.getItem('md_referred_by')) {
         localStorage.setItem('md_referred_by', ref);
         const current = getUserCredits();
-        setUserCredits(Math.max(2, current + 1));
+        const newCredits = Math.max(1, current + 1);
+        setUserCredits(newCredits);
+
+        let visitorId = localStorage.getItem('md_visitor_id');
+        if (!visitorId) {
+            visitorId = 'v_' + Math.random().toString(36).substring(2, 12);
+            localStorage.setItem('md_visitor_id', visitorId);
+        }
+
+        if (supabaseClient) {
+            supabaseClient.rpc('process_referral_reward', {
+                p_referrer_code: ref,
+                p_referee_id: visitorId
+            }).then(({ data, error }) => {
+                if (error) {
+                    console.warn('Referral reward notice:', error.message);
+                } else {
+                    console.log('🎁 Ricompensa referral processata:', data);
+                }
+            });
+        }
+
         setTimeout(() => {
-            alert('🎁 Benvenuto da parte di un amico!\nHai ricevuto +1 Consulto Bonus omaggio per iniziare la tua lettura.');
-        }, 1500);
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            }
+            alert('🎁 Benvenuto da parte di un amico!\nHai ricevuto +1 Consulto Bonus omaggio per iniziare la tua lettura sulla Matrice del Destino.');
+        }, 1200);
     }
 }
 
@@ -1454,7 +1483,6 @@ window.openCreditsModal = openCreditsModal;
 window.closeCreditsModal = closeCreditsModal;
 window.watchRewardedAd = watchRewardedAd;
 window.buyPremiumPass = buyPremiumPass;
-window.copyReferralLink = copyReferralLink;
 window.copyReferralLink = copyReferralLink;
 window.checkPaymentReturn = checkPaymentReturn;
 
