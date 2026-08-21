@@ -676,6 +676,11 @@ async function sendMessage(overrideText = null, creditCost = 1) {
         return;
     }
 
+    // Deduct required credits immediately upon message dispatch & sync to cloud
+    const newCredits = Math.max(0, currentCredits - creditCost);
+    setUserCredits(newCredits, true);
+    console.log(`🪙 Crediti scalati per consulto (${creditCost}c): da ${currentCredits} a ${newCredits}.`);
+
     if (!overrideText && input) {
         input.value = '';
         input.style.height = 'auto';
@@ -827,13 +832,6 @@ async function sendMessage(overrideText = null, creditCost = 1) {
 
             // Also check if assistant response contains structured report info
             extractMatrixFromAssistantReport(finalText);
-
-            // Deduct required credits strictly upon valid response reception!
-            const currentCredits = getUserCredits();
-            if (currentCredits >= creditCost) {
-                setUserCredits(currentCredits - creditCost);
-                console.log(`✦ Consulto completato: crediti scalati da ${currentCredits} a ${currentCredits - creditCost}.`);
-            }
         },
         onError: (err) => {
             console.warn("API Stream encountered an issue, automatically activating Instant Neural Fallback:", err.message);
@@ -2223,13 +2221,6 @@ async function syncUserWalletAndProfile(user) {
 
         if (walletData) {
             let balance = typeof walletData.credits === 'number' ? walletData.credits : 0;
-            if (isAdmin && balance < 100) {
-                balance = 100;
-                await supabaseClient
-                    .from('user_matrix_wallets')
-                    .update({ credits: balance, updated_at: new Date().toISOString() })
-                    .eq('user_id', user.id);
-            }
             setUserCredits(balance, false);
         } else {
             // New user registration / first Google sign in
