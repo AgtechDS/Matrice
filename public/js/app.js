@@ -273,7 +273,7 @@ function initChatInputs() {
         });
     }
 
-    if (btnSend) btnSend.addEventListener('click', sendMessage);
+    if (btnSend) btnSend.addEventListener('click', () => sendMessage());
     if (btnStop) btnStop.addEventListener('click', () => {
         apiClient.cancelStream();
         setGeneratingState(false);
@@ -554,18 +554,28 @@ function escapeHtml(text) {
 
 // Send User Message
 async function sendMessage(overrideText = null) {
+    if (typeof overrideText !== 'string') {
+        overrideText = null;
+    }
     if (state.isGenerating) return;
     const input = document.getElementById('chat-input');
-    const text = (overrideText || input.value).trim();
-    // Check credits before starting
+    const text = (overrideText || input?.value || '').trim();
+    if (!text) return;
+
+    // Check credits and registration status before starting
     const currentCredits = getUserCredits();
     if (currentCredits <= 0) {
-        openCreditsModal();
-        alert('✦ Hai esaurito i consulti disponibili.\nRicarica gratuitamente condividendo il tuo link Invita un Amico o attiva il Pass Arcano!');
+        if (!state.currentUser) {
+            openAuthModal();
+            alert('✨ Registrati per Ricevere 1 Consulto Gratuito!\n\nPer calcolare la tua Matrice del Destino e ricevere l\'analisi oracolare completa, registrati o accedi con Google/Email in 5 secondi!');
+        } else {
+            openCreditsModal();
+            alert('✦ Hai esaurito i consulti disponibili.\nRicarica gratuitamente condividendo il tuo link Invita un Amico (+2 Consulti) o attiva il Pass Arcano!');
+        }
         return;
     }
 
-    if (!overrideText) {
+    if (!overrideText && input) {
         input.value = '';
         input.style.height = 'auto';
     }
@@ -896,11 +906,16 @@ try {
 function getUserCredits() {
     const raw = localStorage.getItem('destiny_credits');
     if (raw === null) {
+        // If user is not logged in, they start with 0 credits until registration!
+        if (!state.currentUser) {
+            localStorage.setItem('destiny_credits', '0');
+            return 0;
+        }
         localStorage.setItem('destiny_credits', '1');
         return 1;
     }
     const val = parseInt(raw, 10);
-    return isNaN(val) ? 1 : val;
+    return isNaN(val) ? 0 : val;
 }
 
 function setUserCredits(count, syncToCloud = true) {
@@ -930,10 +945,16 @@ function updateCreditsDisplay() {
     const credits = getUserCredits();
     const badgeEl = document.getElementById('user-credits-count');
     const modalEl = document.getElementById('modal-credits-display');
-    const text = credits === 1 ? '1 Consulto' : `${credits} Consulti`;
+    
+    let text = `${credits} Consulti`;
+    if (!state.currentUser && credits === 0) {
+        text = '0 Consulti (Accedi per +1)';
+    } else if (credits === 1) {
+        text = '1 Consulto';
+    }
 
     if (badgeEl) badgeEl.textContent = text;
-    if (modalEl) modalEl.textContent = text;
+    if (modalEl) modalEl.textContent = credits === 1 ? '1 Consulto' : `${credits} Consulti`;
 }
 
 function openCreditsModal() {
@@ -1386,7 +1407,7 @@ async function initSupabaseAuth() {
                 const localCredits = getUserCredits();
 
                 if (data) {
-                    // Merge local with cloud: take the maximum
+                    // Existing registered user: sync credits from database
                     const merged = Math.max(data.credits, localCredits);
                     setUserCredits(merged, false);
                     if (merged !== data.credits) {
@@ -1396,14 +1417,23 @@ async function initSupabaseAuth() {
                             .eq('user_id', session.user.id);
                     }
                 } else {
-                    // Create initial cloud wallet with local credits
+                    // Brand new user registration: award 1 free welcome credit!
+                    const welcomeCredits = Math.max(1, localCredits);
+                    setUserCredits(welcomeCredits, false);
                     await supabaseClient
                         .from('user_matrix_wallets')
                         .insert({
                             user_id: session.user.id,
                             email: session.user.email,
-                            credits: localCredits
+                            credits: welcomeCredits
                         });
+
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+                    }
+                    setTimeout(() => {
+                        alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito per completare la tua analisi archetipica.');
+                    }, 500);
                 }
                 updateCreditsDisplay();
             } catch (err) {
