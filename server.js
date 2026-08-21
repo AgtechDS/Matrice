@@ -219,23 +219,56 @@ function detectConsultationType(messages) {
     if (lastUserMsg.includes('sinastria') || lastUserMsg.includes('matrice congiunta') || lastUserMsg.includes('partner 1') || lastUserMsg.includes('partner 2')) {
         return 'sinastria';
     }
-    if (lastUserMsg.includes('meditazione guidata') || lastUserMsg.includes('audio-meditazione') || lastUserMsg.includes('meditazione')) {
-        return 'meditazione';
-    }
     if (lastUserMsg.includes('14 sezioni') || lastUserMsg.includes('report completo') || lastUserMsg.includes('modulo guidato') || lastUserMsg.includes('ecco i miei dati completi')) {
         return 'matrice_completa';
     }
     return 'dialogo_libero';
 }
 
-function calculateCurrentTransits(date = new Date()) {
+const ZODIAC_SIGNS_ORDERED = [
+    { name: "Ariete", symbol: "♈", element: "Fuoco", modality: "Cardinale", planet: "Marte", arcana: 4 },
+    { name: "Toro", symbol: "♉", element: "Terra", modality: "Fisso", planet: "Venere", arcana: 5 },
+    { name: "Gemelli", symbol: "♊", element: "Aria", modality: "Mobile", planet: "Mercurio", arcana: 6 },
+    { name: "Cancro", symbol: "♋", element: "Acqua", modality: "Cardinale", planet: "Luna", arcana: 7 },
+    { name: "Leone", symbol: "♌", element: "Fuoco", modality: "Fisso", planet: "Sole", arcana: 19 },
+    { name: "Vergine", symbol: "♍", element: "Terra", modality: "Mobile", planet: "Mercurio", arcana: 9 },
+    { name: "Bilancia", symbol: "♎", element: "Aria", modality: "Cardinale", planet: "Venere", arcana: 8 },
+    { name: "Scorpione", symbol: "♏", element: "Acqua", modality: "Fisso", planet: "Plutone / Marte", arcana: 13 },
+    { name: "Sagittario", symbol: "♐", element: "Fuoco", modality: "Mobile", planet: "Giove", arcana: 14 },
+    { name: "Capricorno", symbol: "♑", element: "Terra", modality: "Cardinale", planet: "Saturno", arcana: 15 },
+    { name: "Acquario", symbol: "♒", element: "Aria", modality: "Fisso", planet: "Urano / Saturno", arcana: 17 },
+    { name: "Pesci", symbol: "♓", element: "Acqua", modality: "Mobile", planet: "Nettuno / Giove", arcana: 18 }
+];
+
+function getZodiacDetailsFromLongitude(longitude) {
+    const norm = (longitude % 360 + 360) % 360;
+    const signIndex = Math.floor(norm / 30);
+    const degree = Math.floor(norm % 30);
+    const minutes = Math.floor((norm % 1) * 60);
+    const sign = ZODIAC_SIGNS_ORDERED[signIndex] || ZODIAC_SIGNS_ORDERED[0];
+    const decan = degree < 10 ? 1 : (degree < 20 ? 2 : 3);
+    return {
+        longitude: norm,
+        signIndex,
+        sign: sign.name,
+        symbol: sign.symbol,
+        degree,
+        minutes,
+        formatted: `${sign.name} ${sign.symbol} a ${degree}°${minutes}' (Decano ${decan})`,
+        element: sign.element,
+        planet: sign.planet,
+        decan
+    };
+}
+
+function calculateCurrentTransits(date = new Date(), natalSignName = null, natalAscSignName = null) {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const dayOfWeek = date.getDay();
 
     const dayGovernors = [
-        { name: "Domenica", planet: "Sole ☀️", focus: "Vitalità solare, espressione del sé, leadership, chiarezza d'intenti" },
+        { name: "Domenica", planet: "Sole ☀️", focus: "Vitalità solare, leadership, espressione del sé, chiarezza d'intenti" },
         { name: "Lunedì", planet: "Luna 🌙", focus: "Intuizione emotiva, ascolto interiore, cura di sé, memoria archetipica" },
         { name: "Martedì", planet: "Marte ♂️", focus: "Azione decisa, coraggio, superamento ostacoli, intraprendenza dinamica" },
         { name: "Mercoledì", planet: "Mercurio ☿", focus: "Comunicazione brillante, accordi, commercio, chiarezza mentale" },
@@ -245,6 +278,30 @@ function calculateCurrentTransits(date = new Date()) {
     ];
 
     const currentGovernor = dayGovernors[dayOfWeek];
+
+    const d = (date.getTime() - Date.UTC(2000, 0, 1, 12, 0, 0)) / (1000 * 60 * 60 * 24);
+
+    const sunLon = (280.460 + 0.9856474 * d) % 360;
+    const moonLon = (218.316 + 13.176396 * d) % 360;
+    const mercuryLon = (252.25 + 4.09233 * d) % 360;
+    const venusLon = (181.98 + 1.60213 * d) % 360;
+    const marsLon = (355.43 + 0.52403 * d) % 360;
+    const jupiterLon = (34.35 + 0.08308 * d) % 360;
+    const saturnLon = (50.08 + 0.03346 * d) % 360;
+    const uranusLon = (314.05 + 0.01173 * d) % 360;
+    const neptuneLon = (304.35 + 0.00598 * d) % 360;
+    const plutoLon = (238.93 + 0.00396 * d) % 360;
+
+    const sun = getZodiacDetailsFromLongitude(sunLon);
+    const moon = getZodiacDetailsFromLongitude(moonLon);
+    const mercury = getZodiacDetailsFromLongitude(mercuryLon);
+    const venus = getZodiacDetailsFromLongitude(venusLon);
+    const mars = getZodiacDetailsFromLongitude(marsLon);
+    const jupiter = getZodiacDetailsFromLongitude(jupiterLon);
+    const saturn = getZodiacDetailsFromLongitude(saturnLon);
+    const uranus = getZodiacDetailsFromLongitude(uranusLon);
+    const neptune = getZodiacDetailsFromLongitude(neptuneLon);
+    const pluto = getZodiacDetailsFromLongitude(plutoLon);
 
     const baseNewMoon = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
     const daysSinceBase = (date.getTime() - baseNewMoon.getTime()) / (1000 * 60 * 60 * 24);
@@ -260,18 +317,58 @@ function calculateCurrentTransits(date = new Date()) {
     else if (cyclePosition >= 22.15 && cyclePosition < 23.99) moonPhaseName = "Ultimo Quarto 🌗";
     else if (cyclePosition >= 23.99 && cyclePosition < 27.69) moonPhaseName = "Luna Calante 🌘";
 
-    const sunSign = calculateZodiacSign(day, month);
+    const aspects = [];
+    const natalSign = ZODIAC_SIGNS_ORDERED.find(s => s.name.toLowerCase() === (natalSignName || '').toLowerCase());
+    if (natalSign) {
+        const natalLon = ZODIAC_SIGNS_ORDERED.indexOf(natalSign) * 30 + 15;
+        const transitsList = [
+            { name: "Sole ☀️", lon: sun.longitude, desc: "Espressione vitale e centratura", transit: sun.formatted },
+            { name: "Luna 🌙", lon: moon.longitude, desc: "Flusso emotivo e intuizione", transit: moon.formatted },
+            { name: "Mercurio ☿", lon: mercury.longitude, desc: "Comunicazione e lucidità mentale", transit: mercury.formatted },
+            { name: "Venere ♀", lon: venus.longitude, desc: "Relazioni, affetto e bellezza", transit: venus.formatted },
+            { name: "Marte ♂️", lon: mars.longitude, desc: "Energia di spinta e determinazione", transit: mars.formatted },
+            { name: "Giove ♃", lon: jupiter.longitude, desc: "Crescita, espansione e fortuna", transit: jupiter.formatted },
+            { name: "Saturno ♄", lon: saturn.longitude, desc: "Struttura, disciplina e maturità", transit: saturn.formatted }
+        ];
+
+        for (const tr of transitsList) {
+            let diff = Math.abs(tr.lon - natalLon) % 360;
+            if (diff > 180) diff = 360 - diff;
+
+            if (diff <= 8) {
+                aspects.push({ planet: tr.name, type: "Congiunzione (0°)", quality: "Potenziante", transit: tr.transit, effect: `Allineamento e fusione tra il tuo Segno Solare e ${tr.name} (${tr.desc}).` });
+            } else if (Math.abs(diff - 60) <= 6) {
+                aspects.push({ planet: tr.name, type: "Sestile (60°)", quality: "Armonico / Stimolante", transit: tr.transit, effect: `Opportunità dinamiche e fluidità operativa con ${tr.name}.` });
+            } else if (Math.abs(diff - 90) <= 7) {
+                aspects.push({ planet: tr.name, type: "Quadratura (90°)", quality: "Sfida Evolutiva", transit: tr.transit, effect: `Tensione costruttiva con ${tr.name}: richiede disciplina e pazienza.` });
+            } else if (Math.abs(diff - 120) <= 8) {
+                aspects.push({ planet: tr.name, type: "Trigone (120°)", quality: "Massima Armonia", transit: tr.transit, effect: `Massima benedizione e facilità di realizzazione con ${tr.name}.` });
+            } else if (Math.abs(diff - 180) <= 8) {
+                aspects.push({ planet: tr.name, type: "Opposizione (180°)", quality: "Polarità / Confronto", transit: tr.transit, effect: `Momento di confronto costruttivo e polarità con ${tr.name}.` });
+            }
+        }
+    }
 
     return {
         dateStr: `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`,
         dayName: currentGovernor.name,
         dayGovernor: currentGovernor,
-        sunTransit: sunSign,
+        sunTransit: sun,
+        moonTransit: moon,
+        mercuryTransit: mercury,
+        venusTransit: venus,
+        marsTransit: mars,
+        jupiterTransit: jupiter,
+        saturnTransit: saturn,
+        uranusTransit: uranus,
+        neptuneTransit: neptune,
+        plutoTransit: pluto,
         moonPhase: {
             name: moonPhaseName,
             illumination: `${illumination}%`,
             ageDays: cyclePosition.toFixed(1)
-        }
+        },
+        aspects
     };
 }
 
@@ -342,6 +439,8 @@ function calculateCompleteMatrixData(fullName, birthDateStr, birthTimeStr = 'non
     const currentDayNum = now.getDate();
     const personalDay = reduceToDigit(personalYear + currentMonthNum + currentDayNum, false);
 
+    const currentTransits = calculateCurrentTransits(now, zodiacSign.name, ascendant.sign.name);
+
     const p1 = reduceToDigit(dayReduced + monthReduced, false);
     const p2 = reduceToDigit(dayReduced + yearReduced, false);
     const p3 = reduceToDigit(p1 + p2, false);
@@ -384,7 +483,7 @@ function calculateCompleteMatrixData(fullName, birthDateStr, birthTimeStr = 'non
         c1, c2, c3, c4,
         trans1, trans2, trans3,
         letterCounts,
-        currentTransits: calculateCurrentTransits()
+        currentTransits
     };
 }
 
@@ -392,91 +491,89 @@ function generateDynamicReport(userData, consultType, messages) {
     const calc = calculateCompleteMatrixData(userData.name, userData.date, userData.time);
     const currentYear = new Date().getFullYear();
     const currentDateStr = new Date().toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+    const tr = calc.currentTransits;
+
+    const aspectsSummary = tr.aspects.length > 0 
+        ? tr.aspects.map(a => `* **${a.planet} (${a.type}):** ${a.quality} — ${a.effect}`).join('\n')
+        : `* Transiti neutrali stabili in corso: nessun aspetto conflittuale rilevato sul Segno Solare.`;
 
     if (consultType === 'tema_natale_zodiaco') {
         return `# 🌌 Tema Natale & Analisi Zodiacale Completa MIT-Grade
 
-> **Disclaimer Etico (Art. 50 EU AI Act):** Mappa astrologica e archetipica generata tramite calcolo efemeridi astronomiche simboliche e sintesi con i 22 Arcani della Matrice del Destino.
+> **Disclaimer Etico (Art. 50 EU AI Act):** Mappa astrologica e archetipica calcolata in tempo reale con efemeridi astronomiche e coordinate dei 22 Arcani della Matrice del Destino.
 
 * **Soggetto:** ${calc.name}
-* **Data & Ora di Nascita:** ${calc.formatted} (Ore: ${userData.time}, Luogo: ${userData.place})
+* **Data & Ora:** ${calc.formatted} (Ore: ${userData.time}, Luogo: ${userData.place})
 * **Segno Solare:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** (${calc.zodiacSign.element}, ${calc.zodiacSign.modality} — Governatore: **${calc.zodiacSign.planet}**)
-* **Ascendente Zodiacale:** **${calc.ascendant.formatted}** (Governatore dell'Ascendente: **${calc.ascendant.sign.planet}**)
-* **Arcano Zodiacale Associato:** Arcano ${calc.zodiacSign.arcana} (${ARCANA_DATA[calc.zodiacSign.arcana]?.name})
+* **Ascendente:** **${calc.ascendant.formatted}** (Governatore: **${calc.ascendant.sign.planet}**)
+* **Arcano Zodiacale:** Arcano ${calc.zodiacSign.arcana} (${ARCANA_DATA[calc.zodiacSign.arcana]?.name})
 * **Frequenza di Nascita:** Arcano ${calc.nodeA} (${calc.arcA.name}) | Life Path: **${calc.lifePath}**
 
 ---
 
 ## 1. Identità Astrale: Segno Solare, Ascendente & Elementi
-La tua essenza primaria è radicata nel segno del **${calc.zodiacSign.name} (${calc.zodiacSign.element})**, che ti conferisce ${calc.zodiacSign.traits.toLowerCase()}. L'**Ascendente in ${calc.ascendant.sign.name} (${calc.ascendant.sign.element})** modella la tua maschera esteriore, la prima impressione che doni al mondo e la modalità strategica con cui affronti le sfide dell'esistenza.
+La combinazione tra il Sole in **${calc.zodiacSign.name} (${calc.zodiacSign.element})** e l'Ascendente in **${calc.ascendant.sign.name} (${calc.ascendant.sign.element})** definisce la tua impronta cosciente e il tuo stile di interazione nel mondo.
 
 ---
 
-## 2. Configurazione delle 12 Case Astrologiche
-* **Casa I (Identità & Presenza):** Ascendente ${calc.ascendant.sign.name} — Autonomia, impatto e coraggio espressivo.
-* **Casa IV (Radici & Famiglia):** Connessione con la Coda Karmica (Arcano ${calc.nodeD} - ${calc.arcD.name}).
-* **Casa VII (Relazioni & Unioni):** Il Canale dell'Amore risuona con l'Arcano ${calc.nodeLove} (${calc.arcLove.name}).
-* **Casa X (Vocazione & Realizzazione Sociale):** Il Medio Cielo e il Canale del Denaro (${calc.nodeMoney} - ${calc.arcMoney.name}) governano il tuo apice professionale.
+## 2. Effemeridi Astronomiche e Transiti Attuali (${currentDateStr})
+* **Sole in Transito:** ${tr.sunTransit.formatted}
+* **Luna in Transito:** ${tr.moonTransit.formatted} | **Fase:** ${tr.moonPhase.name} (${tr.moonPhase.illumination})
+* **Mercurio:** ${tr.mercuryTransit.formatted}
+* **Venere:** ${tr.venusTransit.formatted}
+* **Marte:** ${tr.marsTransit.formatted}
+* **Giove:** ${tr.jupiterTransit.formatted}
+* **Saturno:** ${tr.saturnTransit.formatted}
+* **Urano:** ${tr.uranusTransit.formatted} | **Nettuno:** ${tr.neptuneTransit.formatted} | **Plutone:** ${tr.plutoTransit.formatted}
 
 ---
 
-## 3. Integrazione Alchemica: Astrologia + Matrice del Destino
-Il tuo Segno Solare (${calc.zodiacSign.name}) si fonde con l'energia dell'**Arcano ${calc.nodeA} (${calc.arcA.name})** e con il tuo **Cuore Energetico (Arcano ${calc.nodeE} - ${calc.arcE.name})**.
+## 3. Aspetti Planetari Attivi sul Tuo Segno (${calc.zodiacSign.name})
+${aspectsSummary}
 
 ---
 
-## 4. Talenti Innati & Canali Vocazionali
-Grazie a ${calc.zodiacSign.planet}, possiedi spiccate capacità di visione espansiva, leadership naturale e pensiero filosofico/strategico.
-
----
-
-## 5. Sfide Astrali & Aspetti di Ombra
-* **Eccesso di impazienza o idealismo:** Evita di sottovalutare i dettagli tecnici operativi.
-* **Tensione tra indipendenza e legami:** Armonizza il bisogno di libertà con l'intimità.
-
----
-
-## 6. Transiti Planetari Correnti (${currentYear})
-Nell'anno in corso (${currentYear}), il tuo **Anno Personale ${calc.personalYear} (${calc.arcPersonalYear.name})** si combina con i transiti benefici di ${calc.zodiacSign.planet}.
-
----
-
-## 7. Verdetto Oracolare & Guida di Manifestazione
-Abbi piena fiducia nel tuo codice astrale unico: incarna la fiamma del ${calc.zodiacSign.name} con la saggezza dell'Arcano ${calc.nodeE} (${calc.arcE.name}).`;
+## 4. Integrazione Alchemica: Astrologia + Matrice del Destino
+* **Nodo A (Nascita):** Arcano ${calc.nodeA} (${calc.arcA.name})
+* **Nodo E (Cuore):** Arcano ${calc.nodeE} (${calc.arcE.name})
+* **Canale Denaro (C+E):** Arcano ${calc.nodeMoney} (${calc.arcMoney.name})
+* **Canale Amore (D+E):** Arcano ${calc.nodeLove} (${calc.arcLove.name})`;
     }
 
     if (consultType === 'oroscopo_giorno') {
         return `# 🌅 Oroscopo & Vibrazione Astrale del Giorno — ${currentDateStr}
 
-> **Disclaimer Etico (Art. 50 EU AI Act):** Analisi combinata di Astrologia Zodiacale e Numerologia Archetipica in tempo reale.
-
-* **Soggetto:** ${calc.name} (Nato/a il: ${calc.formatted}, Ore: ${userData.time})
-* **Segno Zodiacale:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** (${calc.zodiacSign.element}, retto da **${calc.zodiacSign.planet}**)
-* **Ascendente:** **${calc.ascendant.formatted}**
-* **Giorno Personale di Oggi:** **Numero ${calc.personalDay}** — Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})
-* **Anno Personale (${currentYear}):** **${calc.personalYear}** (${calc.arcPersonalYear.name})
+* **Soggetto:** ${calc.name} | **Segno:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** | **Ascendente:** **${calc.ascendant.formatted}**
+* **Cielo Astronomico di Oggi:** Sole in ${tr.sunTransit.name} | ${tr.moonPhase.name} (${tr.moonPhase.illumination}) | Governatore del Giorno: **${tr.dayGovernor.planet}** (${tr.dayName})
+* **Giorno Personale:** **Numero ${calc.personalDay}** — Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})
 
 ---
 
-## 1. Clima Energetico & Transito del Segno
-Oggi per il **${calc.zodiacSign.name}** con **Ascendente ${calc.ascendant.sign.name}**, l'energia di **${calc.zodiacSign.planet}** si sintonizza perfettamente con l'**Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})**.
+## 1. Clima Energetico & Transiti Astrali di Oggi
+Oggi il giorno è governato da **${tr.dayGovernor.planet}**, che indirizza l'energia verso: *${tr.dayGovernor.focus}*. La Luna in **${tr.moonTransit.formatted}** determina il ritmo emotivo della giornata.
 
 ---
 
-## 2. Le 3 Opportunità Astrali di Oggi
-1. **Lavoro & Finanze:** Ottimo allineamento tra la mente analitica e la spinta espansiva del tuo Segno Solare.
-2. **Amore & Relazioni:** L'Ascendente ${calc.ascendant.sign.name} favorisce trasparenza e magnetismo negli incontri.
-3. **Crescita Personale:** Momento propizio per sbloccare vecchi dubbi e ritrovare centratura.
+## 2. Aspetti Planetari Attivi sul ${calc.zodiacSign.name}
+${aspectsSummary}
 
 ---
 
-## 3. Insidie da Evitare
-* Non agire d'impulso sotto l'effetto della fretta.
+## 3. Le 3 Grandi Opportunità Odierne
+1. **Lavoro & Finanze:** Risoluzione concreta sostenuta dal Giorno Personale ${calc.personalDay} (${calc.arcPersonalDay.name}).
+2. **Amore & Relazioni:** Chiarezza espressiva armonizzata dall'Ascendente ${calc.ascendant.sign.name}.
+3. **Evoluzione Personale:** Momento favorevole per integrare l'energia di ${tr.sunTransit.name}.
 
 ---
 
-## 4. Consiglio & Rituale del Giorno
-Connettiti all'elemento **${calc.zodiacSign.element}**: visualizza una fiamma di chiarezza che illumina ogni tua scelta odierna.`;
+## 4. Ombre & Insidie da Evitare
+* Evitare reazioni impulsive di fronte a imprevisti temporanei.
+* Preservare la lucidità mentale nei momenti di sovraccarico.
+
+---
+
+## 5. Consiglio & Rituale Pratico d'Azione
+Dedica 5 minuti all'ascolto consapevole dell'elemento **${calc.zodiacSign.element}**: allinea le tue azioni con l'Arcano ${calc.personalDay} (${calc.arcPersonalDay.name}).`;
     }
 
     if (consultType === 'oroscopo_settimana') {
@@ -982,7 +1079,8 @@ DEVI GENERARE L'INTERO REPORT A 14 SEZIONI PER ${userData.name} (${calc.zodiacSi
                 }
 
                 const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino, dell'Astrologia Esoterica e degli Archetipi Numerologici (metodo Ladini dei 22 Arcani, Astrologia Occidentale e Numerologia Pitagorica). 
-Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analitico, nobile e solenne.
+Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analitico, nobile e solenne. NESSUN TESTO PRECONFEZIONATO O HARDCODATO: genera ogni analisi in tempo reale incrociando rigorosamente i dati astronomici, astrologici e numerologici calcolati.
+
 🔴 DATI DEL SOGGETTO: Nome: ${userData.name}, ${dateInfo}.
 🔴 PROFILO ASTROLOGICO & NUMEROLOGICO CALCOLATO:
 - Segno Solare: ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Elemento ${calc.zodiacSign.element}, Governatore: ${calc.zodiacSign.planet})
@@ -997,6 +1095,16 @@ Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analit
 - Life Path: ${calc.lifePath}, Espressione: ${calc.expressionNumber}, Anima: ${calc.soulNumber}, Personalità: ${calc.personalityNumber}
 - Anno Personale ${currentYear}: ${calc.personalYear} (${calc.arcPersonalYear.name})
 - Giorno Personale oggi (${currentDateStr}): ${calc.personalDay} (${calc.arcPersonalDay.name})
+
+🔴 EFFEMERIDI ASTRONOMICHE REALI DI OGGI (${currentDateStr}):
+- Sole in Transito: ${calc.currentTransits.sunTransit.formatted}
+- Luna in Transito: ${calc.currentTransits.moonTransit.formatted} | Fase: ${calc.currentTransits.moonPhase.name} (${calc.currentTransits.moonPhase.illumination})
+- Mercurio: ${calc.currentTransits.mercuryTransit.formatted} | Venere: ${calc.currentTransits.venusTransit.formatted} | Marte: ${calc.currentTransits.marsTransit.formatted}
+- Giove: ${calc.currentTransits.jupiterTransit.formatted} | Saturno: ${calc.currentTransits.saturnTransit.formatted}
+- Urano: ${calc.currentTransits.uranusTransit.formatted} | Nettuno: ${calc.currentTransits.neptuneTransit.formatted} | Plutone: ${calc.currentTransits.plutoTransit.formatted}
+- Pianeta Governatore del Giorno: ${calc.currentTransits.dayGovernor.planet} (${calc.currentTransits.dayName}) — Focus: ${calc.currentTransits.dayGovernor.focus}
+- Aspetti Planetari Attivi sul Segno Solare (${calc.zodiacSign.name}):
+${calc.currentTransits.aspects.length > 0 ? calc.currentTransits.aspects.map(a => `  * ${a.planet} (${a.type}): ${a.quality} — ${a.effect}`).join('\n') : '  * Transiti stabili in flusso armonico.'}
 
 ${specificInstruction}`;
 
