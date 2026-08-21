@@ -2206,10 +2206,6 @@ function updateAuthUI(user) {
 
 async function syncUserWalletAndProfile(user) {
     if (!supabaseClient || !user) return;
-    const isAdmin = user.email && (
-        user.email.toLowerCase().includes('agtech') ||
-        user.email.toLowerCase().includes('admin')
-    );
 
     try {
         // 1. Authoritative Cloud Wallet Fetch (never inherit stale unauthenticated local storage)
@@ -2223,8 +2219,8 @@ async function syncUserWalletAndProfile(user) {
             let balance = typeof walletData.credits === 'number' ? walletData.credits : 0;
             setUserCredits(balance, false);
         } else {
-            // New user registration / first Google sign in
-            const welcomeCredits = isAdmin ? 100 : 1;
+            // Standard new user registration / first Google sign in (1 Welcome Credit)
+            const welcomeCredits = 1;
             setUserCredits(welcomeCredits, false);
             await supabaseClient
                 .from('user_matrix_wallets')
@@ -2238,11 +2234,7 @@ async function syncUserWalletAndProfile(user) {
                 confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
             }
             setTimeout(() => {
-                if (isAdmin) {
-                    alert('👑 Accesso Amministratore AgTech!\n\nSono stati accreditati 100 Consulti gratuiti sul tuo account.');
-                } else {
-                    alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito di benvenuto per iniziare la tua lettura oracolare.');
-                }
+                alert('🎉 Benvenuto nella Matrice del Destino!\n\nTi è stato accreditato 1 Consulto Gratuito di benvenuto per iniziare la tua lettura oracolare.');
             }, 500);
         }
 
