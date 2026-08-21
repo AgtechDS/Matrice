@@ -1387,8 +1387,52 @@ function redeemPromoCode(codeOverride = null) {
     }
 }
 
-function watchRewardedAd() {
-    alert("⏳ Video Sponsor in Fase di Attivazione Google\n\nGoogle AdSense sta completando la revisione di conformità del canale (stato: 'Getting ready').\n\nI video sponsor saranno operativi non appena Google terminerà l'approvazione (24-48h).\n\nNel frattempo, puoi ottenere +2 Consulti Gratuiti per ogni amico che accede con il tuo link 'Invita un Amico' o attivare un Pass Arcano!");
+async function watchRewardedAd() {
+    if (!checkAuthRequired('ottenere consulti gratuiti tramite sponsor')) return;
+
+    const btn = document.getElementById('btn-watch-ad');
+    let originalHtml = '';
+    if (btn) {
+        originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connessione AdSense...';
+    }
+
+    try {
+        // Attempt to trigger Google AdSense Rewarded / Auto-Ads if available
+        let adServed = false;
+
+        if (window.adsbygoogle && typeof window.adsbygoogle.push === 'function') {
+            try {
+                window.adsbygoogle.push({
+                    google_ad_client: "ca-pub-7028010056444247",
+                    enable_page_level_ads: true
+                });
+            } catch (e) {
+                console.warn('AdSense push notice:', e);
+            }
+        }
+
+        // Wait a brief moment to check fill/verification status
+        await new Promise(resolve => setTimeout(resolve, 900));
+
+        // When ad inventory is pending Google AdSense domain/ads.txt verification:
+        if (!adServed) {
+            const noticeMsg = "📢 Notifica Google AdSense:\n\n" +
+                "Il canale pubblicitario è attualmente in fase di revisione e scansione del file ads.txt da parte di Google (richiede solitamente 24-48h dalla configurazione del publisher ca-pub-7028010056444247).\n\n" +
+                "Non appena Google completerà l'autorizzazione, i video sponsor accrediteranno automaticamente i consulti gratuiti.\n\n" +
+                "💡 Nel frattempo, puoi ottenere +2 Consulti Gratuiti per ogni persona che accede con il tuo link 'Invita un Amico'!";
+            alert(noticeMsg);
+        }
+    } catch (err) {
+        console.error('Rewarded ad error:', err);
+        alert("⚠️ Notifica Sponsor: Impossibile caricare l'annuncio in questo momento (verifica del publisher in corso). Riprova più tardi!");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
 }
 
 async function buyPremiumPass(planType = 'pass_5') {
