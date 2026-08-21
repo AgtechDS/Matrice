@@ -51,6 +51,80 @@ const ARCANA_DATA = {
     22: { name: "Il Matto", archetype: "Il Viaggiatore Libero / Fiducia Assoluta", keywords: "Libertà, spontaneità, inizio del viaggio, gioia pura" }
 };
 
+const ZODIAC_SIGNS = [
+    { name: "Capricorno", symbol: "♑", element: "Terra", modality: "Cardinale", planet: "Saturno", startMonth: 12, startDay: 22, endMonth: 1, endDay: 19, arcana: 15, traits: "Disciplina, ambizione, pragmatismo, maestria della materia" },
+    { name: "Acquario", symbol: "♒", element: "Aria", modality: "Fisso", planet: "Urano / Saturno", startMonth: 1, startDay: 20, endMonth: 2, endDay: 18, arcana: 17, traits: "Visione pionieristica, indipendenza, libertà, intuizione collettiva" },
+    { name: "Pesci", symbol: "♓", element: "Acqua", modality: "Mobile", planet: "Nettuno / Giove", startMonth: 2, startDay: 19, endMonth: 3, endDay: 20, arcana: 18, traits: "Empatia mistica, sensibilità profonda, creatività sottile, compassione" },
+    { name: "Ariete", symbol: "♈", element: "Fuoco", modality: "Cardinale", planet: "Marte", startMonth: 3, startDay: 21, endMonth: 4, endDay: 19, arcana: 4, traits: "Iniziativa audace, leadership dinamica, coraggio, slancio vitale" },
+    { name: "Toro", symbol: "♉", element: "Terra", modality: "Fisso", planet: "Venere", startMonth: 4, startDay: 20, endMonth: 5, endDay: 20, arcana: 5, traits: "Radicamento, costanza, senso della bellezza, costruzione di prosperità" },
+    { name: "Gemelli", symbol: "♊", element: "Aria", modality: "Mobile", planet: "Mercurio", startMonth: 5, startDay: 21, endMonth: 6, endDay: 20, arcana: 6, traits: "Curiosità intellettuale, comunicazione brillante, versatilità, connessione" },
+    { name: "Cancro", symbol: "♋", element: "Acqua", modality: "Cardinale", planet: "Luna", startMonth: 6, startDay: 21, endMonth: 7, endDay: 22, arcana: 7, traits: "Intelligenza emotiva, memoria ancestrale, protezione, intuito protettivo" },
+    { name: "Leone", symbol: "♌", element: "Fuoco", modality: "Fisso", planet: "Sole", startMonth: 7, startDay: 23, endMonth: 8, endDay: 22, arcana: 19, traits: "Magnetismo, sovranità interiore, generosità radiosa, dignità e calore" },
+    { name: "Vergine", symbol: "♍", element: "Terra", modality: "Mobile", planet: "Mercurio", startMonth: 8, startDay: 23, endMonth: 9, endDay: 22, arcana: 9, traits: "Discernimento analitico, precisione, cura del dettaglio, servizio consapevole" },
+    { name: "Bilancia", symbol: "♎", element: "Aria", modality: "Cardinale", planet: "Venere", startMonth: 9, startDay: 23, endMonth: 10, endDay: 22, arcana: 8, traits: "Senso di giustizia, armonia estetica, diplomazia, ricerca di equilibrio" },
+    { name: "Scorpione", symbol: "♏", element: "Acqua", modality: "Fisso", planet: "Plutone / Marte", startMonth: 10, startDay: 23, endMonth: 11, endDay: 21, arcana: 13, traits: "Trasformazione alchemica, magnetismo intimo, penetrazione della verità" },
+    { name: "Sagittario", symbol: "♐", element: "Fuoco", modality: "Mobile", planet: "Giove", startMonth: 11, startDay: 22, endMonth: 12, endDay: 21, arcana: 14, traits: "Espansione spirituale, ricerca della verità, ottimismo cosmico, saggezza filosofica" }
+];
+
+function calculateZodiacSign(day, month) {
+    for (const sign of ZODIAC_SIGNS) {
+        if (sign.startMonth === sign.endMonth) {
+            if (month === sign.startMonth && day >= sign.startDay && day <= sign.endDay) return sign;
+        } else if (sign.startMonth > sign.endMonth) {
+            if ((month === 12 && day >= sign.startDay) || (month === 1 && day <= sign.endDay)) return sign;
+        } else {
+            if ((month === sign.startMonth && day >= sign.startDay) || (month === sign.endMonth && day <= sign.endDay)) return sign;
+        }
+    }
+    return ZODIAC_SIGNS[11];
+}
+
+function calculateAscendant(day, month, year, timeStr) {
+    let hours = 12, minutes = 0;
+    let hasExactTime = false;
+    if (timeStr && timeStr !== 'non disponibile' && timeStr !== 'non specificato') {
+        const timeParts = timeStr.match(/(\d{1,2})[:.](\d{2})/);
+        if (timeParts) {
+            hours = parseInt(timeParts[1], 10);
+            minutes = parseInt(timeParts[2], 10);
+            hasExactTime = true;
+        }
+    }
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const startOfYear = new Date(Date.UTC(year, 0, 1));
+    const dayOfYear = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+
+    let siderealHours = ((dayOfYear - 80) * 0.0657098 + hours + minutes / 60 + 0.8) % 24;
+    if (siderealHours < 0) siderealHours += 24;
+
+    const zodiacOrder = [
+        ZODIAC_SIGNS.find(s => s.name === "Ariete"),
+        ZODIAC_SIGNS.find(s => s.name === "Toro"),
+        ZODIAC_SIGNS.find(s => s.name === "Gemelli"),
+        ZODIAC_SIGNS.find(s => s.name === "Cancro"),
+        ZODIAC_SIGNS.find(s => s.name === "Leone"),
+        ZODIAC_SIGNS.find(s => s.name === "Vergine"),
+        ZODIAC_SIGNS.find(s => s.name === "Bilancia"),
+        ZODIAC_SIGNS.find(s => s.name === "Scorpione"),
+        ZODIAC_SIGNS.find(s => s.name === "Sagittario"),
+        ZODIAC_SIGNS.find(s => s.name === "Capricorno"),
+        ZODIAC_SIGNS.find(s => s.name === "Acquario"),
+        ZODIAC_SIGNS.find(s => s.name === "Pesci")
+    ];
+
+    const signIndex = Math.floor(siderealHours / 2) % 12;
+    const ascendantSign = zodiacOrder[signIndex] || ZODIAC_SIGNS[0];
+    const degreeApprox = Math.floor(((siderealHours % 2) / 2) * 30);
+
+    return {
+        sign: ascendantSign,
+        degree: degreeApprox,
+        hasExactTime,
+        formatted: `${ascendantSign.name} ${ascendantSign.symbol} (~${degreeApprox}°)`
+    };
+}
+
 const LETTER_VALUES = {
     'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
     'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'O': 6, 'P': 7, 'Q': 8, 'R': 9,
@@ -126,6 +200,9 @@ function detectConsultationType(messages) {
     const fullText = messages.map(m => m.content || '').join('\n').toLowerCase();
     const query = (lastUserMsg + ' ' + fullText).toLowerCase();
 
+    if (query.includes('tema natale') || query.includes('calcolo zodiacale') || query.includes('analisi zodiacale completa') || query.includes('zodiaco mit')) {
+        return 'tema_natale_zodiaco';
+    }
     if (query.includes('oroscopo del giorno') || query.includes('oroscopo di oggi') || query.includes('vibrazione energetica per la giornata di oggi') || query.includes('giorno personale')) {
         return 'oroscopo_giorno';
     }
@@ -153,7 +230,7 @@ function detectConsultationType(messages) {
     return 'dialogo_libero';
 }
 
-function calculateCompleteMatrixData(fullName, birthDateStr) {
+function calculateCompleteMatrixData(fullName, birthDateStr, birthTimeStr = 'non disponibile') {
     const cleanName = (fullName || 'Utente').toUpperCase().trim();
     
     let totalNameSum = 0;
@@ -209,6 +286,9 @@ function calculateCompleteMatrixData(fullName, birthDateStr) {
     const nodeMoney = reduceTo22(nodeC + nodeE);
     const nodeLove = reduceTo22(nodeD + nodeE);
 
+    const zodiacSign = calculateZodiacSign(day, month);
+    const ascendant = calculateAscendant(day, month, year, birthTimeStr);
+
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentYearDigitsSum = String(currentYear).split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
@@ -236,6 +316,8 @@ function calculateCompleteMatrixData(fullName, birthDateStr) {
         name: fullName,
         day, month, year,
         formatted: `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`,
+        zodiacSign,
+        ascendant,
         lifePath,
         soulNumber,
         personalityNumber,
@@ -261,167 +343,189 @@ function calculateCompleteMatrixData(fullName, birthDateStr) {
 }
 
 function generateDynamicReport(userData, consultType, messages) {
-    const calc = calculateCompleteMatrixData(userData.name, userData.date);
+    const calc = calculateCompleteMatrixData(userData.name, userData.date, userData.time);
     const currentYear = new Date().getFullYear();
     const currentDateStr = new Date().toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    if (consultType === 'oroscopo_giorno') {
-        return `# 🌅 Oroscopo & Vibrazione del Giorno — ${currentDateStr}
+    if (consultType === 'tema_natale_zodiaco') {
+        return `# 🌌 Tema Natale & Analisi Zodiacale Completa MIT-Grade
 
-> **Disclaimer Etico (Art. 50 EU AI Act):** Analisi energetica simbolica calcolata sulla base dei cicli numerologici del Giorno Personale e degli Arcani Maggiori.
+> **Disclaimer Etico (Art. 50 EU AI Act):** Mappa astrologica e archetipica generata tramite calcolo efemeridi astronomiche simboliche e sintesi con i 22 Arcani della Matrice del Destino.
 
 * **Soggetto:** ${calc.name}
-* **Data di Nascita:** ${calc.formatted}
-* **Anno Personale (${currentYear}):** **${calc.personalYear}** (${calc.arcPersonalYear.name})
+* **Data & Ora di Nascita:** ${calc.formatted} (Ore: ${userData.time}, Luogo: ${userData.place})
+* **Segno Solare:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** (${calc.zodiacSign.element}, ${calc.zodiacSign.modality} — Governatore: **${calc.zodiacSign.planet}**)
+* **Ascendente Zodiacale:** **${calc.ascendant.formatted}** (Governatore dell'Ascendente: **${calc.ascendant.sign.planet}**)
+* **Arcano Zodiacale Associato:** Arcano ${calc.zodiacSign.arcana} (${ARCANA_DATA[calc.zodiacSign.arcana]?.name})
+* **Frequenza di Nascita:** Arcano ${calc.nodeA} (${calc.arcA.name}) | Life Path: **${calc.lifePath}**
+
+---
+
+## 1. Identità Astrale: Segno Solare, Ascendente & Elementi
+La tua essenza primaria è radicata nel segno del **${calc.zodiacSign.name} (${calc.zodiacSign.element})**, che ti conferisce ${calc.zodiacSign.traits.toLowerCase()}. L'**Ascendente in ${calc.ascendant.sign.name} (${calc.ascendant.sign.element})** modella la tua maschera esteriore, la prima impressione che doni al mondo e la modalità strategica con cui affronti le sfide dell'esistenza.
+
+---
+
+## 2. Configurazione delle 12 Case Astrologiche
+* **Casa I (Identità & Presenza):** Ascendente ${calc.ascendant.sign.name} — Autonomia, impatto e coraggio espressivo.
+* **Casa IV (Radici & Famiglia):** Connessione con la Coda Karmica (Arcano ${calc.nodeD} - ${calc.arcD.name}).
+* **Casa VII (Relazioni & Unioni):** Il Canale dell'Amore risuona con l'Arcano ${calc.nodeLove} (${calc.arcLove.name}).
+* **Casa X (Vocazione & Realizzazione Sociale):** Il Medio Cielo e il Canale del Denaro (${calc.nodeMoney} - ${calc.arcMoney.name}) governano il tuo apice professionale.
+
+---
+
+## 3. Integrazione Alchemica: Astrologia + Matrice del Destino
+Il tuo Segno Solare (${calc.zodiacSign.name}) si fonde con l'energia dell'**Arcano ${calc.nodeA} (${calc.arcA.name})** e con il tuo **Cuore Energetico (Arcano ${calc.nodeE} - ${calc.arcE.name})**.
+
+---
+
+## 4. Talenti Innati & Canali Vocazionali
+Grazie a ${calc.zodiacSign.planet}, possiedi spiccate capacità di visione espansiva, leadership naturale e pensiero filosofico/strategico.
+
+---
+
+## 5. Sfide Astrali & Aspetti di Ombra
+* **Eccesso di impazienza o idealismo:** Evita di sottovalutare i dettagli tecnici operativi.
+* **Tensione tra indipendenza e legami:** Armonizza il bisogno di libertà con l'intimità.
+
+---
+
+## 6. Transiti Planetari Correnti (${currentYear})
+Nell'anno in corso (${currentYear}), il tuo **Anno Personale ${calc.personalYear} (${calc.arcPersonalYear.name})** si combina con i transiti benefici di ${calc.zodiacSign.planet}.
+
+---
+
+## 7. Verdetto Oracolare & Guida di Manifestazione
+Abbi piena fiducia nel tuo codice astrale unico: incarna la fiamma del ${calc.zodiacSign.name} con la saggezza dell'Arcano ${calc.nodeE} (${calc.arcE.name}).`;
+    }
+
+    if (consultType === 'oroscopo_giorno') {
+        return `# 🌅 Oroscopo & Vibrazione Astrale del Giorno — ${currentDateStr}
+
+> **Disclaimer Etico (Art. 50 EU AI Act):** Analisi combinata di Astrologia Zodiacale e Numerologia Archetipica in tempo reale.
+
+* **Soggetto:** ${calc.name} (Nato/a il: ${calc.formatted}, Ore: ${userData.time})
+* **Segno Zodiacale:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** (${calc.zodiacSign.element}, retto da **${calc.zodiacSign.planet}**)
+* **Ascendente:** **${calc.ascendant.formatted}**
 * **Giorno Personale di Oggi:** **Numero ${calc.personalDay}** — Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})
-* **Frequenza Chiave:** ${calc.arcPersonalDay.keywords}
+* **Anno Personale (${currentYear}):** **${calc.personalYear}** (${calc.arcPersonalYear.name})
 
 ---
 
-## 1. Clima Energetico & Archetipo Dominante
-Oggi vibri sotto l'egida dell'**Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})**. Questa frequenza interagisce direttamente con il tuo Arcano di Nascita (${calc.nodeA} - ${calc.arcA.name}) e il tuo Centro Emozionale (${calc.nodeE} - ${calc.arcE.name}). È una giornata caratterizzata da ${calc.arcPersonalDay.keywords.toLowerCase()}, ideale per canalizzare chiarezza e determinazione.
+## 1. Clima Energetico & Transito del Segno
+Oggi per il **${calc.zodiacSign.name}** con **Ascendente ${calc.ascendant.sign.name}**, l'energia di **${calc.zodiacSign.planet}** si sintonizza perfettamente con l'**Arcano ${calc.personalDay} (${calc.arcPersonalDay.name})**.
 
 ---
 
-## 2. Le 3 Grandi Opportunità di Oggi
-1. **Chiarezza Decisionale:** Ottimo momento per mettere a fuoco priorità strategiche senza disperdere energie.
-2. **Sblocco Relazionale & Comunicativo:** L'allineamento con il tuo Cuore (${calc.arcE.name}) favorisce dialoghi franchi ed empatici.
-3. **Manifestazione Materiale:** Possibilità di compiere passi concreti nei progetti professionali e finanziari.
+## 2. Le 3 Opportunità Astrali di Oggi
+1. **Lavoro & Finanze:** Ottimo allineamento tra la mente analitica e la spinta espansiva del tuo Segno Solare.
+2. **Amore & Relazioni:** L'Ascendente ${calc.ascendant.sign.name} favorisce trasparenza e magnetismo negli incontri.
+3. **Crescita Personale:** Momento propizio per sbloccare vecchi dubbi e ritrovare centratura.
 
 ---
 
-## 3. Ombre & Insidie da Evitare
-* **Impulsività o rigidità:** Evita di forzare situazioni non ancora mature.
-* **Dubbio sterile:** Non mettere in discussione il valore delle tue intuizioni profonde.
+## 3. Insidie da Evitare
+* Non agire d'impulso sotto l'effetto della fretta.
 
 ---
 
-## 4. Rituale & Consiglio Pratico d'Azione
-*Prenditi 3 minuti di raccoglimento al mattino o durante una pausa:* visualizza la luce dorata dell'Arcano ${calc.arcPersonalDay.name} che illumina le tue azioni odierne. Agisci con presenza consapevole.`;
+## 4. Consiglio & Rituale del Giorno
+Connettiti all'elemento **${calc.zodiacSign.element}**: visualizza una fiamma di chiarezza che illumina ogni tua scelta odierna.`;
     }
 
     if (consultType === 'oroscopo_settimana') {
         return `# 🔮 Guida Oracolare Settimanale (Previsione 7 Giorni)
 
-* **Soggetto:** ${calc.name} (Nato/a il: ${calc.formatted})
-* **Ciclo Numerologico:** Anno Personale ${calc.personalYear} (${calc.arcPersonalYear.name})
-* **Settimana di Riferimento:** Giornata odierna (${currentDateStr}) e proiezione dei prossimi 7 giorni
+* **Soggetto:** ${calc.name} (Data: ${calc.formatted})
+* **Segno Zodiacale:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** | **Ascendente:** **${calc.ascendant.formatted}**
+* **Anno Personale (${currentYear}):** **${calc.personalYear}** (${calc.arcPersonalYear.name})
 
 ---
 
-## 1. Mappa dei 7 Giorni — Clima Archetipico Quotidiano
+## 1. Clima della Settimana per il ${calc.zodiacSign.name}
+La settimana corrente vede l'attivazione dei tuoi canali di espansione con il governatore ${calc.zodiacSign.planet}.
+
+---
+
+## 2. Previsione Giorno per Giorno
 * **Giorno 1:** Arcano Guida ${calc.personalDay} (${calc.arcPersonalDay.name}) — Focus su avvio, centratura e chiarezza.
 * **Giorno 2:** Arcano Guida ${reduceToDigit(calc.personalDay + 1, false)} — Dialogo, ascolto interiore e relazioni.
 * **Giorno 3:** Arcano Guida ${reduceToDigit(calc.personalDay + 2, false)} — Creatività, espressione e contatti sociali.
 * **Giorno 4:** Arcano Guida ${reduceToDigit(calc.personalDay + 3, false)} — Struttura, organizzazione e metodo operativo.
 * **Giorno 5:** Arcano Guida ${reduceToDigit(calc.personalDay + 4, false)} — Movimento, dinamismo e flessibilità.
 * **Giorno 6:** Arcano Guida ${reduceToDigit(calc.personalDay + 5, false)} — Armonia domestica, legami affettivi e cura.
-* **Giorno 7:** Arcano Guida ${reduceToDigit(calc.personalDay + 6, false)} — Introspezione, studio e ricarica energetica.
-
----
-
-## 2. Giorni di Massima Favorevolezza
-I giorni centrali della settimana presentano il massimo potenziale per chiudere accordi o prendere decisioni importanti.`;
+* **Giorno 7:** Arcano Guida ${reduceToDigit(calc.personalDay + 6, false)} — Introspezione, studio e ricarica energetica.`;
     }
 
     if (consultType === 'amore_relazioni') {
         return `# ❤️ Canale dell'Amore & Compatibilità nella Matrice del Destino
 
-* **Soggetto:** ${calc.name} (Data: ${calc.formatted})
+* **Soggetto:** ${calc.name} | **Segno:** ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Asc. ${calc.ascendant.sign.name})
 * **Arcano dell'Amore (Nodo D+E):** **Arcano ${calc.nodeLove} (${calc.arcLove.name})**
 * **Nodo del Cuore (Centro):** **Arcano ${calc.nodeE} (${calc.arcE.name})**
 * **Coda Karmica:** **Arcano ${calc.nodeD} (${calc.arcD.name})**
 
 ---
 
-## 1. Il Tuo Codice dell'Amore & Archetipo di Partner
-Il tuo Canale Relazionale è retto dall'**Arcano ${calc.nodeLove} (${calc.arcLove.name})**: sei attratto/a da persone che incarnano ${calc.arcLove.keywords.toLowerCase()}. Cerchi una connessione profonda che sappia fondere passione spirituale e stabilità.
+## 1. Il Tuo Codice dell'Amore
+Il tuo Canale Relazionale fonde il fuoco del **${calc.zodiacSign.name}** con l'**Arcano ${calc.nodeLove} (${calc.arcLove.name})**.
 
 ---
 
 ## 2. Blocchi Karmici da Sciogliere
-Il legame con la Coda Karmica (${calc.arcD.name}) indica la necessità di superare la paura del giudizio e l'autosvalutazione, aprendoti alla vulnerabilità senza timore.
-
----
-
-## 3. Consiglio per le Relazioni
-Comunica sempre con la trasparenza del tuo Arcano Centrale (${calc.arcE.name}), stabilendo confini sani e amorevoli.`;
+Supera la tentazione di fuggire quando l'intimità richiede vulnerabilità emotiva profonda.`;
     }
 
     if (consultType === 'denaro_carriera') {
         return `# 💰 Canale del Denaro, Carriera & Vocazione Materiale
 
-* **Soggetto:** ${calc.name} (Data: ${calc.formatted})
+* **Soggetto:** ${calc.name} | **Segno:** ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Asc. ${calc.ascendant.sign.name})
 * **Arcano del Denaro (Nodo C+E):** **Arcano ${calc.nodeMoney} (${calc.arcMoney.name})**
 * **Nodo della Materia (Anno):** **Arcano ${calc.nodeC} (${calc.arcC.name})**
 * **Numero dell'Espressione:** **${calc.expressionNumber}**
 
 ---
 
-## 1. Vocazione Professionale & Canali di Flusso
-Il tuo Canale della Prosperità è presieduto dall'**Arcano ${calc.nodeMoney} (${calc.arcMoney.name})**. I tuoi talenti naturali fioriscono in ambiti legati a ${calc.arcMoney.keywords.toLowerCase()}.
-
----
-
-## 2. Credenze Limitanti da Sbloccare
-Il passaggio dall'Arcano ${calc.nodeC} (${calc.arcC.name}) all'Abbondanza richiede di superare il senso di scarsità e valorizzare economicamente le tue competenze uniche.
-
----
-
-## 3. Strategia di Monetizzazione
-Punta su progetti a lungo termine che rispecchiano la tua etica e le tue capacità direttive.`;
+## 1. Vocazione Professionale & Abbondanza
+L'influenza di **${calc.zodiacSign.planet}** unita all'**Arcano ${calc.nodeMoney} (${calc.arcMoney.name})** fa di te un catalizzatore di progetti ad alto impatto.`;
     }
 
     if (consultType === 'pinnacoli_sfide') {
         return `# 🏔️ Master Report: I 4 Pinnacoli Evolutivi & le 4 Sfide
 
-* **Soggetto:** ${calc.name} | Life Path: **${calc.lifePath}**
+* **Soggetto:** ${calc.name} | Life Path: **${calc.lifePath}** | Segno: **${calc.zodiacSign.name}**
 * **Età di Transizione:**
-  * **1° Pinnacolo:** Da 0 a **${calc.trans1} anni**
-  * **2° Pinnacolo:** Da **${calc.trans1 + 1}** a **${calc.trans2} anni**
-  * **3° Pinnacolo:** Da **${calc.trans2 + 1}** a **${calc.trans3} anni**
-  * **4° Pinnacolo:** Dai **${calc.trans3 + 1} anni** in poi
+  * **1° Pinnacolo:** Da 0 a **${calc.trans1} anni** (Arcano ${calc.p1})
+  * **2° Pinnacolo:** Da **${calc.trans1 + 1}** a **${calc.trans2} anni** (Arcano ${calc.p2})
+  * **3° Pinnacolo:** Da **${calc.trans2 + 1}** a **${calc.trans3} anni** (Arcano ${calc.p3})
+  * **4° Pinnacolo:** Dai **${calc.trans3 + 1} anni** in poi (Arcano ${calc.p4})
 
 ---
 
-## 1. I 4 Grandi Pinnacoli (Apici di Realizzazione)
-* **1° Pinnacolo (Arcano ${calc.p1}):** Costruzione delle basi interiori e affermazione personale.
-* **2° Pinnacolo (Arcano ${calc.p2}):** Espansione relazionale e professionale.
-* **3° Pinnacolo (Arcano ${calc.p3}):** Maturità, autorevolezza e maestria.
-* **4° Pinnacolo (Arcano ${calc.p4}):** Saggezza, lascito spirituale e piena libertà.
-
----
-
-## 2. Le 4 Sfide Karmiche di Vita
-* **Sfida 1 (Grado ${calc.c1}):** Armonizzazione dell'ego e indipendenza.
-* **Sfida 2 (Grado ${calc.c2}):** Fiducia nelle proprie capacità materiali.
-* **Sfida 3 (Grado ${calc.c3}):** Integrazione emotiva profonda.
-* **Sfida 4 (Grado ${calc.c4}):** Realizzazione spirituale autentica.`;
+## Le 4 Sfide Karmiche
+* **Sfida 1 (Grado ${calc.c1}):** Autonomia e padronanza.
+* **Sfida 2 (Grado ${calc.c2}):** Fiducia materiale.
+* **Sfida 3 (Grado ${calc.c3}):** Integrazione emotiva.
+* **Sfida 4 (Grado ${calc.c4}):** Realizzazione spirituale.`;
     }
 
     return `# Report Completo di Analisi Numerologica & Matrice del Destino (14 Sezioni)
 
-> **Disclaimer Etico (Art. 50 EU AI Act):** Questa analisi si basa sui principi simbolici dei 22 Arcani Maggiori e della numerologia pitagorica.
+> **Disclaimer Etico (Art. 50 EU AI Act):** Questa analisi si basa sui principi simbolici dei 22 Arcani Maggiori e della tradizione astrologica.
 
 ---
 
 ## 1. Sintesi Iniziale
 * **Soggetto:** ${calc.name}
 * **Data di Nascita:** ${calc.formatted} (Ore: ${userData.time}, Luogo: ${userData.place})
+* **Segno Solare & Ascendente:** **${calc.zodiacSign.name} ${calc.zodiacSign.symbol}** (${calc.zodiacSign.element}), **Ascendente ${calc.ascendant.formatted}**
 * **Tipo di Analisi:** ${userData.type}
-* **Anno Solare di Riferimento:** ${currentYear}
-* **Configurazione Energetica:** Potente allineamento tra la frequenza spirituale (Arcano ${calc.nodeA} - ${calc.arcA.name}) e la manifestazione materiale (Arcano ${calc.nodeC} - ${calc.arcC.name}).
 * **Archetipi Fondamentali:** Arcano ${calc.nodeE} (${calc.arcE.name} - Centro/Cuore) e Arcano ${calc.nodeA} (${calc.arcA.name} - Spirito/Risorse).
 
 ---
 
 ## 2. Analisi del Nome & Frequenze Lettere
 * **Nome Completo:** ${calc.name}
-* **Numero dell'Espressività (Destino):** **${calc.expressionNumber}** — Sintesi delle abilità innate e della modalità di realizzazione nel mondo.
-* **Numero dell'Anima (Vocali):** **${calc.soulNumber}** — I desideri intimi del cuore, le spinte motivazionali e i valori spirituali interiori.
-* **Numero della Personalità (Consonanti):** **${calc.personalityNumber}** — L'immagine esteriore, la reputazione e il modo di relazionarsi in società.
-* **Numero della Maturità:** **${calc.maturityNumber}** — L'archetipo di piena fioritura che si consolida nella seconda metà della vita.
-* **Numero dell'Equilibrio:** **${reduceToDigit(calc.day, false)}** — La risorsa centrale per ristabilire stabilità emotiva e chiarezza nei momenti di sfida.
 
 ---
 
@@ -741,35 +845,55 @@ const server = http.createServer(async (req, res) => {
                 
                 let specificInstruction = '';
                 switch (consultType) {
+                    case 'tema_natale_zodiaco':
+                        specificInstruction = `🔴 RICHIESTA CONSULTA: TEMA NATALE & ANALISI ZODIACALE COMPLETA MIT-GRADE (10 CREDITI).
+DEVI GENERARE UN'ANALISI ASTROLOGICA E ZODIACALE COMPLETA, APPROFONDITA ED ESTREMAMENTE PROFESSIONALE.
+Dati Astronomici Calcolati:
+- Segno Solare: ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Elemento ${calc.zodiacSign.element}, ${calc.zodiacSign.modality} — Governatore: ${calc.zodiacSign.planet})
+- Ascendente Zodiacale: ${calc.ascendant.formatted} (Governatore dell'Ascendente: ${calc.ascendant.sign.planet})
+- Arcano Zodiacale: Arcano ${calc.zodiacSign.arcana} (${ARCANA_DATA[calc.zodiacSign.arcana]?.name})
+- Arcano di Nascita: ${calc.nodeA} (${calc.arcA.name}) | Life Path: ${calc.lifePath}
+Struttura la risposta in 8 sezioni monumentali:
+# 🌌 Tema Natale & Analisi Zodiacale Completa MIT-Grade
+* **Soggetto:** ${userData.name} | **Segno:** ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} | **Ascendente:** ${calc.ascendant.formatted}
+## 1. Identità Astrale: Segno Solare, Ascendente & Dominanti Elementali
+## 2. Configurazione delle 12 Case Astrologiche & Pianeti Guida
+## 3. Integrazione Alchemica: Segno Zodiacale + Arcano di Nascita + Life Path
+## 4. Talenti Innati, Vocazione & Canali di Manifestazione
+## 5. Sfide Astrali, Karma & Aspetti di Ombra
+## 6. Relazioni, Affinità Zodiacale & Canale d'Amore
+## 7. Transiti Planetari Attuali (${currentYear}) & Clima Astrale
+## 8. Verdetto Oracolare di Sintesi & Guida Evolutiva`;
+                        break;
+
                     case 'oroscopo_giorno':
                         specificInstruction = `🔴 RICHIESTA CONSULTA: OROSCOPO DEL GIORNO (${currentDateStr}).
-DEVI GENERARE ESCLUSIVAMENTE L'OROSCOPO DEL GIORNO PER OGGI. NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
-Dati chiave: Giorno Personale di oggi = Numero ${calc.personalDay} (Arcano ${calc.personalDay} - ${calc.arcPersonalDay.name}), Anno Personale = ${calc.personalYear} (${calc.arcPersonalYear.name}), Arcano di Nascita = ${calc.nodeA} (${calc.arcA.name}), Cuore = ${calc.nodeE} (${calc.arcE.name}).
-Struttura la risposta con:
-# 🌅 Oroscopo & Vibrazione del Giorno — ${currentDateStr}
-* **Soggetto:** ${userData.name} | Giorno Personale: **${calc.personalDay}** | Arcano Guida: **${calc.arcPersonalDay.name}**
-## 1. Clima Energetico & Archetipo Dominante di Oggi
+DEVI GENERARE L'OROSCOPO DEL GIORNO INTEGRANDO IL SEGNO ZODIACALE (${calc.zodiacSign.name} ${calc.zodiacSign.symbol}), L'ASCENDENTE (${calc.ascendant.formatted}) E IL GIORNO PERSONALE NUMEROLOGICO (Numero ${calc.personalDay} - Arcano ${calc.personalDay} ${calc.arcPersonalDay.name}). NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
+Struttura:
+# 🌅 Oroscopo & Vibrazione Astrale del Giorno — ${currentDateStr}
+* **Soggetto:** ${userData.name} | **Segno:** ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} | **Ascendente:** ${calc.ascendant.formatted} | **Giorno Personale:** ${calc.personalDay} (${calc.arcPersonalDay.name})
+## 1. Clima Energetico & Transiti del Segno di Oggi
 ## 2. Le 3 Grandi Opportunità Odierne (Professione, Relazioni, Spirito)
-## 3. Ombre & Insidie da Evitare
-## 4. Rituale / Consiglio Pratico d'Azione`;
+## 3. Ombre & Insidie Astrali da Evitare
+## 4. Consiglio & Rituale Pratico d'Azione`;
                         break;
 
                     case 'oroscopo_settimana':
                         specificInstruction = `🔴 RICHIESTA CONSULTA: GUIDA ORACOLARE SETTIMANALE (7 GIORNI).
-DEVI GENERARE LA PREVISIONE DEI 7 GIORNI DELLA SETTIMANA GIORNO PER GIORNO. NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
+DEVI GENERARE LA PREVISIONE DEI 7 GIORNI DELLA SETTIMANA PER IL SEGNO ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Ascendente ${calc.ascendant.formatted}) GIORNO PER GIORNO. NON GENERARE IL REPORT GENERALE A 14 SEZIONI.
 Dati chiave: Anno Personale = ${calc.personalYear} (${calc.arcPersonalYear.name}), Life Path = ${calc.lifePath}.
 Struttura con tema della settimana, mappa dei 7 giorni con Arcano quotidiano e focus, giorni più favorevoli e consiglio di sintesi.`;
                         break;
 
                     case 'amore_relazioni':
                         specificInstruction = `🔴 RICHIESTA CONSULTA: FOCUS CANALE AMORE & RELAZIONI.
-DEVI ANALIZZARE APPROFONDITAMENTE IL CANALE AMORE (Nodo D+E: Arcano ${calc.nodeLove} - ${calc.arcLove.name}, Nodo Cuore: Arcano ${calc.nodeE} - ${calc.arcE.name}, Coda Karmica: Arcano ${calc.nodeD} - ${calc.arcD.name}). NON GENERARE IL REPORT A 14 SEZIONI.
+DEVI ANALIZZARE APPROFONDITAMENTE IL CANALE AMORE (Nodo D+E: Arcano ${calc.nodeLove} - ${calc.arcLove.name}, Nodo Cuore: Arcano ${calc.nodeE} - ${calc.arcE.name}, Coda Karmica: Arcano ${calc.nodeD} - ${calc.arcD.name}, Segno: ${calc.zodiacSign.name} ${calc.zodiacSign.symbol}). NON GENERARE IL REPORT A 14 SEZIONI.
 Fornisci: 1. Il Codice dell'Amore e Partner Karmico ideale, 2. Ferite karmiche e blocchi emotivi da sciogliere, 3. Dinamica di coppia / per single, 4. 3 Chiavi pratiche di armonizzazione.`;
                         break;
 
                     case 'denaro_carriera':
                         specificInstruction = `🔴 RICHIESTA CONSULTA: FOCUS CANALE DENARO, CARRIERA & PROSPERITÀ.
-DEVI ANALIZZARE IL CANALE DENARO (Nodo C+E: Arcano ${calc.nodeMoney} - ${calc.arcMoney.name}, Nodo Materia: Arcano ${calc.nodeC} - ${calc.arcC.name}, Numero Espressione: ${calc.expressionNumber}). NON GENERARE IL REPORT A 14 SEZIONI.
+DEVI ANALIZZARE IL CANALE DENARO (Nodo C+E: Arcano ${calc.nodeMoney} - ${calc.arcMoney.name}, Nodo Materia: Arcano ${calc.nodeC} - ${calc.arcC.name}, Numero Espressione: ${calc.expressionNumber}, Segno: ${calc.zodiacSign.name}). NON GENERARE IL REPORT A 14 SEZIONI.
 Fornisci: 1. Professioni vocazionali e canali di flusso economico, 2. Credenze limitanti e karma del denaro da sbloccare, 3. Strategia concreta di monetizzazione, 4. Piano in 3 passi per attrarre abbondanza.`;
                         break;
 
@@ -793,17 +917,19 @@ Struttura con: Scopo Spirituale dell'Incontro, Punti di Affinità, Zone di Frizi
 
                     case 'matrice_completa':
                         specificInstruction = `🔴 RICHIESTA CONSULTA: REPORT COMPLETO A 14 SEZIONI.
-DEVI GENERARE L'INTERO REPORT A 14 SEZIONI PER ${userData.name} IN MODO COMPLETO, PROFONDO E SENZA TRONCATURE.`;
+DEVI GENERARE L'INTERO REPORT A 14 SEZIONI PER ${userData.name} (${calc.zodiacSign.name} ${calc.zodiacSign.symbol}, Ascendente ${calc.ascendant.formatted}) IN MODO COMPLETO, PROFONDO E SENZA TRONCATURE.`;
                         break;
 
                     default:
-                        specificInstruction = `🔴 RICHIESTA LIBERA IN CHAT: Rispondi in modo diretto, esauriente e approfondito alla domanda specifica dell'utente, integrando la saggezza dei suoi archetipi della Matrice (Nodo A: ${calc.nodeA}, Nodo E: ${calc.nodeE}, Life Path: ${calc.lifePath}).`;
+                        specificInstruction = `🔴 RICHIESTA LIBERA IN CHAT: Rispondi in modo diretto, esauriente e approfondito alla domanda specifica dell'utente, integrando la saggezza dei suoi archetipi della Matrice (Nodo A: ${calc.nodeA}, Nodo E: ${calc.nodeE}, Segno: ${calc.zodiacSign.name} ${calc.zodiacSign.symbol}, Ascendente: ${calc.ascendant.formatted}).`;
                 }
 
-                const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino e degli Archetipi Numerologici (metodo Ladini dei 22 Arcani e Numerologia Pitagorica). 
+                const sysPrompt = `Sei l'Oracolo Supremo della Matrice del Destino, dell'Astrologia Esoterica e degli Archetipi Numerologici (metodo Ladini dei 22 Arcani, Astrologia Occidentale e Numerologia Pitagorica). 
 Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analitico, nobile e solenne.
-🔴 DATI DEL SOGGETTO: Nome: ${userData.name}, ${dateInfo}, Ora: ${userData.time}, Luogo: ${userData.place}.
-🔴 CALCOLI NUMEROLOGICI PRE-ELABORATI:
+🔴 DATI DEL SOGGETTO: Nome: ${userData.name}, ${dateInfo}.
+🔴 PROFILO ASTROLOGICO & NUMEROLOGICO CALCOLATO:
+- Segno Solare: ${calc.zodiacSign.name} ${calc.zodiacSign.symbol} (Elemento ${calc.zodiacSign.element}, Governatore: ${calc.zodiacSign.planet})
+- Ascendente: ${calc.ascendant.formatted} (Governatore Ascendente: ${calc.ascendant.sign.planet})
 - Arcano di Nascita (Nodo A): Arcano ${calc.nodeA} (${calc.arcA.name})
 - Arcano dello Spirito (Nodo B): Arcano ${calc.nodeB} (${calc.arcB.name})
 - Arcano della Materia (Nodo C): Arcano ${calc.nodeC} (${calc.arcC.name})

@@ -1099,7 +1099,7 @@ function startDailyHoroscope() {
         return;
     }
     const today = new Date().toLocaleDateString('it-IT');
-    const prompt = `Analisi Oroscopo del Giorno (${today}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nCalcola la mia vibrazione energetica per la giornata di oggi: Giorno Personale, transito degli Arcani odierni, clima universale, opportunità del giorno e consigli pratici di azione.`;
+    const prompt = `Analisi Oroscopo del Giorno & Vibrazione Astrale (${today}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nCalcola l'Oroscopo del Giorno per il mio Segno Zodiacale Solare e per il mio Ascendente calcolato dall'orario di nascita, combinato con il Giorno Personale numerologico di oggi, le opportunità nelle 24 ore, le insidie da evitare e il rituale pratico d'azione.`;
     sendMessage(prompt, 1);
 }
 
@@ -1111,7 +1111,7 @@ function startWeeklyForecast() {
         alert('ℹ️ Inserisci prima la tua data di nascita per calcolare la Guida Settimanale!');
         return;
     }
-    const prompt = `Guida Oracolare Settimanale (Previsione 7 Giorni):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nElabora la mappa oracolare dei 7 giorni della settimana corrente giorno per giorno. Per ciascun giorno indica l'Arcano guida, il focus principale (lavoro, amore, introspezione) e i giorni più favorevoli per firmare accordi o avviare iniziative.`;
+    const prompt = `Guida Oracolare Settimanale (Previsione 7 Giorni):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nElabora la mappa oracolare dei 7 giorni della settimana corrente giorno per giorno per il mio Segno Zodiacale e Ascendente. Per ciascun giorno indica l'Arcano guida, il focus principale (lavoro, amore, introspezione) e i giorni più favorevoli per firmare accordi o avviare iniziative.`;
     sendMessage(prompt, 3);
 }
 
@@ -1139,20 +1139,7 @@ function startMoneyFocus() {
     sendMessage(prompt, 1);
 }
 
-// 5. Master Pinnacoli & Decennale (10 crediti)
-function startPinnaclesMaster() {
-    const profile = getActiveUserProfile();
-    if (!profile) {
-        openWizardModal();
-        alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Master Report Pinnacoli!');
-        return;
-    }
-    const currentYear = new Date().getFullYear();
-    const prompt = `Master Report: I 4 Pinnacoli Evolutivi, le 4 Sfide & Proiezione Decennale (${currentYear}-${currentYear + 10}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nProcedi con il Master Report avanzato: calcola le età esatte di transizione dei 4 Pinnacoli (formula 36 - LifePath), analizza ciascun Pinnacolo con i relativi archetipi, descrivi le 4 Sfide evolutive da superare e fornisci la proiezione decennale anno per anno con strategie pratiche.`;
-    sendMessage(prompt, 10);
-}
-
-// 6. Sinastria di Coppia (5 crediti)
+// 5. Sinastria di Coppia (5 crediti)
 function openSynastryModal() {
     const profile = getActiveUserProfile();
     if (profile) {
@@ -1187,7 +1174,32 @@ function submitSynastryCalculation() {
     sendMessage(prompt, 5);
 }
 
-// 7. Audio-Meditazione Vocale AI (2 crediti)
+// 6. Tema Natale & Analisi Zodiacale Completa MIT-Grade (10 crediti)
+function startFullZodiacAnalysis() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data e ora di nascita per calcolare il Tema Natale & Zodiaco Completo!');
+        return;
+    }
+    const prompt = `Tema Natale & Analisi Zodiacale Completa MIT-Grade (10 crediti):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time || 'non disponibile'}\nCittà e Nazione: ${profile.place || 'Italia'}\n\nEsegui l'analisi astrologica e zodiacale completa in 8 sezioni monumentali: calcola il Segno Solare con elemento e pianeta governatore, l'Ascendente zodiacale esatto dall'ora di nascita, la configurazione delle 12 Case, l'alchimia con l'Arcano di Nascita e il Centro della Matrice del Destino, i talenti vocazionali, le sfide d'ombra, i transiti correnti e la guida oracolare di manifestazione.`;
+    sendMessage(prompt, 10);
+}
+
+// 7. Master Pinnacoli & Decennale (10 crediti)
+function startPinnaclesMaster() {
+    const profile = getActiveUserProfile();
+    if (!profile) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Master Report Pinnacoli!');
+        return;
+    }
+    const currentYear = new Date().getFullYear();
+    const prompt = `Master Report: I 4 Pinnacoli Evolutivi, le 4 Sfide & Proiezione Decennale (${currentYear}-${currentYear + 10}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nProcedi con il Master Report avanzato: calcola le età esatte di transizione dei 4 Pinnacoli (formula 36 - LifePath), analizza ciascun Pinnacolo con i relativi archetipi, descrivi le 4 Sfide evolutive da superare e fornisci la proiezione decennale anno per anno con strategie pratiche.`;
+    sendMessage(prompt, 10);
+}
+
+// 8. Audio-Meditazione Vocale AI (2 crediti)
 async function generateVoiceMeditation() {
     const profile = getActiveUserProfile();
     if (!profile) {
@@ -1199,7 +1211,7 @@ async function generateVoiceMeditation() {
     sendMessage(prompt, 2);
 }
 
-// 8. Esportazione PDF Luxury (3 crediti)
+// 9. Esportazione PDF Luxury (3 crediti)
 function exportLuxuryPdf() {
     const credits = getUserCredits();
     if (credits < 3) {
@@ -2101,6 +2113,7 @@ window.startDailyHoroscope = startDailyHoroscope;
 window.startWeeklyForecast = startWeeklyForecast;
 window.startLoveFocus = startLoveFocus;
 window.startMoneyFocus = startMoneyFocus;
+window.startFullZodiacAnalysis = startFullZodiacAnalysis;
 window.startPinnaclesMaster = startPinnaclesMaster;
 window.openSynastryModal = openSynastryModal;
 window.closeSynastryModal = closeSynastryModal;

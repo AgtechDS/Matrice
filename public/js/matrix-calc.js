@@ -24,9 +24,83 @@ const ARCANA_DATA = {
     18: { name: "La Luna", archetype: "Il Sognatore / Inconscio e Immaginazione", keywords: "Mistero, chiaroveggenza, superamento delle paure, immaginazione vivida", element: "Acqua" },
     19: { name: "Il Sole", archetype: "L'Illuminatore / Gioia e Successo", keywords: "Vitalità, generosità, abbondanza, chiarezza mentale, radiazione positiva", element: "Fuoco" },
     20: { name: "Il Giudizio", archetype: "La Voce Ancestrale / Chiamata di Vocazione", keywords: "Risveglio karmico, legami ancestrali, rinascita spirituale, vocazione", element: "Fuoco / Aria" },
-    21: { name: "Il Mondo", archetype: "Il Cosmpolita / Realizzazione Totale", keywords: "Completezza, confini aperti, integrazione globale, pace interiore", element: "Terra / Etere" },
+    21: { name: "Il Mondo", archetype: "Il Cosmopolita / Realizzazione Totale", keywords: "Completezza, confini aperti, integrazione globale, pace interiore", element: "Terra / Etere" },
     22: { name: "Il Matto", archetype: "Il Viaggiatore Libero / Fiducia Assoluta", keywords: "Libertà, spontaneità, inizio del viaggio, assenza di vincoli, gioia pura", element: "Aria" }
 };
+
+const ZODIAC_SIGNS = [
+    { name: "Capricorno", symbol: "♑", element: "Terra", modality: "Cardinale", planet: "Saturno", startMonth: 12, startDay: 22, endMonth: 1, endDay: 19, arcana: 15, traits: "Disciplina, ambizione, pragmatismo, maestria della materia" },
+    { name: "Acquario", symbol: "♒", element: "Aria", modality: "Fisso", planet: "Urano / Saturno", startMonth: 1, startDay: 20, endMonth: 2, endDay: 18, arcana: 17, traits: "Visione pionieristica, indipendenza, libertà, intuizione collettiva" },
+    { name: "Pesci", symbol: "♓", element: "Acqua", modality: "Mobile", planet: "Nettuno / Giove", startMonth: 2, startDay: 19, endMonth: 3, endDay: 20, arcana: 18, traits: "Empatia mistica, sensibilità profonda, creatività sottile, compassione" },
+    { name: "Ariete", symbol: "♈", element: "Fuoco", modality: "Cardinale", planet: "Marte", startMonth: 3, startDay: 21, endMonth: 4, endDay: 19, arcana: 4, traits: "Iniziativa audace, leadership dinamica, coraggio, slancio vitale" },
+    { name: "Toro", symbol: "♉", element: "Terra", modality: "Fisso", planet: "Venere", startMonth: 4, startDay: 20, endMonth: 5, endDay: 20, arcana: 5, traits: "Radicamento, costanza, senso della bellezza, costruzione di prosperità" },
+    { name: "Gemelli", symbol: "♊", element: "Aria", modality: "Mobile", planet: "Mercurio", startMonth: 5, startDay: 21, endMonth: 6, endDay: 20, arcana: 6, traits: "Curiosità intellettuale, comunicazione brillante, versatilità, connessione" },
+    { name: "Cancro", symbol: "♋", element: "Acqua", modality: "Cardinale", planet: "Luna", startMonth: 6, startDay: 21, endMonth: 7, endDay: 22, arcana: 7, traits: "Intelligenza emotiva, memoria ancestrale, protezione, intuito protettivo" },
+    { name: "Leone", symbol: "♌", element: "Fuoco", modality: "Fisso", planet: "Sole", startMonth: 7, startDay: 23, endMonth: 8, endDay: 22, arcana: 19, traits: "Magnetismo, sovranità interiore, generosità radiosa, dignità e calore" },
+    { name: "Vergine", symbol: "♍", element: "Terra", modality: "Mobile", planet: "Mercurio", startMonth: 8, startDay: 23, endMonth: 9, endDay: 22, arcana: 9, traits: "Discernimento analitico, precisione, cura del dettaglio, servizio consapevole" },
+    { name: "Bilancia", symbol: "♎", element: "Aria", modality: "Cardinale", planet: "Venere", startMonth: 9, startDay: 23, endMonth: 10, endDay: 22, arcana: 8, traits: "Senso di giustizia, armonia estetica, diplomazia, ricerca di equilibrio" },
+    { name: "Scorpione", symbol: "♏", element: "Acqua", modality: "Fisso", planet: "Plutone / Marte", startMonth: 10, startDay: 23, endMonth: 11, endDay: 21, arcana: 13, traits: "Trasformazione alchemica, magnetismo intimo, penetrazione della verità" },
+    { name: "Sagittario", symbol: "♐", element: "Fuoco", modality: "Mobile", planet: "Giove", startMonth: 11, startDay: 22, endMonth: 12, endDay: 21, arcana: 14, traits: "Espansione spirituale, ricerca della verità, ottimismo cosmico, saggezza filosofica" }
+];
+
+function calculateZodiacSign(day, month) {
+    for (const sign of ZODIAC_SIGNS) {
+        if (sign.startMonth === sign.endMonth) {
+            if (month === sign.startMonth && day >= sign.startDay && day <= sign.endDay) return sign;
+        } else if (sign.startMonth > sign.endMonth) {
+            if ((month === 12 && day >= sign.startDay) || (month === 1 && day <= sign.endDay)) return sign;
+        } else {
+            if ((month === sign.startMonth && day >= sign.startDay) || (month === sign.endMonth && day <= sign.endDay)) return sign;
+        }
+    }
+    return ZODIAC_SIGNS[11];
+}
+
+function calculateAscendant(day, month, year, timeStr) {
+    let hours = 12, minutes = 0;
+    let hasExactTime = false;
+    if (timeStr && timeStr !== 'non disponibile' && timeStr !== 'non specificato') {
+        const timeParts = timeStr.match(/(\d{1,2})[:.](\d{2})/);
+        if (timeParts) {
+            hours = parseInt(timeParts[1], 10);
+            minutes = parseInt(timeParts[2], 10);
+            hasExactTime = true;
+        }
+    }
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const startOfYear = new Date(Date.UTC(year, 0, 1));
+    const dayOfYear = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+
+    let siderealHours = ((dayOfYear - 80) * 0.0657098 + hours + minutes / 60 + 0.8) % 24;
+    if (siderealHours < 0) siderealHours += 24;
+
+    const zodiacOrder = [
+        ZODIAC_SIGNS.find(s => s.name === "Ariete"),
+        ZODIAC_SIGNS.find(s => s.name === "Toro"),
+        ZODIAC_SIGNS.find(s => s.name === "Gemelli"),
+        ZODIAC_SIGNS.find(s => s.name === "Cancro"),
+        ZODIAC_SIGNS.find(s => s.name === "Leone"),
+        ZODIAC_SIGNS.find(s => s.name === "Vergine"),
+        ZODIAC_SIGNS.find(s => s.name === "Bilancia"),
+        ZODIAC_SIGNS.find(s => s.name === "Scorpione"),
+        ZODIAC_SIGNS.find(s => s.name === "Sagittario"),
+        ZODIAC_SIGNS.find(s => s.name === "Capricorno"),
+        ZODIAC_SIGNS.find(s => s.name === "Acquario"),
+        ZODIAC_SIGNS.find(s => s.name === "Pesci")
+    ];
+
+    const signIndex = Math.floor(siderealHours / 2) % 12;
+    const ascendantSign = zodiacOrder[signIndex] || ZODIAC_SIGNS[0];
+    const degreeApprox = Math.floor(((siderealHours % 2) / 2) * 30);
+
+    return {
+        sign: ascendantSign,
+        degree: degreeApprox,
+        hasExactTime,
+        formatted: `${ascendantSign.name} ${ascendantSign.symbol} (~${degreeApprox}°)`
+    };
+}
 
 const LETTER_VALUES = {
     'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
@@ -57,7 +131,7 @@ function reduceToDigit(n, keepMaster = false) {
 }
 
 // Calcolo completo Matrice del Destino e Numerologia
-function calculateCompleteMatrix(fullName, birthDateStr) {
+function calculateCompleteMatrix(fullName, birthDateStr, birthTimeStr = 'non disponibile') {
     const cleanName = (fullName || 'Utente').toUpperCase().trim();
     
     // 1. Analisi del Nome
@@ -131,9 +205,14 @@ function calculateCompleteMatrix(fullName, birthDateStr) {
         if (val >= 1 && val <= 9) grid3x3[val] = (grid3x3[val] || 0) + 1;
     }
 
+    const zodiacSign = calculateZodiacSign(day, month);
+    const ascendant = calculateAscendant(day, month, year, birthTimeStr);
+
     return {
         name: fullName || 'Elena Solaris',
         birthDate: { day, month, year, formatted: `${day}/${month}/${year}` },
+        zodiacSign,
+        ascendant,
         numerology: {
             lifePath,
             soulNumber,
@@ -427,6 +506,9 @@ if (typeof window !== 'undefined') {
     window.calculateWeeklyForecast = calculateWeeklyForecast;
     window.calculateSynastryMatrix = calculateSynastryMatrix;
     window.calculateAdvancedPinnacles = calculateAdvancedPinnacles;
+    window.calculateZodiacSign = calculateZodiacSign;
+    window.calculateAscendant = calculateAscendant;
+    window.ZODIAC_SIGNS = ZODIAC_SIGNS;
     window.ARCANA_DATA = ARCANA_DATA;
     window.reduceTo22 = reduceTo22;
     window.reduceToDigit = reduceToDigit;
@@ -438,6 +520,9 @@ if (typeof globalThis !== 'undefined') {
     globalThis.calculateWeeklyForecast = calculateWeeklyForecast;
     globalThis.calculateSynastryMatrix = calculateSynastryMatrix;
     globalThis.calculateAdvancedPinnacles = calculateAdvancedPinnacles;
+    globalThis.calculateZodiacSign = calculateZodiacSign;
+    globalThis.calculateAscendant = calculateAscendant;
+    globalThis.ZODIAC_SIGNS = ZODIAC_SIGNS;
     globalThis.ARCANA_DATA = ARCANA_DATA;
     globalThis.reduceTo22 = reduceTo22;
     globalThis.reduceToDigit = reduceToDigit;
