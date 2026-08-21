@@ -569,6 +569,10 @@ async function sendMessage(overrideText = null, creditCost = 1) {
     const text = (overrideText || input?.value || '').trim();
     if (!text) return;
 
+    if (typeof setMobileView === 'function') {
+        setMobileView('chat');
+    }
+
     // Check for Admin Secret Promo Code [64447adminag] -> Add 100 credits
     const cleanCheck = text.toLowerCase().replace(/[\[\]\s]/g, '');
     if (cleanCheck === '64447adminag' || cleanCheck.includes('64447adminag')) {
@@ -773,8 +777,27 @@ async function sendMessage(overrideText = null, creditCost = 1) {
     });
 }
 
-function sendQuickPrompt(text) {
-    sendMessage(text);
+function sendQuickPrompt(typeOrText) {
+    if (typeof setMobileView === 'function') setMobileView('chat');
+    if (!typeOrText) return;
+    const lower = String(typeOrText).toLowerCase();
+    if (lower === 'oroscopo_giorno' || lower.includes('oroscopo giorno') || lower === 'oroscopo') {
+        startDailyHoroscope();
+    } else if (lower === 'oroscopo_settimana' || lower === 'week' || lower.includes('guida settimanale')) {
+        startWeeklyForecast();
+    } else if (lower === 'amore' || lower === 'amore_relazioni' || lower.includes('canale amore')) {
+        startLoveFocus();
+    } else if (lower === 'denaro' || lower === 'denaro_carriera' || lower.includes('canale denaro')) {
+        startMoneyFocus();
+    } else if (lower === 'zodiaco' || lower === 'tema_natale' || lower.includes('tema natale')) {
+        startFullZodiacAnalysis();
+    } else if (lower === 'pinnacoli' || lower.includes('pinnacoli')) {
+        startPinnaclesMaster();
+    } else if (lower === 'sinastria') {
+        openSynastryModal();
+    } else {
+        sendMessage(typeOrText);
+    }
 }
 
 // --- Matrix Extraction & Visualizer Update ---
