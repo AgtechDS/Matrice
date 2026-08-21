@@ -403,7 +403,7 @@ function appendMessage(role, content, reasoning = '', isWelcome = false) {
         reasoningBox.className = 'reasoning-box';
         reasoningBox.innerHTML = `
             <div class="reasoning-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                <span><i class="fa-solid fa-brain"></i> Ragionamento DeepSeek</span>
+                <span><i class="fa-solid fa-compass-drafting"></i> L'Architetto sta ragionando...</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="reasoning-body" style="display: none;">${escapeHtml(reasoning)}</div>
@@ -724,7 +724,7 @@ async function sendMessage(overrideText = null, creditCost = 1) {
             reasoningBox.className = 'reasoning-box';
             reasoningBox.innerHTML = `
                 <div class="reasoning-header" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(223, 177, 91, 0.08); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 0.8rem; color: var(--gold);" onclick="const b = this.nextElementSibling; b.style.display = b.style.display === 'none' ? 'block' : 'none';">
-                    <span class="reasoning-label"><i class="fa-solid fa-brain"></i> Ragionamento AI (${state.model})</span>
+                    <span class="reasoning-label"><i class="fa-solid fa-compass-drafting"></i> L'Architetto sta ragionando...</span>
                     <i class="fa-solid fa-chevron-down"></i>
                 </div>
                 <div class="reasoning-body" style="display: ${isStillThinking ? 'block' : 'none'}; font-size: 0.78rem; font-family: var(--font-mono); color: var(--text-muted); padding: 8px; background: rgba(0,0,0,0.3); border-radius: var(--radius-sm); max-height: 250px; overflow-y: auto; white-space: pre-wrap; margin-bottom: 10px;"></div>
@@ -759,7 +759,7 @@ async function sendMessage(overrideText = null, creditCost = 1) {
             updateLiveReasoning(accumulatedReasoning, true);
             if (streamingContentDiv) {
                 streamingContentDiv.style.display = 'block';
-                streamingContentDiv.innerHTML = '<span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> Elaborazione del ragionamento archetipico...</span>';
+                streamingContentDiv.innerHTML = '<span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> L\'Architetto sta elaborando il disegno della Matrice...</span>';
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
         },
@@ -783,7 +783,7 @@ async function sendMessage(overrideText = null, creditCost = 1) {
                     accumulatedText = parsed.content;
                     streamingContentDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(parsed.content) : parsed.content;
                 } else if (parsed.isThinking) {
-                    streamingContentDiv.innerHTML = '<span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> Elaborazione del ragionamento archetipico in corso...</span>';
+                    streamingContentDiv.innerHTML = '<span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> L\'Architetto sta elaborando il disegno della Matrice...</span>';
                 }
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
