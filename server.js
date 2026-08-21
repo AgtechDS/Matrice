@@ -196,35 +196,33 @@ function extractUserDataFromMessages(messages) {
 
 function detectConsultationType(messages) {
     if (!Array.isArray(messages) || messages.length === 0) return 'matrice_completa';
-    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
-    const fullText = messages.map(m => m.content || '').join('\n').toLowerCase();
-    const query = (lastUserMsg + ' ' + fullText).toLowerCase();
+    const lastUserMsg = ([...messages].reverse().find(m => m.role === 'user')?.content || '').toLowerCase();
 
-    if (query.includes('tema natale') || query.includes('calcolo zodiacale') || query.includes('analisi zodiacale completa') || query.includes('zodiaco mit')) {
+    if (lastUserMsg.includes('tema natale') || lastUserMsg.includes('calcolo zodiacale') || lastUserMsg.includes('analisi zodiacale') || lastUserMsg.includes('zodiaco mit') || lastUserMsg.includes('zodiacale')) {
         return 'tema_natale_zodiaco';
     }
-    if (query.includes('oroscopo del giorno') || query.includes('oroscopo di oggi') || query.includes('vibrazione energetica per la giornata di oggi') || query.includes('giorno personale')) {
+    if (lastUserMsg.includes('oroscopo del giorno') || lastUserMsg.includes('oroscopo di oggi') || lastUserMsg.includes('oroscopo giorno') || lastUserMsg.includes('vibrazione astrale') || (lastUserMsg.includes('oroscopo') && !lastUserMsg.includes('settiman'))) {
         return 'oroscopo_giorno';
     }
-    if (query.includes('guida oracolare settimanale') || query.includes('previsione 7 giorni') || query.includes('settimana corrente giorno per giorno')) {
+    if (lastUserMsg.includes('guida oracolare settimanale') || lastUserMsg.includes('previsione 7 giorni') || lastUserMsg.includes('settimana corrente') || lastUserMsg.includes('settimanale') || lastUserMsg.includes('week')) {
         return 'oroscopo_settimana';
     }
-    if (query.includes('focus canale amore') || query.includes('relazioni di coppia') || query.includes('partner karmico') || query.includes('nodo d + e')) {
+    if (lastUserMsg.includes('focus canale amore') || lastUserMsg.includes('canale dell\'amore') || lastUserMsg.includes('relazioni di coppia') || lastUserMsg.includes('partner karmico') || lastUserMsg.includes('canale amore') || lastUserMsg.includes('nodo d + e') || lastUserMsg.includes('amore')) {
         return 'amore_relazioni';
     }
-    if (query.includes('focus canale denaro') || query.includes('carriera & abbondanza') || query.includes('sblocco denaro') || query.includes('nodo c + e')) {
+    if (lastUserMsg.includes('focus canale denaro') || lastUserMsg.includes('canale del denaro') || lastUserMsg.includes('carriera & abbondanza') || lastUserMsg.includes('abbondanza') || lastUserMsg.includes('monetizzare') || lastUserMsg.includes('canale denaro') || lastUserMsg.includes('nodo c + e') || lastUserMsg.includes('denaro')) {
         return 'denaro_carriera';
     }
-    if (query.includes('master report') || query.includes('4 pinnacoli') || query.includes('sfide evolutive') || query.includes('pinnacoli evolutivi')) {
+    if (lastUserMsg.includes('master report') || lastUserMsg.includes('4 pinnacoli') || lastUserMsg.includes('pinnacoli evolutivi') || lastUserMsg.includes('sfide evolutive') || lastUserMsg.includes('pinnacoli')) {
         return 'pinnacoli_sfide';
     }
-    if (query.includes('sinastria') || query.includes('matrice congiunta') || query.includes('partner 1') || query.includes('partner 2')) {
+    if (lastUserMsg.includes('sinastria') || lastUserMsg.includes('matrice congiunta') || lastUserMsg.includes('partner 1') || lastUserMsg.includes('partner 2')) {
         return 'sinastria';
     }
-    if (query.includes('meditazione guidata') || query.includes('audio-meditazione')) {
+    if (lastUserMsg.includes('meditazione guidata') || lastUserMsg.includes('audio-meditazione') || lastUserMsg.includes('meditazione')) {
         return 'meditazione';
     }
-    if (query.includes('14 sezioni') || query.includes('report completo') || query.includes('modulo guidato') || query.includes('ecco i miei dati completi')) {
+    if (lastUserMsg.includes('14 sezioni') || lastUserMsg.includes('report completo') || lastUserMsg.includes('modulo guidato') || lastUserMsg.includes('ecco i miei dati completi')) {
         return 'matrice_completa';
     }
     return 'dialogo_libero';
@@ -943,7 +941,15 @@ Rispondi ESCLUSIVAMENTE IN LINGUA ITALIANA con tono profondo, autorevole, analit
 
 ${specificInstruction}`;
 
-                finalMessages.unshift({ role: 'system', content: sysPrompt });
+                if (consultType !== 'matrice_completa' && consultType !== 'dialogo_libero') {
+                    const lastUserQuery = [...messages].reverse().find(m => m.role === 'user')?.content || 'Procedi con il consulto.';
+                    finalMessages = [
+                        { role: 'system', content: sysPrompt },
+                        { role: 'user', content: lastUserQuery }
+                    ];
+                } else {
+                    finalMessages.unshift({ role: 'system', content: sysPrompt });
+                }
             }
 
             const payload = {

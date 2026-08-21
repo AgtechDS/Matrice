@@ -1566,13 +1566,149 @@ function printReport() {
 function generateLocalReportFallback() {
     let name = 'Elena Solaris';
     let date = '1995-07-21';
+    let time = 'non disponibile';
+    let place = 'Italia';
     if (state.currentMatrixData) {
-        name = state.currentMatrixData.name;
-        date = `${state.currentMatrixData.birthDate.year}-${String(state.currentMatrixData.birthDate.month).padStart(2, '0')}-${String(state.currentMatrixData.birthDate.day).padStart(2, '0')}`;
+        name = state.currentMatrixData.name || name;
+        if (state.currentMatrixData.birthDate) {
+            date = `${state.currentMatrixData.birthDate.year}-${String(state.currentMatrixData.birthDate.month).padStart(2, '0')}-${String(state.currentMatrixData.birthDate.day).padStart(2, '0')}`;
+        }
     }
+    const profile = getActiveUserProfile();
+    if (profile) {
+        name = profile.name || name;
+        date = profile.date || date;
+        time = profile.time || time;
+        place = profile.place || place;
+    }
+
     const data = calculateCompleteMatrix(name, date);
     updateMatrixVisualization(name, date);
-    const reportMarkdown = generateCompleteReport14Sections(data);
+
+    let consultType = 'matrice_completa';
+    if (typeof detectConsultationType === 'function') {
+        consultType = detectConsultationType(state.messages);
+    }
+
+    let reportMarkdown = '';
+
+    if (consultType === 'amore_relazioni') {
+        reportMarkdown = `# ❤️ Focus Canale Amore & Relazioni di Coppia
+
+> **Consulto Energetico:** Mappa della relazione e delle risonanze karmiche.
+
+* **Soggetto:** ${data.name}
+* **Data di Nascita:** ${data.birthDate.formatted}
+* **Canale dell'Amore (Nodo D + E):** Arcano ${data.nodes.love} (${data.arcana[data.nodes.love]?.name})
+* **Cuore Energetico (Nodo E):** Arcano ${data.nodes.E} (${data.arcana[data.nodes.E]?.name})
+* **Coda Karmica (Nodo D):** Arcano ${data.nodes.D} (${data.arcana[data.nodes.D]?.name})
+
+---
+
+## 1. Il Codice dell'Amore & Archetipo del Partner Ideale
+Il Canale dell'Amore è governato dall'**Arcano ${data.nodes.love} (${data.arcana[data.nodes.love]?.name})**. Questo archetipo indica che nelle relazioni cerchi autenticità, allineamento di valori e crescita condivisa.
+
+## 2. Ferite Karmiche & Blocchi Affettivi da Sciogliere
+L'Arcano ${data.nodes.D} nella Coda Karmica evidenzia memorie di dinamiche passate da trasformare in piena sicurezza e maturità interiore.
+
+## 3. Dinamica di Coppia & Consigli Pratici
+1. Coltiva confini sani e comunicazione trasparente.
+2. Lascia spazio all'individualità reciproca.
+3. Ascolta l'intuizione del Cuore (Arcano ${data.nodes.E}).`;
+    } else if (consultType === 'denaro_carriera') {
+        reportMarkdown = `# 💰 Focus Canale Denaro, Carriera & Abbondanza
+
+> **Consulto Vocazionale:** Sblocco dei flussi materiali e allineamento di carriera.
+
+* **Soggetto:** ${data.name}
+* **Data di Nascita:** ${data.birthDate.formatted}
+* **Canale del Denaro (Nodo C + E):** Arcano ${data.nodes.money} (${data.arcana[data.nodes.money]?.name})
+* **Nodo della Materia (Nodo C):** Arcano ${data.nodes.C} (${data.arcana[data.nodes.C]?.name})
+* **Life Path:** **${data.lifePath}**
+
+---
+
+## 1. Professioni Vocazionali & Canali di Flusso Economico
+L'Arcano ${data.nodes.money} definisce il tuo rapporto con la prosperità materiale e la capacità di generare valore attraverso competenze strutturate e visione strategica.
+
+## 2. Credenze Limitanti & Sblocco dell'Abbondanza
+Sciogli la paura della scarsità integrando l'Arcano ${data.nodes.C} in luce positiva.
+
+## 3. Strategia di Monetizzazione in 3 Passi
+1. Valorizza le tue abilità distintive.
+2. Stabilisci obiettivi congrui e trasparenti.
+3. Investi costantemente nella tua evoluzione personale.`;
+    } else if (consultType === 'oroscopo_giorno') {
+        const todayStr = new Date().toLocaleDateString('it-IT');
+        const zSign = typeof calculateZodiacSign === 'function' ? calculateZodiacSign(data.birthDate.day, data.birthDate.month) : { name: 'Zodiaco', symbol: '✦' };
+        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time) : { formatted: 'In calcolo' };
+        const dayP = typeof reduceToDigit === 'function' ? reduceToDigit(data.personalYear + (new Date().getMonth() + 1) + new Date().getDate(), false) : 1;
+        reportMarkdown = `# 🌅 Oroscopo & Vibrazione Astrale del Giorno — ${todayStr}
+
+* **Soggetto:** ${data.name} | **Segno:** ${zSign.name} ${zSign.symbol} | **Ascendente:** ${asc.formatted}
+* **Giorno Personale:** Numero ${dayP}
+
+---
+
+## 1. Clima Energetico Odierno
+La giornata favorisce lucidità, concentrazione e scelte ponderate.
+
+## 2. Opportunità nelle 24 Ore
+Ottima vibrazione per chiarire questioni in sospeso e avviare nuove intese.
+
+## 3. Consiglio d'Azione
+Mantieni centratura ed evita reazioni impulsive.`;
+    } else if (consultType === 'oroscopo_settimana') {
+        const zSign = typeof calculateZodiacSign === 'function' ? calculateZodiacSign(data.birthDate.day, data.birthDate.month) : { name: 'Zodiaco', symbol: '✦' };
+        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time) : { formatted: 'In calcolo' };
+        reportMarkdown = `# 🔮 Guida Oracolare Settimanale (Previsione 7 Giorni)
+
+* **Soggetto:** ${data.name} | **Segno:** ${zSign.name} ${zSign.symbol} (Ascendente ${asc.formatted})
+* **Anno Personale:** ${data.personalYear}
+
+---
+
+## Mappa della Settimana
+* **Inizio Settimana (Lun-Mar):** Pianificazione e organizzazione strategica.
+* **Metà Settimana (Mer-Gio):** Comunicazione, accordi e relazioni costruttive.
+* **Fine Settimana (Ven-Dom):** Ricarica interiore e sintesi delle priorità.`;
+    } else if (consultType === 'tema_natale_zodiaco') {
+        const zSign = typeof calculateZodiacSign === 'function' ? calculateZodiacSign(data.birthDate.day, data.birthDate.month) : { name: 'Zodiaco', symbol: '✦', element: 'Fuoco', planet: 'Sole' };
+        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time) : { formatted: 'Ascendente' };
+        reportMarkdown = `# 🌌 Tema Natale & Analisi Zodiacale Completa MIT-Grade
+
+* **Soggetto:** ${data.name} | **Segno:** **${zSign.name} ${zSign.symbol}** (${zSign.element}) | **Ascendente:** **${asc.formatted}**
+* **Life Path:** ${data.lifePath} | **Arcano di Nascita:** Arcano ${data.nodes.A}
+
+---
+
+## 1. Identità Astrale & Segno Solare
+Essenza primaria in ${zSign.name} con governatore ${zSign.planet}.
+
+## 2. Ascendente & Configurazione delle Case
+Ascendente per una presenza carismatica e determinata.
+
+## 3. Integrazione con la Matrice del Destino
+Armonizzazione tra il Cuore (Arcano ${data.nodes.E}) e il Segno Solare.`;
+    } else if (consultType === 'pinnacoli_sfide') {
+        reportMarkdown = `# 🏔️ Master Report: I 4 Pinnacoli Evolutivi & 4 Sfide
+
+* **Soggetto:** ${data.name} | **Life Path:** ${data.lifePath}
+
+---
+
+## 1. Mappa delle Fasi Evolutive
+* **1° Pinnacolo:** Arcano ${data.pinnacles.p1}
+* **2° Pinnacolo:** Arcano ${data.pinnacles.p2}
+* **3° Pinnacolo:** Arcano ${data.pinnacles.p3}
+* **4° Pinnacolo:** Arcano ${data.pinnacles.p4}
+
+## 2. Le 4 Sfide Karmiche
+Sfide ${data.challenges.c1}, ${data.challenges.c2}, ${data.challenges.c3}, ${data.challenges.c4}.`;
+    } else {
+        reportMarkdown = generateCompleteReport14Sections(data);
+    }
+
     appendMessage('assistant', reportMarkdown);
     state.messages.push({ role: 'assistant', content: reportMarkdown });
 }
