@@ -557,7 +557,7 @@
         </main>
 
         <!-- App Legal & Compliance Footer (GDPR / EU AI Act Compliant) -->
-        <footer class="app-footer">
+        <footer class="app-footer" id="app-footer">
             <div class="footer-left">
                 <span class="ai-act-badge"><i class="fa-solid fa-robot"></i> Sistema AI Generativa (UE 2024/1689)</span>
                 <span>© 2026 Matrice del Destino — Tutti i diritti riservati.</span>
@@ -575,7 +575,15 @@
                     title="Cancella subito tutti i dati inseriti (Diritto all'Oblio)"><i
                         class="fa-solid fa-trash-can"></i> Cancella Dati</button>
             </div>
+            <button class="footer-close-btn" id="btn-close-legal-footer" onclick="toggleLegalFooter(false)" title="Chiudi / Nascondi banner legale">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </footer>
+
+        <!-- Pulsante di riapertura discreto quando il footer è nascosto -->
+        <button class="legal-reopen-btn" id="btn-reopen-legal-footer" onclick="toggleLegalFooter(true)" style="display: none;" title="Mostra Info Legali e Privacy">
+            <i class="fa-solid fa-scale-balanced"></i> <span>Info Legali & Privacy ▴</span>
+        </button>
     </div>
 
     <!-- Modal 1: Guided Data Wizard -->

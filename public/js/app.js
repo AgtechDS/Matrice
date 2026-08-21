@@ -2589,6 +2589,31 @@ window.sendMessage = sendMessage;
 window.resetSession = resetSession;
 window.updateMatrixVisualization = updateMatrixVisualization;
 window.setMobileView = setMobileView;
+window.toggleLegalFooter = toggleLegalFooter;
+
+// --- Legal Box Banner Collapse / Close System ---
+function toggleLegalFooter(show) {
+    const footer = document.getElementById('app-footer');
+    const reopenBtn = document.getElementById('btn-reopen-legal-footer');
+    if (!footer) return;
+
+    if (show) {
+        footer.classList.remove('is-hidden');
+        if (reopenBtn) reopenBtn.style.display = 'none';
+        localStorage.setItem('md_legal_footer_hidden', 'false');
+    } else {
+        footer.classList.add('is-hidden');
+        if (reopenBtn) reopenBtn.style.display = 'inline-flex';
+        localStorage.setItem('md_legal_footer_hidden', 'true');
+    }
+}
+
+function initLegalFooterState() {
+    const isHidden = localStorage.getItem('md_legal_footer_hidden');
+    if (isHidden === 'true') {
+        toggleLegalFooter(false);
+    }
+}
 
 // --- MIT-Grade Scroll Reveal Animation System ---
 function initScrollReveal() {
@@ -2620,6 +2645,7 @@ async function initApp() {
     initBackgroundCanvas();
     initTabs();
     initChatInputs();
+    initLegalFooterState();
     
     // Fetch server configuration & system prompt
     try {
