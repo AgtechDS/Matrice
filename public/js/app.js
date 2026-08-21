@@ -1489,7 +1489,7 @@ function copyReferralLink() {
             .then(() => {});
     }
 
-    const currentOrigin = window.location.origin || 'https://matrice-jade.vercel.app';
+    const currentOrigin = window.location.origin || 'https://matricedestino.it';
     const link = `${currentOrigin}/?ref=${userRef}`;
 
     if (navigator.share) {
@@ -1531,7 +1531,7 @@ function shareReferralWhatsApp() {
         userRef = 'm_' + Math.random().toString(36).substring(2, 9);
         localStorage.setItem('md_user_ref', userRef);
     }
-    const currentOrigin = window.location.origin || 'https://matrice-jade.vercel.app';
+    const currentOrigin = window.location.origin || 'https://matricedestino.it';
     const link = `${currentOrigin}/?ref=${userRef}`;
     const text = encodeURIComponent(`✨ Scopri la tua Matrice del Destino e calcola il tuo Ottagramma Sacro con l'Oracolo Archetipico!\n${link}`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
@@ -1543,7 +1543,7 @@ function shareReferralTelegram() {
         userRef = 'm_' + Math.random().toString(36).substring(2, 9);
         localStorage.setItem('md_user_ref', userRef);
     }
-    const currentOrigin = window.location.origin || 'https://matrice-jade.vercel.app';
+    const currentOrigin = window.location.origin || 'https://matricedestino.it';
     const link = encodeURIComponent(`${currentOrigin}/?ref=${userRef}`);
     const text = encodeURIComponent(`✨ Scopri la tua Matrice del Destino e calcola il tuo Ottagramma Sacro con l'Oracolo Archetipico!`);
     window.open(`https://t.me/share/url?url=${link}&text=${text}`, '_blank');

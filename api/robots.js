@@ -14,7 +14,7 @@ Allow: /
 User-agent: Googlebot
 Allow: /
 
-Sitemap: https://matrice-jade.vercel.app/sitemap.xml
+Sitemap: https://matricedestino.it/sitemap.xml
 `;
 
     if (res && typeof res.setHeader === 'function') {
