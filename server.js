@@ -79,11 +79,63 @@ function calculateZodiacSign(day, month) {
     return ZODIAC_SIGNS[11];
 }
 
-function calculateAscendant(day, month, year, timeStr) {
+function isItalianDST(y, m, d) {
+    if (m < 3 || m > 10) return false;
+    if (m > 3 && m < 10) return true;
+    const lastSunMarch = 31 - (new Date(Date.UTC(y, 2, 31)).getUTCDay());
+    if (m === 3) return d >= lastSunMarch;
+    const lastSunOct = 31 - (new Date(Date.UTC(y, 9, 31)).getUTCDay());
+    if (m === 10) return d < lastSunOct;
+    return false;
+}
+
+function resolveCoordinates(placeStr) {
+    if (!placeStr || typeof placeStr !== 'string') return { lat: 37.50, lon: 15.08 };
+    const p = placeStr.toLowerCase();
+    if (p.includes('catania') || p.includes('misterbianco') || p.includes('siracusa') || p.includes('ragusa') || p.includes('enna') || p.includes('messina') || p.includes('caltanissetta')) {
+        return { lat: 37.50, lon: 15.08 };
+    }
+    if (p.includes('palermo') || p.includes('trapani') || p.includes('agrigento')) {
+        return { lat: 38.12, lon: 13.36 };
+    }
+    if (p.includes('roma') || p.includes('lazio')) {
+        return { lat: 41.90, lon: 12.50 };
+    }
+    if (p.includes('milano') || p.includes('lombardia') || p.includes('monza') || p.includes('bergamo') || p.includes('brescia')) {
+        return { lat: 45.46, lon: 9.19 };
+    }
+    if (p.includes('napoli') || p.includes('campania') || p.includes('salerno') || p.includes('caserta')) {
+        return { lat: 40.85, lon: 14.27 };
+    }
+    if (p.includes('torino') || p.includes('piemonte')) {
+        return { lat: 45.07, lon: 7.68 };
+    }
+    if (p.includes('firenze') || p.includes('toscana') || p.includes('pisa')) {
+        return { lat: 43.77, lon: 11.25 };
+    }
+    if (p.includes('bologna') || p.includes('emilia') || p.includes('modena') || p.includes('parma')) {
+        return { lat: 44.49, lon: 11.34 };
+    }
+    if (p.includes('bari') || p.includes('puglia') || p.includes('lecce') || p.includes('taranto')) {
+        return { lat: 41.12, lon: 16.87 };
+    }
+    if (p.includes('venezia') || p.includes('veneto') || p.includes('verona') || p.includes('padova')) {
+        return { lat: 45.44, lon: 12.33 };
+    }
+    if (p.includes('genova') || p.includes('liguria')) {
+        return { lat: 44.41, lon: 8.93 };
+    }
+    if (p.includes('cagliari') || p.includes('sardegna') || p.includes('sassari')) {
+        return { lat: 39.22, lon: 9.12 };
+    }
+    return { lat: 41.90, lon: 12.50 };
+}
+
+function calculateAscendant(day, month, year, timeStr, placeStr = null) {
     let hours = 12, minutes = 0;
     let hasExactTime = false;
     if (timeStr && timeStr !== 'non disponibile' && timeStr !== 'non specificato') {
-        const timeParts = timeStr.match(/(\d{1,2})[:.](\d{2})/);
+        const timeParts = String(timeStr).match(/(\d{1,2})[:.](\d{2})/);
         if (timeParts) {
             hours = parseInt(timeParts[1], 10);
             minutes = parseInt(timeParts[2], 10);
@@ -91,37 +143,68 @@ function calculateAscendant(day, month, year, timeStr) {
         }
     }
 
-    const date = new Date(Date.UTC(year, month - 1, day));
-    const startOfYear = new Date(Date.UTC(year, 0, 1));
-    const dayOfYear = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+    const coords = resolveCoordinates(placeStr);
+    const latitude = coords.lat;
+    const longitude = coords.lon;
 
-    let siderealHours = ((dayOfYear - 80) * 0.0657098 + hours + minutes / 60 + 0.8) % 24;
-    if (siderealHours < 0) siderealHours += 24;
+    const tzOffset = isItalianDST(year, month, day) ? 2 : 1;
+    const utcHours = hours + minutes / 60 - tzOffset;
 
-    const zodiacOrder = [
-        ZODIAC_SIGNS.find(s => s.name === "Ariete"),
-        ZODIAC_SIGNS.find(s => s.name === "Toro"),
-        ZODIAC_SIGNS.find(s => s.name === "Gemelli"),
-        ZODIAC_SIGNS.find(s => s.name === "Cancro"),
-        ZODIAC_SIGNS.find(s => s.name === "Leone"),
-        ZODIAC_SIGNS.find(s => s.name === "Vergine"),
-        ZODIAC_SIGNS.find(s => s.name === "Bilancia"),
-        ZODIAC_SIGNS.find(s => s.name === "Scorpione"),
-        ZODIAC_SIGNS.find(s => s.name === "Sagittario"),
-        ZODIAC_SIGNS.find(s => s.name === "Capricorno"),
-        ZODIAC_SIGNS.find(s => s.name === "Acquario"),
-        ZODIAC_SIGNS.find(s => s.name === "Pesci")
+    let y = year;
+    let m = month;
+    if (m <= 2) {
+        y -= 1;
+        m += 12;
+    }
+    const A = Math.floor(y / 100);
+    const B = 2 - A + Math.floor(A / 4);
+    const dayFraction = utcHours / 24;
+    const JD = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + B - 1524.5 + dayFraction;
+
+    const T = (JD - 2451545.0) / 36525.0;
+
+    let GMST = 280.46061837 + 360.98564736629 * (JD - 2451545.0) + 0.000387933 * T * T - (T * T * T) / 38710000.0;
+    GMST = ((GMST % 360) + 360) % 360;
+
+    let RAMC = ((GMST + longitude) % 360 + 360) % 360;
+    const ramcRad = RAMC * Math.PI / 180;
+
+    const eps = (23.4392911 - 0.0130042 * T) * Math.PI / 180;
+    const latRad = latitude * Math.PI / 180;
+
+    const yEcl = Math.cos(ramcRad);
+    const xEcl = -Math.sin(ramcRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps);
+
+    let ascDeg = Math.atan2(yEcl, xEcl) * 180 / Math.PI;
+    ascDeg = ((ascDeg % 360) + 360) % 360;
+
+    const zodiac = [
+        { name: "Ariete", symbol: "♈", element: "Fuoco" },
+        { name: "Toro", symbol: "♉", element: "Terra" },
+        { name: "Gemelli", symbol: "♊", element: "Aria" },
+        { name: "Cancro", symbol: "♋", element: "Acqua" },
+        { name: "Leone", symbol: "♌", element: "Fuoco" },
+        { name: "Vergine", symbol: "♍", element: "Terra" },
+        { name: "Bilancia", symbol: "♎", element: "Aria" },
+        { name: "Scorpione", symbol: "♏", element: "Acqua" },
+        { name: "Sagittario", symbol: "♐", element: "Fuoco" },
+        { name: "Capricorno", symbol: "♑", element: "Terra" },
+        { name: "Acquario", symbol: "♒", element: "Aria" },
+        { name: "Pesci", symbol: "♓", element: "Acqua" }
     ];
 
-    const signIndex = Math.floor(siderealHours / 2) % 12;
-    const ascendantSign = zodiacOrder[signIndex] || ZODIAC_SIGNS[0];
-    const degreeApprox = Math.floor(((siderealHours % 2) / 2) * 30);
+    const signIndex = Math.floor(ascDeg / 30) % 12;
+    const degreeInSign = Math.floor(ascDeg % 30);
+    const minutesInSign = Math.floor(((ascDeg % 30) - degreeInSign) * 60);
+    const ascendantSign = zodiac[signIndex];
 
     return {
         sign: ascendantSign,
-        degree: degreeApprox,
+        degree: degreeInSign,
+        minutes: minutesInSign,
+        totalDegrees: ascDeg,
         hasExactTime,
-        formatted: `${ascendantSign.name} ${ascendantSign.symbol} (~${degreeApprox}°)`
+        formatted: `${ascendantSign.name} ${ascendantSign.symbol} (~${degreeInSign}°)`
     };
 }
 

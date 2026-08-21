@@ -271,7 +271,7 @@ Puoi cliccare sul pulsante in alto **✦ Modulo Guidato** per impostare la tua d
             : { name: "Zodiaco", symbol: "✦", element: "Astrale" };
 
         const ascendant = typeof calculateAscendant === 'function'
-            ? calculateAscendant(day, month, year, profile.time)
+            ? calculateAscendant(day, month, year, profile.time, profile.place)
             : { formatted: "In calcolo" };
 
         const now = new Date();
@@ -279,12 +279,17 @@ Puoi cliccare sul pulsante in alto **✦ Modulo Guidato** per impostare la tua d
         const curMonth = now.getMonth() + 1;
         const curYear = now.getFullYear();
 
+        // Numerologia Personale Standard & Mappatura 22 Arcani
         const py = typeof reduceToDigit === 'function'
             ? reduceToDigit(reduceToDigit(day) + reduceToDigit(month) + reduceToDigit(curYear))
             : 1;
 
-        const pd = typeof reduceTo22 === 'function'
-            ? reduceTo22(reduceToDigit(curDay) + reduceToDigit(curMonth) + py)
+        const pm = typeof reduceToDigit === 'function'
+            ? reduceToDigit(py + reduceToDigit(curMonth))
+            : 1;
+
+        const pd = typeof reduceToDigit === 'function'
+            ? reduceToDigit(pm + reduceToDigit(curDay))
             : 1;
 
         const pdArcana = (typeof ARCANA_DATA !== 'undefined' && ARCANA_DATA[pd]) ? ARCANA_DATA[pd].name : 'Iniziatore';
@@ -294,7 +299,7 @@ Puoi cliccare sul pulsante in alto **✦ Modulo Guidato** per impostare la tua d
 
         const dayGov = transits ? transits.dayGovernor : { planet: 'Sole ☀️', focus: 'Vitalità solare e chiarezza' };
         const dayName = transits ? transits.dayName : 'Oggi';
-        const moon = transits ? `${transits.moonPhase.name} (${transits.moonPhase.illumination})` : '';
+        const moon = transits && transits.moonPhase ? `${transits.moonPhase.name} · ${transits.moonPhase.illumination}` : '';
 
         const customGreeting = `### Bentornato/a, ${profile.name}! 🌌
 
@@ -1861,12 +1866,15 @@ Sciogli la paura della scarsità integrando l'Arcano ${data.nodes.C} in luce pos
     } else if (consultType === 'oroscopo_giorno') {
         const todayStr = new Date().toLocaleDateString('it-IT');
         const zSign = typeof calculateZodiacSign === 'function' ? calculateZodiacSign(data.birthDate.day, data.birthDate.month) : { name: 'Zodiaco', symbol: '✦' };
-        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time) : { formatted: 'In calcolo' };
-        const dayP = typeof reduceToDigit === 'function' ? reduceToDigit(data.personalYear + (new Date().getMonth() + 1) + new Date().getDate(), false) : 1;
+        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time, data.birthPlace || null) : { formatted: 'In calcolo' };
+        const py = typeof reduceToDigit === 'function' ? reduceToDigit(reduceToDigit(data.birthDate.day) + reduceToDigit(data.birthDate.month) + reduceToDigit(new Date().getFullYear())) : 1;
+        const pm = typeof reduceToDigit === 'function' ? reduceToDigit(py + (new Date().getMonth() + 1)) : 1;
+        const dayP = typeof reduceToDigit === 'function' ? reduceToDigit(pm + new Date().getDate()) : 1;
+        const dayArcana = (typeof ARCANA_DATA !== 'undefined' && ARCANA_DATA[dayP]) ? ARCANA_DATA[dayP].name : 'Evolutivo';
         reportMarkdown = `# 🌅 Oroscopo & Vibrazione Astrale del Giorno — ${todayStr}
 
 * **Soggetto:** ${data.name} | **Segno:** ${zSign.name} ${zSign.symbol} | **Ascendente:** ${asc.formatted}
-* **Giorno Personale:** Numero ${dayP}
+* **Giorno Personale:** Numero ${dayP} — Arcano ${dayP} (*${dayArcana}*)
 
 ---
 
@@ -1880,7 +1888,7 @@ Ottima vibrazione per chiarire questioni in sospeso e avviare nuove intese.
 Mantieni centratura ed evita reazioni impulsive.`;
     } else if (consultType === 'oroscopo_settimana') {
         const zSign = typeof calculateZodiacSign === 'function' ? calculateZodiacSign(data.birthDate.day, data.birthDate.month) : { name: 'Zodiaco', symbol: '✦' };
-        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time) : { formatted: 'In calcolo' };
+        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time, data.birthPlace || null) : { formatted: 'In calcolo' };
         reportMarkdown = `# 🔮 Guida Oracolare Settimanale (Previsione 7 Giorni)
 
 * **Soggetto:** ${data.name} | **Segno:** ${zSign.name} ${zSign.symbol} (Ascendente ${asc.formatted})
@@ -1894,7 +1902,7 @@ Mantieni centratura ed evita reazioni impulsive.`;
 * **Fine Settimana (Ven-Dom):** Ricarica interiore e sintesi delle priorità.`;
     } else if (consultType === 'tema_natale_zodiaco') {
         const zSign = typeof calculateZodiacSign === 'function' ? calculateZodiacSign(data.birthDate.day, data.birthDate.month) : { name: 'Zodiaco', symbol: '✦', element: 'Fuoco', planet: 'Sole' };
-        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time) : { formatted: 'Ascendente' };
+        const asc = typeof calculateAscendant === 'function' ? calculateAscendant(data.birthDate.day, data.birthDate.month, data.birthDate.year, time, data.birthPlace || null) : { formatted: 'Ascendente' };
         reportMarkdown = `# 🌌 Tema Natale & Analisi Zodiacale Completa MIT-Grade
 
 * **Soggetto:** ${data.name} | **Segno:** **${zSign.name} ${zSign.symbol}** (${zSign.element}) | **Ascendente:** **${asc.formatted}**
