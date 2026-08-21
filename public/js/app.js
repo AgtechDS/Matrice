@@ -2652,7 +2652,9 @@ function toggleLegalFooter(show) {
 
 function initLegalFooterState() {
     const isHidden = localStorage.getItem('md_legal_footer_hidden');
-    if (isHidden === 'true') {
+    const isMobile = window.innerWidth <= 900;
+    // On iPhone/mobile screens, start with legal banner collapsed by default so it never covers the chat or input!
+    if (isHidden === 'true' || (isMobile && isHidden !== 'false')) {
         toggleLegalFooter(false);
     }
 }
