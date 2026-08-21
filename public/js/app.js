@@ -230,8 +230,25 @@ Per costruire la tua mappa energetica completa, procederemo raccogliendo i tuoi 
 *(Puoi rispondere direttamente qui in chat o cliccare su **Modulo Guidato** in alto per inserire tutti i dati insieme!)*`;
 
 function getDynamicWelcomeGreeting(profile) {
-    if (!profile || !profile.name || !profile.date) {
+    if (!profile || !profile.name) {
         return { text: INITIAL_GREETING, isCustom: false };
+    }
+
+    // If registered user has a name but hasn't entered birth date yet
+    if (!profile.date) {
+        const registeredGreeting = `### Bentornato/a, ${profile.name}! 🌌
+
+Il tuo profilo è autenticato e sincronizzato con l'Oracolo della **Matrice del Destino**.
+
+> *Per calcolare la tua mappa energetica completa, svelare i tuoi **22 Arcani** e scoprire il tuo **Giorno Personale di oggi**, inserisci la tua data di nascita.*
+
+Puoi cliccare sul pulsante in alto **✦ Modulo Guidato** per impostare la tua data in 5 secondi oppure scriverla direttamente qui in chat!
+
+---
+
+**Configurazione Rapida:**
+*Qual è la tua data di nascita (GG/MM/AAAA) e città di nascita?*`;
+        return { text: registeredGreeting, isCustom: true };
     }
 
     try {
@@ -1141,14 +1158,14 @@ function loadUserProfile() {
                 // Render full interactive matrix diagram
                 updateMatrixVisualization(data.name, data.date);
                 updateUserProfileBanner(data);
-
-                // Refresh chat greeting with personalized status if in initial state
-                if (state.messages.length <= 1) {
-                    resetSession();
-                }
             }
         } else {
             updateUserProfileBanner(null);
+        }
+
+        // Refresh chat greeting with personalized status if in initial state
+        if (state.messages.length <= 1) {
+            resetSession();
         }
     } catch (e) {
         console.warn('Profile load notice:', e);
@@ -1195,18 +1212,41 @@ function getActiveUserProfile() {
         const raw = localStorage.getItem('destiny_matrix_saved_profile');
         if (raw) {
             const data = JSON.parse(raw);
-            if (data && data.name && data.date) return data;
+            if (data && data.name) return data;
         }
     } catch (e) {}
+
+    if (state.activeProfile && state.activeProfile.name) {
+        return state.activeProfile;
+    }
 
     const nameInp = document.getElementById('wz-name')?.value?.trim();
     const dateInp = document.getElementById('wz-date')?.value;
     const timeInp = document.getElementById('wz-time')?.value?.trim();
     const placeInp = document.getElementById('wz-place')?.value?.trim();
 
-    if (nameInp && dateInp) {
-        return { name: nameInp, date: dateInp, time: timeInp, place: placeInp };
+    if (nameInp) {
+        return { name: nameInp, date: dateInp || null, time: timeInp, place: placeInp };
     }
+
+    if (state.currentUser) {
+        const meta = state.currentUser.user_metadata || {};
+        const identities = (state.currentUser.identities && state.currentUser.identities[0]) ? (state.currentUser.identities[0].identity_data || {}) : {};
+        const displayName = meta.full_name || 
+                            meta.name || 
+                            meta.user_name || 
+                            identities.full_name || 
+                            identities.name || 
+                            (state.currentUser.email ? state.currentUser.email.split('@')[0] : 'Consultante');
+        
+        return {
+            name: displayName,
+            date: dateInp || null,
+            time: timeInp || null,
+            place: placeInp || 'Italia'
+        };
+    }
+
     return null;
 }
 
