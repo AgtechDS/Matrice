@@ -1,8 +1,8 @@
 # 🌌 Matrice del Destino — Sacred Oracle (STATUS_APP)
 
-> **Ultimo Aggiornamento**: 2026-08-20  
-> **Versione**: 2.3.0 (Voice Assistant Guided Tour & Pipeline, Supabase Cloud Sync, GDPR/AI Act 2026)  
-> **Stato Globale**: 🟢 **OPERATIVO & VERIFICATO (100%)**
+> **Ultimo Aggiornamento**: 2026-08-21  
+> **Versione**: 3.0.0 (Production Custom Domain matricedestino.it, Google AdSense, Supabase Cloud Auth & Stripe Live)  
+> **Stato Globale**: 🟢 **OPERATIVO & IN PRODUZIONE (100%)**
 
 ---
 
@@ -11,16 +11,17 @@
 | Proprietà | Dettaglio / Valore |
 | :--- | :--- |
 | **Applicazione** | Matrice del Destino — Oracolo Archetipico & Numerologia Sacra |
+| **Dominio di Produzione** | **`https://www.matricedestino.it`** *(Apex `https://matricedestino.it` con redirect 308 su `www`)* |
+| **Hosting & CDN** | Vercel Edge Serverless + Register.it DNS autoritativo (`76.76.21.21` / `cname.vercel-dns.com`) |
+| **SSL / HTTPS** | Let's Encrypt Wildcard Certificate (Attivo & Convalidato) |
 | **UI/UX Design** | MIT-Grade Neumorfismo 2.0, Deep Obsidian Dark Mode, Responsive Mobile/Tablet |
-| **Guided Onboarding** | Tour interattivo a 5 step con **Spotlight Dorato Pulsante** e **Guida Vocale Neurale** sincronizzata (`/audio/tour_step*.wav`) |
-| **Ambiente Locale** | `http://localhost:3000` (Node.js Native HTTP Server / Next.js) |
-| **Target Cloud** | Vercel Serverless (`api/*.js` + Static CDN) — Live: `https://matrice-jade.vercel.app` |
-| **Database & Auth** | **Supabase Postgres (EU West 1)** con Row Level Security (RLS) & Google/Email OAuth |
-| **Cloud Sync** | Sincronizzazione automatica del wallet crediti multi-dispositivo (PC, Mobile, Tablet) |
-| **Fornitore LLM** | **LLMAPI.ai** (`deepseek-v4-flash-0731`) / Groq Smart Auto-Routing |
-| **Costo LLM** | ~$0.028 per 1M token (~0.00007$ per lettura completa a 14 sezioni) |
+| **Icone & Branding** | Suite completa `favicon_io` (`favicon.ico`, `apple-touch-icon`, `site.webmanifest`, PNG multi-risoluzione) |
+| **Guided Onboarding** | Tour interattivo a 5 step con **Spotlight Dorato Pulsante** e **Guida Vocale Neurale** |
+| **Ambiente Locale** | `http://localhost:3000` (Node.js Native HTTP Server) |
+| **Database & Auth** | **Supabase Postgres (EU West 1)** con Row Level Security (RLS) & Google OAuth 2.0 |
+| **Fornitore LLM** | **LLMAPI.ai** (`deepseek-v4-flash-0731`) con prompt oracolari specializzati per tema |
 | **Sintesi Vocale TTS** | Google Gemini 3.1 Flash Neural Audio (Voce `Aoede` & `Puck`) |
-| **Monetizzazione** | Stripe Checkout (1.99€ Pass 5 / 4.49€ Mappa Maestra) + Google AdSense Rewarded Ads (`ca-pub-7028010056444247`) |
+| **Monetizzazione** | Stripe Checkout (1.99€ Pass 5 / 4.49€ Mappa Maestra 15) + Google AdSense Rewarded Ads (`ca-pub-7028010056444247`) |
 | **Conformità Legale** | **GDPR (Reg. UE 2016/679)**, **EU AI Act 2026 (Reg. UE 2024/1689 Art. 50)**, Google Consent Mode v2, Diritto all'Oblio |
 
 ---
@@ -29,115 +30,51 @@
 
 | Endpoint | Metodo | Descrizione | Runtime |
 | :--- | :---: | :--- | :---: |
-| `/` | `GET` | Dashboard Web (Geometria Sacra, Griglia 3×3, Chat Markdown) | Static |
-| `/api/chat` | `POST` | Streaming Server-Sent Events (SSE) con `qwen/qwen3.6-27b` | Server / Serverless |
+| `/` | `GET` | Dashboard Web (Geometria Sacra, Griglia 3×3, Oroscopo, Chat Markdown) | Static CDN |
+| `/ads.txt` | `GET` | Record autorizzato Google AdSense (`pub-7028010056444247`) | Edge Route (`/api/ads-txt`) |
+| `/robots.txt` | `GET` | Policy di scansione per Googlebot, Mediapartners-Google e AdsBot | Edge Route (`/api/robots`) |
+| `/sitemap.xml` | `GET` | Sitemap XML per indicizzazione Google Search Console | Edge Route (`/api/sitemap`) |
+| `/api/chat` | `POST` | Streaming Server-Sent Events (SSE) con `deepseek-v4-flash-0731` | Server / Serverless |
 | `/api/tts` | `POST` | Sintesi neurale Gemini Flash + conversione buffer PCM $\rightarrow$ WAV 24kHz | Server / Serverless |
-| `/api/config` | `GET` | Recupero prompt di sistema (`prompt2analisi.md`) e chiavi predefinite | Server / Serverless |
+| `/api/config` | `GET` | Parametri di configurazione runtime e prompt di sistema | Server / Serverless |
+| `/api/create-checkout-session` | `POST` | Inizializzazione sessioni di pagamento Stripe Checkout | Server / Serverless |
 | `/api/test-connection` | `POST` | Test di connettività e latenza per provider AI | Server / Serverless |
-| `/audio/welcome.wav` | `GET` | Audio vocale di benvenuto ad alta fedeltà (1.47 MB) | Static |
 
 ---
 
-## 🎙️ Architettura Vocale (TTS)
+## 🔯 Moduli Oracolari Specializzati
 
-```
-[Testo Risposta AI]
-        │
-        ▼
-[Pulizia Markdown & Caratteri Speciali]
-        │
-        ▼
-[POST /api/tts] ──► Google Gemini Flash TTS Preview (Audio API)
-                          │
-                          ▼
-            [Raw PCM Buffer 24000Hz 16-bit Mono]
-                          │
-                          ▼
-            [Generazione Header RIFF/WAVE a 44 Byte]
-                          │
-                          ▼
-            [Audio Blob WAV Standard] ──► Web Audio Player + Equalizzatore Soundwave
-```
-
-### Voci Disponibili (Google Gemini Audio)
-1. **`Aoede`** *(Predefinita)*: Voce femminile spirituale, calda ed armoniosa.
-2. **`Puck`**: Voce maschile brillante e dinamica.
-3. **`Charon`**: Voce maschile profonda, saggia e autorevole.
-4. **`Kore`**: Voce femminile dolce e rilassante.
-5. **`Fenrir`**: Voce maschile decisa e diretta.
+1. **Oroscopo del Giorno & della Settimana**: Previsione astrologica e numerologica calibrata sul Segno Solare e Ascendente esatto.
+2. **Focus Canale Amore & Relazioni**: Analisi del codice dell'amore, partner karmico e guarigione delle ferite emotive (Nodi D ed E).
+3. **Focus Canale Denaro & Prosperità**: Sblocco del karma finanziario, professioni vocazionali e strategie di abbondanza (Nodi C ed E).
+4. **Master Report dei 4 Pinnacoli & 4 Sfide**: Mappatura delle 4 età evolutive e proiezione decennale con calcolo dell'Anno Personale.
+5. **Sinastria di Coppia**: Matrice congiunta tra due soggetti con calcolo delle energie di connessione spirituale e di coppia.
+6. **Report Completo a 14 Sezioni**: Trattato integrale archetipico con esportazione Markdown e PDF per la stampa.
 
 ---
 
-## 🔯 Motore di Calcolo Archetipico (22 Arcani)
+## 📁 Registro delle Tabelle Supabase (Database Cloud)
 
-1. **Giorno di Nascita (Punto Superiore - Spirito)**: Risorse interiori, talenti e manifestazione del sé.
-2. **Mese di Nascita (Punto Sinistro - Anima)**: Connessione spirituale, intuito e sfera emotiva.
-3. **Anno di Nascita (Punto Destro - Materia)**: Realizzazione materiale, finanze e rapporto con il lavoro.
-4. **Coda Karmica (Punto Inferiore - Karma)**: Debiti e memorie karmiche da integrare e trasmutare.
-5. **Centro della Matrice (Comfort Zone)**: Punto di equilibrio energetico della personalità.
-6. **Canale del Denaro ($)**: Punti di sblocco dell'abbondanza finanziaria e vocazione professionale.
-7. **Canale delle Relazioni (❤️)**: Partner ideale, armonia di coppia e superamento dei blocchi relazionali.
-8. **Griglia Pitagorica 3×3**: Mappa della frequenza delle cifre 1-9 con i piani Mentale (3-6-9), Emotivo (2-5-8) e Fisico (1-4-7).
+| Tabella | Chiave Primaria | Descrizione |
+| :--- | :--- | :--- |
+| `public.user_matrix_wallets` | `user_id` (UUID) | Saldo crediti consulti, storico acquisti, referral code e conteggio inviti |
+| `public.user_matrix_profiles` | `id` (UUID) | Dati anagrafici salvati (Nome, Data, Ora, Luogo di nascita, Tipo analisi) |
+| `public.user_matrix_consultations` | `id` (UUID) | Storico delle sessioni di lettura generate e messaggi oracolari |
 
 ---
 
-## 📁 Struttura Directory del Progetto
+## 🚀 Istruzioni di Deploy e Verifica
 
-```
-Matrice/
-├── api/                     # Handler Serverless per deploy Vercel
-│   ├── chat.js              # Streaming SSE per chat
-│   ├── config.js            # Servizio configurazione e prompt
-│   ├── test-connection.js   # Test diagnostico provider
-│   └── tts.js               # Google Gemini Flash TTS PCM->WAV
-├── docs/                    # Documentazione & report archetipici
-│   ├── promptanalise.md
-│   ├── report_*.md
-│   └── riassunto_matrice.md
-├── public/                  # Asset statici e client web
-│   ├── audio/
-│   │   └── welcome.wav      # Audio iniziale pre-renderizzato
-│   ├── css/
-│   │   └── style.css        # Design system Geometria Sacra & Glassmorphism
-│   ├── js/
-│   │   ├── api-client.js    # Client streaming ed errori quota
-│   │   ├── app.js           # Controller interfaccia e canvas particelle
-│   │   ├── matrix-calc.js   # Motore matematico dei 22 Arcani
-│   │   ├── marked.min.js    # Parser Markdown locale offline
-│   │   └── confetti.browser.min.js # Animazioni particelle
-│   └── index.html           # Dashboard principale
-├── src/                     # Codice sorgente TypeScript (Next.js / Vite)
-│   ├── app/                 # Layout, stili globali e pagine
-│   ├── components/          # Componenti React (Canvas, Chat, Ottagramma, Modali)
-│   └── lib/                 # Motore di calcolo tipizzato e definizioni
-├── tests/                   # Script diagnostici e suite di test
-│   ├── test_both.js
-│   ├── test_gemini_tts.js
-│   ├── test_groq_report.js
-│   └── ...
-├── prompt2analisi.md        # Protocollo di consulenza in 14 Fasi
-├── server.js                # Server HTTP nativo Node.js (Zero external dependencies)
-├── vercel.json              # Configurazione Vercel
-├── STATUS_APP.md            # Stato operativo dell'applicazione
-└── README.md                # Guida completa e documentazione
+### Verifica Live in Produzione:
+```bash
+curl -I https://www.matricedestino.it
+curl -I https://www.matricedestino.it/ads.txt
+curl -I https://www.matricedestino.it/robots.txt
+curl -I https://www.matricedestino.it/sitemap.xml
 ```
 
----
-
-## 🚀 Istruzioni di Avvio e Manutenzione
-
-### Avvio Server Locale:
+### Avvio Locale:
 ```bash
 node server.js
 ```
 Accedere a: `http://localhost:3000`
-
-### Verifica Diagnostica Completa:
-```bash
-node tests/test_both.js
-```
-
-### Deploy su Vercel:
-```bash
-vercel --prod
-```
