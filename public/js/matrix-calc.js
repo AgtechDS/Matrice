@@ -431,14 +431,14 @@ if (typeof window !== 'undefined') {
     window.reduceTo22 = reduceTo22;
     window.reduceToDigit = reduceToDigit;
 }
-export {
-    calculateCompleteMatrix,
-    generateCompleteReport14Sections,
-    calculateDailyHoroscope,
-    calculateWeeklyForecast,
-    calculateSynastryMatrix,
-    calculateAdvancedPinnacles,
-    ARCANA_DATA,
-    reduceTo22,
-    reduceToDigit
-};
+if (typeof globalThis !== 'undefined') {
+    globalThis.calculateCompleteMatrix = calculateCompleteMatrix;
+    globalThis.generateCompleteReport14Sections = generateCompleteReport14Sections;
+    globalThis.calculateDailyHoroscope = calculateDailyHoroscope;
+    globalThis.calculateWeeklyForecast = calculateWeeklyForecast;
+    globalThis.calculateSynastryMatrix = calculateSynastryMatrix;
+    globalThis.calculateAdvancedPinnacles = calculateAdvancedPinnacles;
+    globalThis.ARCANA_DATA = ARCANA_DATA;
+    globalThis.reduceTo22 = reduceTo22;
+    globalThis.reduceToDigit = reduceToDigit;
+}

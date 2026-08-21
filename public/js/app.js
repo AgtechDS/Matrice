@@ -918,6 +918,9 @@ Ti confermo tutti i dati. Procedi con il report completo a 14 sezioni calcolando
     saveUserProfile({ name, date, time, place, type });
 
     closeWizardModal();
+    if (typeof setMobileView === 'function') {
+        setMobileView('chat');
+    }
     sendMessage(messageToAI);
 }
 
@@ -1927,6 +1930,26 @@ window.addEventListener('resize', () => {
 });
 
 // Expose to window for inline onclicks
+// --- Mobile View Navigation Handler ---
+function setMobileView(view) {
+    const mainWorkspace = document.querySelector('.main-workspace');
+    const btnChat = document.getElementById('btn-mobile-chat');
+    const btnMatrix = document.getElementById('btn-mobile-matrix');
+    
+    if (view === 'matrix') {
+        mainWorkspace?.classList.add('mobile-show-matrix');
+        mainWorkspace?.classList.remove('mobile-show-chat');
+        btnMatrix?.classList.add('active');
+        btnChat?.classList.remove('active');
+    } else {
+        mainWorkspace?.classList.add('mobile-show-chat');
+        mainWorkspace?.classList.remove('mobile-show-matrix');
+        btnChat?.classList.add('active');
+        btnMatrix?.classList.remove('active');
+    }
+}
+
+// Expose to window for inline onclicks & modules
 window.openPrivacyModal = openPrivacyModal;
 window.closePrivacyModal = closePrivacyModal;
 window.openAiActModal = openAiActModal;
@@ -1966,6 +1989,26 @@ window.exportLuxuryPdf = exportLuxuryPdf;
 window.saveUserProfile = saveUserProfile;
 window.loadUserProfile = loadUserProfile;
 window.switchSidebarTab = switchSidebarTab;
+window.openWizardModal = openWizardModal;
+window.closeWizardModal = closeWizardModal;
+window.fillSampleData = fillSampleData;
+window.submitWizardData = submitWizardData;
+window.openCreditsModal = openCreditsModal;
+window.closeCreditsModal = closeCreditsModal;
+window.watchRewardedAd = watchRewardedAd;
+window.copyReferralLink = copyReferralLink;
+window.shareReferralWhatsApp = shareReferralWhatsApp;
+window.shareReferralTelegram = shareReferralTelegram;
+window.initiateStripeCheckout = initiateStripeCheckout;
+window.openReportModal = openReportModal;
+window.closeReportModal = closeReportModal;
+window.selectNode = selectNode;
+window.sendQuickPrompt = sendQuickPrompt;
+window.toggleSpeech = toggleSpeech;
+window.sendMessage = sendMessage;
+window.resetSession = resetSession;
+window.updateMatrixVisualization = updateMatrixVisualization;
+window.setMobileView = setMobileView;
 
 // --- Master Application Initialization ---
 function initApp() {

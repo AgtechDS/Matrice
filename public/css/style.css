@@ -2041,5 +2041,286 @@ body {
     font-weight: 800;
 }
 
+/* ==========================================================================
+   📱 Mobile Responsive System (iPhone iOS & Samsung Android Optimization)
+   ========================================================================== */
+
+.mobile-view-switcher {
+    display: none;
+    background: rgba(8, 33, 43, 0.95);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    padding: 4px;
+    gap: 6px;
+    margin-bottom: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+}
+
+.mobile-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 40px;
+}
+
+.mobile-tab-btn.active {
+    background: linear-gradient(135deg, var(--gold-primary), #f59e0b);
+    color: #06171e;
+    box-shadow: 0 2px 10px rgba(244, 162, 11, 0.35);
+}
+
+@media (max-width: 900px) {
+    .mobile-view-switcher {
+        display: flex;
+    }
+
+    .app-container {
+        padding: 6px 8px;
+        gap: 6px;
+        height: 100dvh;
+        min-height: 100dvh;
+        max-height: 100dvh;
+        overflow: hidden;
+    }
+
+    .app-header {
+        padding: 8px 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-radius: var(--radius-md);
+    }
+
+    .brand-section {
+        gap: 8px;
+    }
+
+    .brand-logo {
+        width: 34px;
+        height: 34px;
+    }
+
+    .brand-title {
+        font-size: 1.05rem;
+        letter-spacing: 0.8px;
+    }
+
+    .brand-badge {
+        display: none;
+    }
+
+    .header-status-indicator {
+        display: none;
+    }
+
+    .header-actions {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        gap: 6px;
+        padding-bottom: 2px;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .header-actions::-webkit-scrollbar {
+        display: none;
+    }
+
+    .btn-header {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: 36px;
+        gap: 5px;
+    }
+
+    .main-workspace {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        gap: 0;
+        overflow: hidden;
+    }
+
+    /* Mobile switcher logic */
+    .main-workspace.mobile-show-chat .matrix-sidebar {
+        display: none !important;
+    }
+
+    .main-workspace.mobile-show-chat .chat-workspace {
+        display: flex !important;
+        flex: 1;
+        height: 100%;
+    }
+
+    .main-workspace.mobile-show-matrix .matrix-sidebar {
+        display: flex !important;
+        flex: 1;
+        height: 100%;
+    }
+
+    .main-workspace.mobile-show-matrix .chat-workspace {
+        display: none !important;
+    }
+
+    .matrix-sidebar,
+    .chat-workspace {
+        border-radius: var(--radius-md);
+        height: 100%;
+    }
+
+    .sidebar-tabs {
+        padding: 2px;
+    }
+
+    .tab-btn {
+        padding: 8px 4px;
+        font-size: 0.74rem;
+        gap: 4px;
+    }
+
+    .sidebar-content {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .matrix-canvas-card {
+        padding: 8px;
+    }
+
+    .matrix-canvas-card svg {
+        max-width: 100%;
+        max-height: 320px;
+    }
+
+    /* Chat layout on mobile */
+    .chat-messages {
+        padding: 12px 10px;
+        gap: 12px;
+    }
+
+    .message-wrapper {
+        max-width: 96%;
+        gap: 8px;
+    }
+
+    .message-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+    }
+
+    .message-bubble {
+        padding: 12px 14px;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .quick-suggestions {
+        padding: 6px 8px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 6px;
+    }
+
+    .quick-suggestions::-webkit-scrollbar {
+        display: none;
+    }
+
+    .chip {
+        flex-shrink: 0;
+        font-size: 0.74rem;
+        padding: 6px 10px;
+        min-height: 34px;
+    }
+
+    .chat-input-container {
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 8px)) 10px;
+        gap: 8px;
+    }
+
+    .chat-input {
+        font-size: 16px !important; /* iOS Safari auto-zoom prevention */
+    }
+
+    .btn-send {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+    }
+
+    /* Modals on mobile */
+    .modal-overlay {
+        padding: 10px;
+    }
+
+    .modal-card {
+        max-width: 96vw;
+        max-height: 90dvh;
+        margin: auto;
+        padding: 16px;
+        border-radius: var(--radius-md);
+    }
+
+    .modal-body {
+        max-height: calc(90dvh - 120px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .form-control {
+        font-size: 16px !important; /* iOS Safari auto-zoom prevention */
+        padding: 10px 12px;
+        min-height: 44px;
+    }
+
+    .recharge-options-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .btn-recharge {
+        padding: 12px;
+        font-size: 0.88rem;
+        min-height: 44px;
+    }
+
+    /* GDPR Banner Mobile */
+    .gdpr-banner-container {
+        left: 10px;
+        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        max-width: calc(100vw - 20px);
+        padding: 14px;
+    }
+
+    .gdpr-actions-row {
+        flex-direction: column;
+    }
+
+    .btn-gdpr {
+        width: 100%;
+        min-height: 42px;
+    }
+}
+
 
 

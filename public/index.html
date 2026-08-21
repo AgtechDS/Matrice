@@ -80,8 +80,18 @@
             </div>
         </header>
 
+        <!-- Mobile View Navigation Switcher (iPhone & Samsung) -->
+        <nav class="mobile-view-switcher" id="mobile-view-switcher">
+            <button class="mobile-tab-btn active" id="btn-mobile-chat" onclick="setMobileView('chat')">
+                <i class="fa-solid fa-comments"></i> <span>Chat & Report</span>
+            </button>
+            <button class="mobile-tab-btn" id="btn-mobile-matrix" onclick="setMobileView('matrix')">
+                <i class="fa-solid fa-dharmachakra"></i> <span>Matrice & Moduli</span>
+            </button>
+        </nav>
+
         <!-- Main Workspace -->
-        <main class="main-workspace">
+        <main class="main-workspace mobile-show-chat">
             <!-- Left Pane: Interactive Matrix Visualizer -->
             <aside class="matrix-sidebar">
                 <div class="sidebar-tabs">
@@ -937,8 +947,8 @@
     </div>
 
     <!-- Application Scripts -->
-    <script src="js/matrix-calc.js?v=32"></script>
-    <script src="js/api-client.js?v=32"></script>
-    <script src="js/app.js?v=32"></script>
+    <script src="js/matrix-calc.js?v=33"></script>
+    <script src="js/api-client.js?v=33"></script>
+    <script src="js/app.js?v=33"></script>
 </body>
 </html>
