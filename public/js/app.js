@@ -562,6 +562,29 @@ async function sendMessage(overrideText = null) {
     const text = (overrideText || input?.value || '').trim();
     if (!text) return;
 
+    // Check for Admin Secret Promo Code [64447adminag] -> Add +5 credits
+    const cleanCheck = text.toLowerCase().replace(/[\[\]\s]/g, '');
+    if (cleanCheck === '64447adminag' || cleanCheck.includes('64447adminag')) {
+        if (!overrideText && input) {
+            input.value = '';
+            input.style.height = 'auto';
+        }
+        appendMessage('user', text);
+        
+        const currentCredits = getUserCredits();
+        const newTotal = currentCredits + 5;
+        setUserCredits(newTotal, true);
+        
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+        }
+        
+        const adminMsg = `👑 **Codice Amministratore Risolto con Successo!**\n\nTi sono stati accreditati **+5 Consulti** sul tuo profilo attivo.\n\n✦ **Nuovo Saldo Disponibile:** **${newTotal} Consulti**\n✦ **Sincronizzazione Cloud:** Attiva`;
+        appendMessage('assistant', adminMsg);
+        state.messages.push({ role: 'assistant', content: adminMsg });
+        return;
+    }
+
     // Check credits and registration status before starting
     const currentCredits = getUserCredits();
     if (currentCredits <= 0) {
@@ -966,6 +989,32 @@ function openCreditsModal() {
 function closeCreditsModal() {
     const modal = document.getElementById('credits-modal');
     if (modal) modal.classList.remove('active');
+}
+
+function redeemPromoCode(codeOverride = null) {
+    const input = document.getElementById('promo-code-input');
+    const rawCode = (codeOverride || input?.value || '').trim();
+    const clean = rawCode.toLowerCase().replace(/[\[\]\s]/g, '');
+
+    if (!clean) {
+        alert('Inserisci un codice promo o admin.');
+        return;
+    }
+
+    if (clean === '64447adminag') {
+        const current = getUserCredits();
+        const newTotal = current + 5;
+        setUserCredits(newTotal, true);
+
+        if (input) input.value = '';
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+        }
+        alert(`👑 Codice Amministratore Valido!\n\nSono stati accreditati +5 Consulti al tuo profilo.\nNuovo Saldo: ${newTotal} Consulti.`);
+        closeCreditsModal();
+    } else {
+        alert('❌ Codice non valido o scaduto.');
+    }
 }
 
 function watchRewardedAd() {
