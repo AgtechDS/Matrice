@@ -3,8 +3,22 @@
  * Handles Sacred Geometry Canvas, Chat Streaming, Matrix Graph Updating, and UI State.
  */
 
+// Supabase Configuration & Client Initialization
+const SUPABASE_URL = 'https://zzprmoehmzwzsumuuzdw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6cHJtb2VobXp3enN1bXV1emR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNzg4MzksImV4cCI6MjEwMjc1NDgzOX0.chFyYCLXZcnBdUfzyXDOh4QtWmgKRZcewo9gmBoRVuA';
+let supabaseClient = null;
+
+try {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+} catch (e) {
+    console.warn('Initial Supabase client setup notice:', e);
+}
+
 // Application State (Locked to DeepSeek V4 Flash Backend)
 const state = {
+    currentUser: null,
     systemPrompt: '',
     provider: 'llmapi',
     baseUrl: 'https://api.llmapi.ai/v1',
@@ -1101,8 +1115,15 @@ function updateUserProfileBanner(userData) {
         }
     } else if (state.currentUser) {
         banner.style.display = 'flex';
-        const displayName = state.currentUser.user_metadata?.full_name || state.currentUser.email.split('@')[0];
-        if (avatar) avatar.textContent = displayName.charAt(0).toUpperCase();
+        const meta = state.currentUser.user_metadata || {};
+        const identities = (state.currentUser.identities && state.currentUser.identities[0]) ? (state.currentUser.identities[0].identity_data || {}) : {};
+        const displayName = meta.full_name || 
+                            meta.name || 
+                            meta.user_name || 
+                            identities.full_name || 
+                            identities.name || 
+                            (state.currentUser.email ? state.currentUser.email.split('@')[0] : 'Profilo');
+        if (avatar) avatar.textContent = displayName.trim().charAt(0).toUpperCase() || '✦';
         if (nameEl) nameEl.textContent = displayName;
         if (detailsEl) detailsEl.textContent = '(Profilo Cloud Sincronizzato)';
     } else {
@@ -1279,19 +1300,6 @@ function exportLuxuryPdf() {
     setTimeout(() => {
         window.print();
     }, 600);
-}
-
-// --- Supabase Cloud Sync & Authentication Setup ---
-const SUPABASE_URL = 'https://zzprmoehmzwzsumuuzdw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6cHJtb2VobXp3enN1bXV1emR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNzg4MzksImV4cCI6MjEwMjc1NDgzOX0.chFyYCLXZcnBdUfzyXDOh4QtWmgKRZcewo9gmBoRVuA';
-
-let supabaseClient = null;
-try {
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-} catch (e) {
-    console.warn('Supabase initialization warning:', e);
 }
 
 // --- Credits & Wallet Management ---
