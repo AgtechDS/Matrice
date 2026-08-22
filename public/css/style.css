@@ -2582,14 +2582,16 @@ html, body {
     }
 
     .app-container {
-        padding: max(6px, env(safe-area-inset-top, 6px)) max(8px, env(safe-area-inset-right, 8px)) calc(64px + env(safe-area-inset-bottom, 6px)) max(8px, env(safe-area-inset-left, 8px));
-        gap: 6px;
-        height: 100dvh;
-        min-height: 100dvh;
-        max-height: 100dvh;
-        overflow: hidden;
+        padding: max(8px, env(safe-area-inset-top, 8px)) 12px calc(76px + env(safe-area-inset-bottom, 10px)) 12px !important;
+        gap: 10px;
+        height: auto !important;
+        min-height: 100dvh !important;
+        max-height: none !important;
+        overflow: visible !important;
         width: 100vw;
         max-width: 100%;
+        display: flex;
+        flex-direction: column;
     }
 
     .app-header {
@@ -2643,20 +2645,21 @@ html, body {
     }
 
     .main-workspace {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        min-height: 0;
-        gap: 0;
-        overflow: hidden;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 0 auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        gap: 0 !important;
+        overflow: visible !important;
+        width: 100% !important;
     }
 
     /* Mobile 4-Tab Screen Router */
     .main-workspace[data-mobile-tab="matrix"] .matrix-sidebar {
         display: flex !important;
-        flex: 1;
-        height: 100%;
-        min-height: 0;
+        width: 100% !important;
+        height: auto !important;
     }
     .main-workspace[data-mobile-tab="matrix"] .matrix-sidebar .sidebar-tabs {
         display: none !important; /* Pure full-screen Ottagramma */
@@ -2665,6 +2668,10 @@ html, body {
         display: none !important;
     }
 
+    .main-workspace[data-mobile-tab="chat"] {
+        height: calc(100dvh - 130px) !important;
+        overflow: hidden !important;
+    }
     .main-workspace[data-mobile-tab="chat"] .matrix-sidebar {
         display: none !important;
     }
@@ -2677,9 +2684,8 @@ html, body {
 
     .main-workspace[data-mobile-tab="arcana"] .matrix-sidebar {
         display: flex !important;
-        flex: 1;
-        height: 100%;
-        min-height: 0;
+        width: 100% !important;
+        height: auto !important;
     }
     .main-workspace[data-mobile-tab="arcana"] .matrix-sidebar .sidebar-tabs {
         display: flex !important;
@@ -2695,9 +2701,8 @@ html, body {
 
     .main-workspace[data-mobile-tab="hub"] .matrix-sidebar {
         display: flex !important;
-        flex: 1;
-        height: 100%;
-        min-height: 0;
+        width: 100% !important;
+        height: auto !important;
     }
     .main-workspace[data-mobile-tab="hub"] .matrix-sidebar .sidebar-tabs {
         display: none !important;
@@ -2711,10 +2716,12 @@ html, body {
         border: none !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-        height: 100%;
-        min-height: 0;
+        height: auto !important;
+        min-height: 0 !important;
         width: 100% !important;
-        overflow: hidden;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 
     .chat-workspace {
@@ -2729,6 +2736,7 @@ html, body {
         background: rgba(0, 0, 0, 0.4);
         border-radius: var(--radius-md) var(--radius-md) 0 0;
         flex-shrink: 0;
+        margin-bottom: 8px;
     }
 
     .tab-btn {
@@ -2747,83 +2755,105 @@ html, body {
     }
 
     .sidebar-content {
-        padding: 4px 2px 24px 2px !important;
-        gap: 12px;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
+        padding: 0 0 24px 0 !important;
+        gap: 12px !important;
         width: 100% !important;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: visible !important;
     }
 
     .tab-pane {
         width: 100% !important;
-        flex: 1;
-        min-height: 0;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
     }
 
     .matrix-canvas-card {
-        padding: 12px 6px;
+        padding: 16px 8px !important;
         width: 100% !important;
-        background: rgba(8, 14, 24, 0.7);
-        border: 1px solid rgba(212, 175, 55, 0.2);
+        background: linear-gradient(135deg, rgba(14, 20, 32, 0.95), rgba(8, 12, 20, 0.98)) !important;
+        border: 1px solid rgba(212, 175, 55, 0.25) !important;
+        border-radius: var(--radius-md) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
     }
 
     .matrix-canvas-card svg {
-        width: 100%;
-        max-width: 320px;
-        max-height: 45vh;
-        margin: 0 auto;
-        display: block;
+        width: 100% !important;
+        max-width: 320px !important;
+        height: auto !important;
+        margin: 0 auto !important;
+        display: block !important;
     }
 
     /* Horizontal smooth scrolling for Node Pills on mobile */
     .matrix-node-pills {
         display: flex !important;
+        flex-direction: row !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
+        overflow-y: hidden !important;
         -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x !important;
         width: 100% !important;
         gap: 8px !important;
         padding: 8px 4px !important;
         margin: 6px 0 !important;
         scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
     }
 
     .matrix-node-pills::-webkit-scrollbar {
         display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
 
     .node-pill {
-        flex-shrink: 0 !important;
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
         white-space: nowrap !important;
-        min-height: 42px !important;
-        padding: 8px 14px !important;
-        font-size: 0.82rem !important;
+        min-height: 44px !important;
+        padding: 8px 16px !important;
+        font-size: 0.84rem !important;
+        border-radius: var(--radius-full) !important;
+        background: rgba(14, 22, 36, 0.9) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        color: #e2e8f0 !important;
+    }
+
+    .node-pill.active {
+        background: rgba(212, 175, 55, 0.2) !important;
+        border-color: var(--gold-bright) !important;
+        color: var(--gold-bright) !important;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.3) !important;
     }
 
     .spirit-resources-card {
         width: 100% !important;
         margin-top: 10px !important;
+        border-radius: var(--radius-md) !important;
     }
 
-    /* Full width Arcani vertical list on mobile (100% width, no halved screen) */
+    /* Full width Arcani vertical list on mobile (100% width, full-bleed) */
     .aspects-grid {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
         gap: 12px !important;
-        padding: 4px 2px 30px 2px !important;
+        padding: 4px 0 30px 0 !important;
     }
 
     .aspect-card {
         width: 100% !important;
-        padding: 14px 16px !important;
+        padding: 16px !important;
         min-height: 72px !important;
         border-radius: var(--radius-md) !important;
-        background: rgba(10, 16, 28, 0.9) !important;
+        background: rgba(14, 20, 32, 0.95) !important;
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
     }
 
     .pitagora-grid {
@@ -2838,14 +2868,15 @@ html, body {
         flex-direction: column !important;
         width: 100% !important;
         gap: 14px !important;
-        padding: 4px 2px 36px 2px !important;
+        padding: 4px 0 36px 0 !important;
     }
 
     .neu-hub-card {
         width: 100% !important;
         padding: 16px !important;
         border-radius: var(--radius-md) !important;
-        background: rgba(10, 16, 28, 0.95) !important;
+        background: rgba(14, 20, 32, 0.95) !important;
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
     }
 
     /* Chat layout on mobile */
