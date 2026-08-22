@@ -2638,8 +2638,78 @@ window.toggleSpeech = toggleSpeech;
 window.sendMessage = sendMessage;
 window.resetSession = resetSession;
 window.updateMatrixVisualization = updateMatrixVisualization;
-window.setMobileView = setMobileView;
+window.setMobileTab = setMobileTab;
+window.toggleMobileDrawer = toggleMobileDrawer;
 window.toggleLegalFooter = toggleLegalFooter;
+
+// --- Mobile Native Bottom Tab Router (4 Tabs: matrix, chat, arcana, hub) ---
+function setMobileTab(tabName) {
+    const mainWorkspace = document.querySelector('.main-workspace');
+    if (!mainWorkspace) return;
+
+    mainWorkspace.setAttribute('data-mobile-tab', tabName);
+
+    // Update bottom nav active state
+    document.querySelectorAll('.bottom-nav-item').forEach(item => item.classList.remove('active'));
+    const activeNavItem = document.getElementById(`nav-item-${tabName}`);
+    if (activeNavItem) activeNavItem.classList.add('active');
+
+    // Sync underlying pane activations
+    if (tabName === 'matrix') {
+        switchSidebarTab('tab-octagram');
+    } else if (tabName === 'arcana') {
+        const currentActiveTab = document.querySelector('.tab-btn.active')?.getAttribute('data-tab');
+        if (currentActiveTab !== 'tab-aspects' && currentActiveTab !== 'tab-pitagora') {
+            switchSidebarTab('tab-aspects');
+        }
+    } else if (tabName === 'hub') {
+        switchSidebarTab('tab-consults');
+    }
+
+    localStorage.setItem('md_active_mobile_tab', tabName);
+}
+
+// --- Mobile Navigation Drawer (Sidebar a Scomparsa) ---
+function toggleMobileDrawer(open) {
+    const overlay = document.getElementById('mobile-drawer-overlay');
+    const drawer = document.getElementById('mobile-drawer');
+    if (!overlay || !drawer) return;
+
+    if (open) {
+        updateDrawerProfileInfo();
+        overlay.classList.add('active');
+        drawer.classList.add('active');
+    } else {
+        overlay.classList.remove('active');
+        drawer.classList.remove('active');
+    }
+}
+
+function updateDrawerProfileInfo() {
+    const profile = getActiveUserProfile();
+    const nameEl = document.getElementById('drawer-user-name');
+    const subEl = document.getElementById('drawer-user-sub');
+    const authLabel = document.getElementById('drawer-auth-label');
+
+    if (profile && profile.name) {
+        if (nameEl) nameEl.textContent = profile.name;
+        if (subEl) {
+            subEl.textContent = profile.date ? `${profile.date} ${profile.place ? '• ' + profile.place : ''}` : 'Data non impostata';
+        }
+    } else {
+        if (nameEl) nameEl.textContent = 'Ospite';
+        if (subEl) subEl.textContent = 'Nessun profilo caricato';
+    }
+
+    if (authLabel) {
+        authLabel.textContent = state.currentUser ? 'Account & Cloud Sincronizzato' : 'Sincronizzazione Cloud';
+    }
+}
+
+function initMobileNavigation() {
+    const savedTab = localStorage.getItem('md_active_mobile_tab') || 'matrix';
+    setMobileTab(savedTab);
+}
 
 // --- Legal Box Banner Collapse / Close System ---
 function toggleLegalFooter(show) {
@@ -2719,6 +2789,7 @@ async function initApp() {
     initGdprConsent();
     await initSupabaseAuth();
     loadUserProfile();
+    initMobileNavigation();
     initScrollReveal();
     setTimeout(() => startOnboardingTour(false), 800);
 }

@@ -54,6 +54,9 @@
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
+            <button class="mobile-drawer-toggle" id="btn-open-mobile-drawer" onclick="toggleMobileDrawer(true)" title="Menu Opzioni">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <div class="brand-section">
                 <div class="brand-logo">
                     <i class="fa-solid fa-dharmachakra" style="color: var(--gold); font-size: 24px;"></i>
@@ -102,16 +105,6 @@
                 </button>
             </div>
         </header>
-
-        <!-- Mobile View Navigation Switcher (iPhone & Samsung) -->
-        <nav class="mobile-view-switcher" id="mobile-view-switcher">
-            <button class="mobile-tab-btn active" id="btn-mobile-chat" onclick="setMobileView('chat')">
-                <i class="fa-solid fa-comments"></i> <span>Chat & Report</span>
-            </button>
-            <button class="mobile-tab-btn" id="btn-mobile-matrix" onclick="setMobileView('matrix')">
-                <i class="fa-solid fa-dharmachakra"></i> <span>Matrice & Moduli</span>
-            </button>
-        </nav>
 
         <!-- Main Workspace -->
         <main class="main-workspace mobile-show-chat">
@@ -598,7 +591,94 @@
         <button class="legal-reopen-btn" id="btn-reopen-legal-footer" onclick="toggleLegalFooter(true)" style="display: none;" title="Mostra Info Legali e Privacy">
             <i class="fa-solid fa-scale-balanced"></i> <span>Info Legali & Privacy ▴</span>
         </button>
+
+        <!-- Mobile Native Bottom Navigation Bar (Apple HIG / Material 3) -->
+        <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+            <button class="bottom-nav-item active" id="nav-item-matrix" onclick="setMobileTab('matrix')">
+                <div class="nav-icon"><i class="fa-solid fa-dharmachakra"></i></div>
+                <span class="nav-label">Mappa</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-item-chat" onclick="setMobileTab('chat')">
+                <div class="nav-icon"><i class="fa-solid fa-comments"></i></div>
+                <span class="nav-label">Oracolo</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-item-arcana" onclick="setMobileTab('arcana')">
+                <div class="nav-icon"><i class="fa-solid fa-gem"></i></div>
+                <span class="nav-label">Arcani & 3×3</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-item-hub" onclick="setMobileTab('hub')">
+                <div class="nav-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <span class="nav-label">Consulti</span>
+            </button>
+        </nav>
     </div>
+
+    <!-- Mobile Navigation Drawer (Sidebar Laterale a Scomparsa per Mobile) -->
+    <div class="mobile-drawer-overlay" id="mobile-drawer-overlay" onclick="toggleMobileDrawer(false)"></div>
+    <aside class="mobile-drawer" id="mobile-drawer">
+        <div class="mobile-drawer-header">
+            <div class="drawer-brand">
+                <div class="brand-logo" style="width: 36px; height: 36px;">
+                    <i class="fa-solid fa-dharmachakra" style="color: var(--gold); font-size: 18px;"></i>
+                </div>
+                <span class="drawer-title">Matrice del Destino</span>
+            </div>
+            <button class="drawer-close-btn" onclick="toggleMobileDrawer(false)" title="Chiudi Menu">&times;</button>
+        </div>
+
+        <!-- User Profile Summary in Drawer -->
+        <div class="drawer-profile-card" id="drawer-profile-card">
+            <div class="drawer-avatar"><i class="fa-solid fa-user-astronaut"></i></div>
+            <div class="drawer-user-info">
+                <div class="drawer-user-name" id="drawer-user-name">Ospite</div>
+                <div class="drawer-user-sub" id="drawer-user-sub">Nessun profilo caricato</div>
+            </div>
+        </div>
+
+        <!-- Drawer Navigation Links -->
+        <nav class="drawer-nav">
+            <div class="drawer-section-title">Navigazione & Moduli</div>
+            <button class="drawer-link-btn" onclick="openWizardModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Modulo Guidato (Dati)</span>
+            </button>
+            <button class="drawer-link-btn" onclick="openAuthModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-cloud text-cyan"></i> <span id="drawer-auth-label">Sincronizzazione Cloud</span>
+            </button>
+            <button class="drawer-link-btn" onclick="openCreditsModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-sparkles text-gold"></i> <span>Ricarica Crediti & Piani</span>
+            </button>
+            <button class="drawer-link-btn" onclick="startOnboardingTour(true); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-compass text-gold"></i> <span>Tour Guidato del Sito</span>
+            </button>
+            <button class="drawer-link-btn" onclick="openReportModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-file-invoice"></i> <span>Visualizza / Esporta Report</span>
+            </button>
+            <button class="drawer-link-btn" onclick="resetSession(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-rotate-right"></i> <span>Ricomincia Sessione</span>
+            </button>
+
+            <div class="drawer-section-title">Legale, Trasparenza & Privacy</div>
+            <button class="drawer-link-btn" onclick="openAiActModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-robot"></i> <span>Trasparenza AI Act (UE 2024/1689)</span>
+            </button>
+            <button class="drawer-link-btn" onclick="openPrivacyModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-shield-halved"></i> <span>Privacy Policy (GDPR)</span>
+            </button>
+            <button class="drawer-link-btn" onclick="openCookieModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-cookie-bite"></i> <span>Cookie Policy & Consenso</span>
+            </button>
+            <button class="drawer-link-btn" onclick="openTermsModal(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-scale-balanced"></i> <span>Termini di Servizio</span>
+            </button>
+            <button class="drawer-link-btn danger" onclick="purgeAllUserData(); toggleMobileDrawer(false);">
+                <i class="fa-solid fa-trash-can"></i> <span>Cancella Dati (Oblio)</span>
+            </button>
+        </nav>
+
+        <div class="drawer-footer">
+            <span>© 2026 Matrice del Destino AI</span>
+        </div>
+    </aside>
 
     <!-- Modal 1: Guided Data Wizard -->
     <div class="modal-overlay" id="wizard-modal">
