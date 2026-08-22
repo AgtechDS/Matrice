@@ -157,6 +157,30 @@ class ApiClient {
             this.abortController = null;
         }
     }
+
+    async generateArcanaImage({ prompt, arcanaNumber, arcanaName, archetype }) {
+        try {
+            const googleKey = localStorage.getItem('google_tts_api_key') || '';
+            const res = await fetch('/api/generate-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt,
+                    arcanaNumber,
+                    arcanaName,
+                    archetype,
+                    apiKey: googleKey
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error?.message || 'Errore nella generazione dell\'immagine');
+            return data;
+        } catch (e) {
+            console.error('generateArcanaImage error:', e);
+            throw e;
+        }
+    }
 }
 
 window.apiClient = new ApiClient();

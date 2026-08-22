@@ -266,6 +266,9 @@
                                     <span class="keyword-chip">Forza Vitale</span>
                                     <span class="keyword-chip">Luce Interiore</span>
                                 </div>
+                                <button class="btn-generate-card" id="btn-generate-spirit-card" onclick="generateCurrentArcanaCard('spirit')" title="Genera la Carta Sacra dell'Arcano in 8K (AI)">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta Sacra 8K (AI)</span>
+                                </button>
                             </div>
                         </div>
 
@@ -274,6 +277,9 @@
                             <div class="aspect-title" id="node-card-title">DETTAGLIO NODO SELEZIONATO</div>
                             <div class="aspect-value" id="node-card-arcana">Clicca su un nodo dell'ottagramma</div>
                             <div class="aspect-subtitle" id="node-card-desc">Scopri l'archetipo, i talenti e le energie corrispondenti.</div>
+                            <button class="btn-generate-card" id="btn-generate-node-card" onclick="generateCurrentArcanaCard('node')" style="display: none; margin-top: 10px;" title="Genera la Carta Sacra di questo Nodo in 8K (AI)">
+                                <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta di questo Nodo (AI)</span>
+                            </button>
                         </div>
                     </div>
 
@@ -703,6 +709,37 @@
             <span>© 2026 Matrice del Destino AI</span>
         </div>
     </aside>
+
+    <!-- Modal: Arcana Sacred Card Image Preview & Download (AI Cascade) -->
+    <div class="modal-overlay" id="arcana-image-modal">
+        <div class="modal-card" style="max-width: 480px; text-align: center;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="arcana-image-modal-title"><i class="fa-solid fa-wand-magic-sparkles text-gold"></i> Carta Sacra dell'Arcano</h3>
+                <button class="modal-close" onclick="closeArcanaImageModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 16px;">
+                <div id="arcana-image-loading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 16px;">
+                    <div class="spinner-gold" style="width: 48px; height: 48px; border: 3px solid rgba(212, 175, 55, 0.2); border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <div style="font-size: 0.95rem; color: #e2e8f0; font-weight: 500;" id="arcana-image-loading-text">Connessione ai Motori AI (Gemini Imagen 3 / Flux)...</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">Canalizzazione delle geometrie sacre e archetipi cosmici</div>
+                </div>
+                <div id="arcana-image-container" style="display: none;">
+                    <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 12px 32px rgba(0,0,0,0.6); margin-bottom: 14px;">
+                        <img id="arcana-image-preview" src="" alt="Carta Sacra" style="width: 100%; height: auto; display: block; border-radius: 16px;">
+                        <div id="arcana-image-provider-badge" style="position: absolute; bottom: 8px; right: 8px; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(212,175,55,0.4); color: #d4af37;">Gemini Imagen 3</div>
+                    </div>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <a id="arcana-image-download-btn" href="#" download="carta_sacra_arcano.jpg" class="btn-header" style="flex: 1; justify-content: center; text-decoration: none;">
+                            <i class="fa-solid fa-download"></i> <span>Scarica Carta 8K</span>
+                        </a>
+                        <button class="btn-header" onclick="regenerateArcanaCard()" style="background: rgba(255,255,255,0.06);">
+                            <i class="fa-solid fa-rotate"></i> <span>Rigenera</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal 1: Guided Data Wizard -->
     <div class="modal-overlay" id="wizard-modal">

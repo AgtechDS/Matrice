@@ -1068,6 +1068,7 @@ function selectNode(key) {
     const titleEl = document.getElementById('node-card-title');
     const arcanaEl = document.getElementById('node-card-arcana');
     const descEl = document.getElementById('node-card-desc');
+    const nodeBtn = document.getElementById('btn-generate-node-card');
 
     if (titleEl) titleEl.textContent = `${nodeInfo.label} (Arcano ${nodeInfo.value})`;
     if (arcanaEl) arcanaEl.textContent = `${nodeInfo.arcana.name}`;
@@ -1077,6 +1078,11 @@ function selectNode(key) {
             <strong>Elemento:</strong> ${nodeInfo.arcana.element || 'Sottile'}<br>
             <strong>Energie chiave:</strong> ${nodeInfo.arcana.keywords}
         `;
+    }
+    if (nodeBtn) {
+        nodeBtn.style.display = 'inline-flex';
+        const span = nodeBtn.querySelector('span');
+        if (span) span.textContent = `Genera Carta di ${nodeInfo.arcana.name} (AI)`;
     }
 
     // Sync node pills active state
@@ -2821,6 +2827,10 @@ window.saveUserProfile = saveUserProfile;
 window.loadUserProfile = loadUserProfile;
 window.switchSidebarTab = switchSidebarTab;
 window.openWizardModal = openWizardModal;
+window.generateCurrentArcanaCard = generateCurrentArcanaCard;
+window.openArcanaImageModal = openArcanaImageModal;
+window.closeArcanaImageModal = closeArcanaImageModal;
+window.regenerateArcanaCard = regenerateArcanaCard;
 window.closeWizardModal = closeWizardModal;
 window.fillSampleData = fillSampleData;
 window.submitWizardData = submitWizardData;
@@ -2843,6 +2853,116 @@ window.updateMatrixVisualization = updateMatrixVisualization;
 window.setMobileTab = setMobileTab;
 window.toggleMobileDrawer = toggleMobileDrawer;
 window.toggleLegalFooter = toggleLegalFooter;
+
+// --- AI Sacred Arcana Image Generation Modal Handlers ---
+let currentGeneratingArcana = null;
+
+function generateCurrentArcanaCard(source) {
+    if (!checkAuthRequired('generare la Carta Sacra AI')) return;
+
+    if (!state.currentMatrixData) {
+        openWizardModal();
+        alert('ℹ️ Inserisci prima i tuoi dati di nascita nel Modulo Guidato per calcolare i tuoi Arcani!');
+        return;
+    }
+
+    let nodeInfo = null;
+    if (source === 'spirit') {
+        nodeInfo = state.currentMatrixData.matrix.top;
+    } else if (source === 'node') {
+        const key = state.selectedNodeKey || 'top';
+        nodeInfo = state.currentMatrixData.matrix[key];
+    } else {
+        nodeInfo = state.currentMatrixData.matrix.top;
+    }
+
+    if (!nodeInfo || !nodeInfo.arcana) {
+        alert('Seleziona prima un Arcano dalla Matrice.');
+        return;
+    }
+
+    currentGeneratingArcana = {
+        number: nodeInfo.value,
+        name: nodeInfo.arcana.name,
+        archetype: nodeInfo.arcana.archetype,
+        source
+    };
+
+    openArcanaImageModal(nodeInfo.value, nodeInfo.arcana.name, nodeInfo.arcana.archetype);
+}
+
+async function openArcanaImageModal(arcanaNum, arcanaName, archetype) {
+    const modal = document.getElementById('arcana-image-modal');
+    if (!modal) return;
+
+    modal.classList.add('active');
+    const titleEl = document.getElementById('arcana-image-modal-title');
+    if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-gold"></i> Arcano ${arcanaNum} — ${arcanaName}`;
+
+    const loadingEl = document.getElementById('arcana-image-loading');
+    const containerEl = document.getElementById('arcana-image-container');
+    const loadingText = document.getElementById('arcana-image-loading-text');
+
+    if (loadingEl) loadingEl.style.display = 'flex';
+    if (containerEl) containerEl.style.display = 'none';
+    if (loadingText) loadingText.textContent = 'Connessione ai Motori AI (Gemini Imagen 3 / Flux)...';
+
+    try {
+        const prompt = `Sacred Tarot Card Arcana ${arcanaNum} ${arcanaName} (${archetype}), mystical glowing golden sacred geometry, 8-pointed star octagram, glowing amber esoteric details, deep cosmic obsidian nebula background, 8k luxury masterpiece, no text`;
+        const res = await apiClient.generateArcanaImage({
+            prompt,
+            arcanaNumber: arcanaNum,
+            arcanaName,
+            archetype
+        });
+
+        if (res && res.success) {
+            const imgEl = document.getElementById('arcana-image-preview');
+            const badgeEl = document.getElementById('arcana-image-provider-badge');
+            const downloadBtn = document.getElementById('arcana-image-download-btn');
+
+            const imgSrc = res.dataUrl || res.imageUrl;
+            if (imgEl) imgEl.src = imgSrc;
+            if (downloadBtn) {
+                downloadBtn.href = imgSrc;
+                downloadBtn.download = `arcano_${arcanaNum}_${arcanaName.toLowerCase().replace(/\s+/g, '_')}.jpg`;
+            }
+
+            const providerLabels = {
+                'gemini': '✦ Motore: Google Gemini Imagen 3',
+                'pollinations': '✦ Motore: Pollinations Flux Engine',
+                'llmapi': '✦ Motore: LLMAPI GLM-Image'
+            };
+            if (badgeEl) badgeEl.textContent = providerLabels[res.provider] || `✦ Motore: ${res.provider}`;
+
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (containerEl) containerEl.style.display = 'block';
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+            }
+        } else {
+            throw new Error(res.error?.message || 'Impossibile generare l\'immagine');
+        }
+    } catch (e) {
+        console.error('Image generation error:', e);
+        if (loadingText) loadingText.textContent = `❌ Errore: ${e.message || 'I motori di generazione sono occupati. Riprova tra poco.'}`;
+        setTimeout(() => {
+            alert(`⚠️ Non è stato possibile generare l'immagine: ${e.message}`);
+            closeArcanaImageModal();
+        }, 2500);
+    }
+}
+
+function closeArcanaImageModal() {
+    const modal = document.getElementById('arcana-image-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function regenerateArcanaCard() {
+    if (!currentGeneratingArcana) return;
+    openArcanaImageModal(currentGeneratingArcana.number, currentGeneratingArcana.name, currentGeneratingArcana.archetype);
+}
 
 // --- Mobile Native Bottom Tab Router (4 Tabs: matrix, chat, arcana, hub) ---
 function setMobileTab(tabName) {
