@@ -1470,40 +1470,58 @@ ${specificInstruction}`;
             }
         }
 
-        // TIER 1: Google Gemini / Imagen
-        const geminiKey = body.apiKey || process.env.GEMINI_TTS_API_KEY || process.env.GOOGLE_API_KEY;
-        if (geminiKey) {
+        // TIER 1 to 4: LLMAPI High-End Image Models Pipeline
+        const llmKey = process.env.LLMAPI_KEY;
+        const priorityModels = [
+            { id: 'qwen-image-max', label: 'Qwen Image Max 8K' },
+            { id: 'dola-seedream-5-0-pro-260628', label: 'Seedream 5.0 Pro' },
+            { id: 'qwen-image-plus', label: 'Qwen Image Plus' },
+            { id: 'cogview-4', label: 'CogView-4' },
+            { id: 'glm-image', label: 'GLM Image' }
+        ];
+
+        for (const item of priorityModels) {
             try {
-                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${geminiKey}`, {
+                const payload = {
+                    model: item.id,
+                    prompt: basePrompt,
+                    n: 1
+                };
+                if (!item.id.includes('qwen')) {
+                    payload.size = '1024x1024';
+                }
+
+                const llmRes = await fetch('https://api.llmapi.ai/v1/images/generations', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: basePrompt,
-                        numberOfImages: 1,
-                        aspectRatio: "1:1",
-                        outputMimeType: "image/jpeg"
-                    })
+                    headers: {
+                        'Authorization': `Bearer ${llmKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 });
-                if (geminiRes.ok) {
-                    const gemData = await geminiRes.json();
-                    if (gemData.generatedImages && gemData.generatedImages[0]?.image?.imageBytes) {
-                        const b64 = gemData.generatedImages[0].image.imageBytes;
+
+                if (llmRes.ok) {
+                    const llmData = await llmRes.json();
+                    const imgUrl = llmData.data?.[0]?.url || llmData.data?.[0]?.b64_json;
+                    if (imgUrl) {
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({
                             success: true,
-                            provider: 'gemini',
-                            mimeType: 'image/jpeg',
-                            dataUrl: `data:image/jpeg;base64,${b64}`
+                            provider: 'llmapi',
+                            model: item.id,
+                            modelLabel: item.label,
+                            imageUrl: imgUrl.startsWith('http') ? imgUrl : undefined,
+                            dataUrl: imgUrl.startsWith('http') ? imgUrl : `data:image/png;base64,${imgUrl}`
                         }));
                         return;
                     }
                 }
             } catch (e) {
-                console.warn('Local Tier 1 Gemini image failed, proceeding to fallback:', e.message);
+                console.warn(`Local LLMAPI ${item.id} failed, trying next:`, e.message);
             }
         }
 
-        // TIER 2: Pollinations.ai (Flux)
+        // TIER 5: Pollinations.ai (Flux Emergency Fallback)
         try {
             const encoded = encodeURIComponent(basePrompt);
             const pollUrl = `https://image.pollinations.ai/prompt/${encoded}?model=flux&width=1024&height=1024&nologo=true&enhance=true&seed=${Math.floor(Math.random() * 999999)}`;
@@ -1516,6 +1534,8 @@ ${specificInstruction}`;
                     res.end(JSON.stringify({
                         success: true,
                         provider: 'pollinations',
+                        model: 'flux',
+                        modelLabel: 'Pollinations Flux Engine',
                         mimeType: 'image/png',
                         dataUrl: `data:image/png;base64,${b64}`,
                         imageUrl: pollUrl
@@ -1524,41 +1544,7 @@ ${specificInstruction}`;
                 }
             }
         } catch (e) {
-            console.warn('Local Tier 2 Pollinations failed, proceeding to fallback:', e.message);
-        }
-
-        // TIER 3: LLMAPI.ai (GLM-Image)
-        const llmKey = process.env.LLMAPI_KEY;
-        try {
-            const llmRes = await fetch('https://api.llmapi.ai/v1/images/generations', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${llmKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'glm-image',
-                    prompt: basePrompt,
-                    size: '1024x1024',
-                    n: 1
-                })
-            });
-            if (llmRes.ok) {
-                const llmData = await llmRes.json();
-                const imgUrl = llmData.data?.[0]?.url;
-                if (imgUrl) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
-                        success: true,
-                        provider: 'llmapi',
-                        imageUrl: imgUrl,
-                        dataUrl: imgUrl
-                    }));
-                    return;
-                }
-            }
-        } catch (e) {
-            console.error('Local Tier 3 LLMAPI failed:', e.message);
+            console.warn('Local Tier 5 Pollinations failed:', e.message);
         }
 
         res.writeHead(500, { 'Content-Type': 'application/json' });

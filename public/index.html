@@ -9,7 +9,8 @@
         content="Piattaforma di analisi numerologica e simbolica della Matrice del Destino basata su intelligenza artificiale DeepSeek e 22 Arcani Maggiori.">
     <link rel="canonical" href="https://matricedestino.it/">
     <meta property="og:title" content="Matrice del Destino — Calcolo Numerologico & Archetipico">
-    <meta property="og:description" content="Calcola la tua Matrice del Destino, Ottagramma Sacro e scopri i tuoi 22 Arcani Maggiori.">
+    <meta property="og:description"
+        content="Calcola la tua Matrice del Destino, Ottagramma Sacro e scopri i tuoi 22 Arcani Maggiori.">
     <meta property="og:url" content="https://matricedestino.it/">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://matricedestino.it/android-chrome-512x512.png">
@@ -54,7 +55,8 @@
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
-            <button class="mobile-drawer-toggle" id="btn-open-mobile-drawer" onclick="toggleMobileDrawer(true)" title="Menu Opzioni">
+            <button class="mobile-drawer-toggle" id="btn-open-mobile-drawer" onclick="toggleMobileDrawer(true)"
+                title="Menu Opzioni">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div class="brand-section">
@@ -245,29 +247,41 @@
 
                         <!-- Quick Node Selector Pills -->
                         <div class="matrix-node-pills" id="matrix-node-pills">
-                            <button class="node-pill active" onclick="selectNode('top')"><i class="fa-solid fa-sparkles text-gold"></i> ✦ Spirito (A)</button>
-                            <button class="node-pill" onclick="selectNode('left')"><i class="fa-solid fa-moon text-cyan"></i> 🌙 Anima (B)</button>
-                            <button class="node-pill" onclick="selectNode('right')"><i class="fa-solid fa-coins" style="color: #10b981;"></i> 💰 Materia (C)</button>
-                            <button class="node-pill" onclick="selectNode('bottom')"><i class="fa-solid fa-scale-balanced" style="color: #f87171;"></i> ⚖️ Karma (D)</button>
-                            <button class="node-pill" onclick="selectNode('center')"><i class="fa-solid fa-heart text-gold"></i> 💖 Cuore (E)</button>
+                            <button class="node-pill active" onclick="selectNode('top')"><i
+                                    class="fa-solid fa-sparkles text-gold"></i> ✦ Spirito (A)</button>
+                            <button class="node-pill" onclick="selectNode('left')"><i
+                                    class="fa-solid fa-moon text-cyan"></i> 🌙 Anima (B)</button>
+                            <button class="node-pill" onclick="selectNode('right')"><i class="fa-solid fa-coins"
+                                    style="color: #10b981;"></i> 💰 Materia (C)</button>
+                            <button class="node-pill" onclick="selectNode('bottom')"><i
+                                    class="fa-solid fa-scale-balanced" style="color: #f87171;"></i> ⚖️ Karma
+                                (D)</button>
+                            <button class="node-pill" onclick="selectNode('center')"><i
+                                    class="fa-solid fa-heart text-gold"></i> 💖 Cuore (E)</button>
                         </div>
 
                         <!-- Spirito & Risorse Interiori Dynamic Highlight Card -->
                         <div class="spirit-resources-card" id="spirit-resources-card">
                             <div class="spirit-card-header">
-                                <div class="spirit-badge"><i class="fa-solid fa-sun text-gold"></i> SPIRITO & RISORSE INTERIORI</div>
+                                <div class="spirit-badge"><i class="fa-solid fa-sun text-gold"></i> SPIRITO & RISORSE
+                                    INTERIORI</div>
                                 <span class="spirit-arcana-tag" id="spirit-arcana-tag">Punto A • Arcano -</span>
                             </div>
                             <div class="spirit-card-body">
                                 <div class="spirit-title" id="spirit-title">In attesa di calcolo dati</div>
-                                <div class="spirit-desc" id="spirit-desc">Inserisci la tua data di nascita per rivelare i talenti innati, la sorgente spirituale e il potenziale energetico dell'Arcano di Nascita.</div>
+                                <div class="spirit-desc" id="spirit-desc">Inserisci la tua data di nascita per rivelare
+                                    i talenti innati, la sorgente spirituale e il potenziale energetico dell'Arcano di
+                                    Nascita.</div>
                                 <div class="spirit-keywords" id="spirit-keywords">
                                     <span class="keyword-chip">Talenti Innati</span>
                                     <span class="keyword-chip">Forza Vitale</span>
                                     <span class="keyword-chip">Luce Interiore</span>
                                 </div>
-                                <button class="btn-generate-card" id="btn-generate-spirit-card" onclick="generateCurrentArcanaCard('spirit')" title="Genera la Carta Sacra dell'Arcano in 8K (AI)">
-                                    <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta Sacra 8K (AI)</span>
+                                <button class="btn-generate-card" id="btn-generate-spirit-card"
+                                    onclick="generateCurrentArcanaCard('spirit')"
+                                    title="Genera la Carta Sacra dell'Arcano in 8K (AI)">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta Sacra
+                                        8K (AI)</span>
                                 </button>
                             </div>
                         </div>
@@ -276,9 +290,13 @@
                         <div class="aspect-card" id="selected-node-card" style="margin-top: 8px;">
                             <div class="aspect-title" id="node-card-title">DETTAGLIO NODO SELEZIONATO</div>
                             <div class="aspect-value" id="node-card-arcana">Clicca su un nodo dell'ottagramma</div>
-                            <div class="aspect-subtitle" id="node-card-desc">Scopri l'archetipo, i talenti e le energie corrispondenti.</div>
-                            <button class="btn-generate-card" id="btn-generate-node-card" onclick="generateCurrentArcanaCard('node')" style="display: none; margin-top: 10px;" title="Genera la Carta Sacra di questo Nodo in 8K (AI)">
-                                <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta di questo Nodo (AI)</span>
+                            <div class="aspect-subtitle" id="node-card-desc">Scopri l'archetipo, i talenti e le energie
+                                corrispondenti.</div>
+                            <button class="btn-generate-card" id="btn-generate-node-card"
+                                onclick="generateCurrentArcanaCard('node')" style="display: none; margin-top: 10px;"
+                                title="Genera la Carta Sacra di questo Nodo in 8K (AI)">
+                                <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta di questo
+                                    Nodo (AI)</span>
                             </button>
                         </div>
                     </div>
@@ -445,7 +463,7 @@
                                 </div>
                                 <div class="neu-hub-card-title">Sinastria di Coppia</div>
                                 <div class="neu-hub-card-desc">Matrice Congiunta con partner: scopo karmico, affinità e
-                                     sinergie.</div>
+                                    sinergie.</div>
                                 <button class="btn-neu-action"><i class="fa-solid fa-ring"></i> Calcola Coppia
                                     (5c)</button>
                             </div>
@@ -453,13 +471,16 @@
                             <!-- Calcolo Ascendente (1 Credito) -->
                             <div class="neu-hub-card" onclick="startAscendantCalculation()">
                                 <div class="neu-hub-card-header">
-                                    <div class="neu-hub-icon" style="color: #38bdf8;"><i class="fa-solid fa-compass"></i>
+                                    <div class="neu-hub-icon" style="color: #38bdf8;"><i
+                                            class="fa-solid fa-compass"></i>
                                     </div>
                                     <div class="neu-hub-badge cyan">1 Credito</div>
                                 </div>
                                 <div class="neu-hub-card-title">Calcolo Ascendente</div>
-                                <div class="neu-hub-card-desc">Calcolo esatto con gradi d'arco, pianeta governatore, 1ª Casa e maschera energetica.</div>
-                                <button class="btn-neu-action"><i class="fa-solid fa-compass"></i> Calcola Ascendente (1c)</button>
+                                <div class="neu-hub-card-desc">Calcolo esatto con gradi d'arco, pianeta governatore, 1ª
+                                    Casa e maschera energetica.</div>
+                                <button class="btn-neu-action"><i class="fa-solid fa-compass"></i> Calcola Ascendente
+                                    (1c)</button>
                             </div>
 
                             <!-- 6. Tema Natale & Analisi Zodiacale Completa MIT -->
@@ -534,7 +555,8 @@
                                 <h3 style="color: var(--gold-bright); margin-bottom: 8px;">Benvenuto nell'Analisi della
                                     Matrice del Destino 🌌</h3>
                                 <p>Sono la tua guida all'interpretazione simbolica e numerologica archetipica dei
-                                    <strong>22 Arcani</strong> e della <strong>Matrice del Destino</strong>.</p>
+                                    <strong>22 Arcani</strong> e della <strong>Matrice del Destino</strong>.
+                                </p>
                                 <blockquote
                                     style="border-left: 3px solid var(--gold-primary); padding-left: 12px; margin: 10px 0; color: var(--text-secondary); font-style: italic;">
                                     Ricorda: La numerologia è un linguaggio simbolico millenario per favorire
@@ -561,7 +583,6 @@
 
                 <!-- Quick Suggestions Bar -->
                 <div class="quick-suggestions" id="quick-suggestions">
-                    <button class="chip" onclick="generateCurrentArcanaCard('spirit')"><i class="fa-solid fa-wand-magic-sparkles text-gold"></i> Carta Sacra 8K (AI)</button>
                     <button class="chip" onclick="startDailyHoroscope()"><i class="fa-solid fa-sun"
                             style="color: #f4a20b;"></i> Oroscopo Giorno (1c)</button>
                     <button class="chip" onclick="startAscendantCalculation()"><i class="fa-solid fa-compass"
@@ -581,8 +602,7 @@
                 <!-- Input Container -->
                 <div class="chat-input-container">
                     <div class="input-box-wrapper">
-                        <textarea class="chat-input" id="chat-input"
-                            placeholder="Scrivi la tua risposta o domanda all'assistente..." rows="1"></textarea>
+                        <textarea class="chat-input" id="chat-input" placeholder="Forg" rows="1"></textarea>
                     </div>
                     <button class="btn-send" id="btn-send" title="Invia messaggio">
                         <i class="fa-solid fa-paper-plane" id="send-icon"></i>
@@ -613,13 +633,15 @@
                     title="Cancella subito tutti i dati inseriti (Diritto all'Oblio)"><i
                         class="fa-solid fa-trash-can"></i> Cancella Dati</button>
             </div>
-            <button class="footer-close-btn" id="btn-close-legal-footer" onclick="toggleLegalFooter(false)" title="Chiudi / Nascondi banner legale">
+            <button class="footer-close-btn" id="btn-close-legal-footer" onclick="toggleLegalFooter(false)"
+                title="Chiudi / Nascondi banner legale">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </footer>
 
         <!-- Pulsante di riapertura discreto quando il footer è nascosto -->
-        <button class="legal-reopen-btn" id="btn-reopen-legal-footer" onclick="toggleLegalFooter(true)" style="display: none;" title="Mostra Info Legali e Privacy">
+        <button class="legal-reopen-btn" id="btn-reopen-legal-footer" onclick="toggleLegalFooter(true)"
+            style="display: none;" title="Mostra Info Legali e Privacy">
             <i class="fa-solid fa-scale-balanced"></i> <span>Info Legali & Privacy ▴</span>
         </button>
 
@@ -715,25 +737,37 @@
     <div class="modal-overlay" id="arcana-image-modal">
         <div class="modal-card" style="max-width: 480px; text-align: center;">
             <div class="modal-header">
-                <h3 class="modal-title" id="arcana-image-modal-title"><i class="fa-solid fa-wand-magic-sparkles text-gold"></i> Carta Sacra dell'Arcano</h3>
+                <h3 class="modal-title" id="arcana-image-modal-title"><i
+                        class="fa-solid fa-wand-magic-sparkles text-gold"></i> Carta Sacra dell'Arcano</h3>
                 <button class="modal-close" onclick="closeArcanaImageModal()">&times;</button>
             </div>
             <div class="modal-body" style="padding: 16px;">
-                <div id="arcana-image-loading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 16px;">
-                    <div class="spinner-gold" style="width: 48px; height: 48px; border: 3px solid rgba(212, 175, 55, 0.2); border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                    <div style="font-size: 0.95rem; color: #e2e8f0; font-weight: 500;" id="arcana-image-loading-text">Connessione ai Motori AI (Gemini Imagen 3 / Flux)...</div>
-                    <div style="font-size: 0.8rem; color: #94a3b8;">Canalizzazione delle geometrie sacre e archetipi cosmici</div>
+                <div id="arcana-image-loading"
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 16px;">
+                    <div class="spinner-gold"
+                        style="width: 48px; height: 48px; border: 3px solid rgba(212, 175, 55, 0.2); border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite;">
+                    </div>
+                    <div style="font-size: 0.95rem; color: #e2e8f0; font-weight: 500;" id="arcana-image-loading-text">
+                        Connessione ai Motori AI (Gemini Imagen 3 / Flux)...</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">Canalizzazione delle geometrie sacre e archetipi
+                        cosmici</div>
                 </div>
                 <div id="arcana-image-container" style="display: none;">
-                    <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 12px 32px rgba(0,0,0,0.6); margin-bottom: 14px;">
-                        <img id="arcana-image-preview" src="" alt="Carta Sacra" style="width: 100%; height: auto; display: block; border-radius: 16px;">
-                        <div id="arcana-image-provider-badge" style="position: absolute; bottom: 8px; right: 8px; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(212,175,55,0.4); color: #d4af37;">Gemini Imagen 3</div>
+                    <div
+                        style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 12px 32px rgba(0,0,0,0.6); margin-bottom: 14px;">
+                        <img id="arcana-image-preview" src="" alt="Carta Sacra"
+                            style="width: 100%; height: auto; display: block; border-radius: 16px;">
+                        <div id="arcana-image-provider-badge"
+                            style="position: absolute; bottom: 8px; right: 8px; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(212,175,55,0.4); color: #d4af37;">
+                            Gemini Imagen 3</div>
                     </div>
                     <div style="display: flex; gap: 8px; justify-content: center;">
-                        <a id="arcana-image-download-btn" href="#" download="carta_sacra_arcano.jpg" class="btn-header" style="flex: 1; justify-content: center; text-decoration: none;">
+                        <a id="arcana-image-download-btn" href="#" download="carta_sacra_arcano.jpg" class="btn-header"
+                            style="flex: 1; justify-content: center; text-decoration: none;">
                             <i class="fa-solid fa-download"></i> <span>Scarica Carta 8K</span>
                         </a>
-                        <button class="btn-header" onclick="regenerateArcanaCard()" style="background: rgba(255,255,255,0.06);">
+                        <button class="btn-header" onclick="regenerateArcanaCard()"
+                            style="background: rgba(255,255,255,0.06);">
                             <i class="fa-solid fa-rotate"></i> <span>Rigenera</span>
                         </button>
                     </div>
@@ -814,13 +848,17 @@
 
                 <div class="recharge-options-grid">
                     <!-- Option 1: Rewarded Ad (Google AdSense) -->
-                    <div class="recharge-card free-option" style="border: 1px solid rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.04);">
+                    <div class="recharge-card free-option"
+                        style="border: 1px solid rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.04);">
                         <div class="recharge-badge"
                             style="background: linear-gradient(135deg, #d4af37, #b8860b); color: #080c14; font-weight: 700;">
-                            <i class="fa-solid fa-play"></i> +1 Consulto Gratis</div>
-                        <div class="recharge-icon" style="color: var(--gold-bright);"><i class="fa-solid fa-circle-play"></i></div>
+                            <i class="fa-solid fa-play"></i> +1 Consulto Gratis
+                        </div>
+                        <div class="recharge-icon" style="color: var(--gold-bright);"><i
+                                class="fa-solid fa-circle-play"></i></div>
                         <h4 class="recharge-title">Guarda Sponsor (+1)</h4>
-                        <p class="recharge-desc">Guarda un breve annuncio sponsorizzato Google per ricevere subito <strong>+1 Consulto Gratuito</strong> sul tuo account.</p>
+                        <p class="recharge-desc">Guarda un breve annuncio sponsorizzato Google per ricevere subito
+                            <strong>+1 Consulto Gratuito</strong> sul tuo account.</p>
                         <button class="btn-recharge btn-free" id="btn-watch-ad"
                             style="background: linear-gradient(135deg, var(--gold-bright), #b8860b); color: #080c14; font-weight: 700; box-shadow: 0 0 15px rgba(212,175,55,0.35);"
                             onclick="watchRewardedAd()">
@@ -836,7 +874,8 @@
                             ⭐ 100% Attivo & Gratuito</div>
                         <div class="recharge-icon" style="color: #34d399;"><i class="fa-solid fa-users"></i></div>
                         <h4 class="recharge-title">Invita un Amico (+2)</h4>
-                        <p class="recharge-desc">Condividi il tuo link oracolare: ricevi <strong>+2 Consulti Omaggio</strong> per ogni amico che accede alla Matrice tramite il tuo link!</p>
+                        <p class="recharge-desc">Condividi il tuo link oracolare: ricevi <strong>+2 Consulti
+                                Omaggio</strong> per ogni amico che accede alla Matrice tramite il tuo link!</p>
                         <button class="btn-recharge btn-referral"
                             style="background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; font-weight: 700; box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);"
                             onclick="copyReferralLink()">
@@ -860,7 +899,7 @@
                     <div class="recharge-card premium-option" style="border-color: rgba(212, 175, 55, 0.5);">
                         <div class="recharge-badge premium" style="background: #38bdf8; color: #000;">Best Value</div>
                         <div class="recharge-icon"><i class="fa-solid fa-wand-magic-sparkles"
-                                 style="color: #38bdf8;"></i></div>
+                                style="color: #38bdf8;"></i></div>
                         <h4 class="recharge-title">Mappa Maestra (15)</h4>
                         <p class="recharge-desc">15 Consulti + Sinastria di Coppia + Report PDF Completo + Accesso
                             Prioritario.</p>
@@ -879,8 +918,9 @@
                         <i class="fa-solid fa-gift"></i> Hai un Codice Promozionale?
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="promo-code-input" class="form-control" placeholder="Inserisci il codice promo..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
-                            style="font-size: 0.85rem; padding: 8px 12px;">
+                        <input type="text" id="promo-code-input" class="form-control"
+                            placeholder="Inserisci il codice promo..." autocomplete="off" autocorrect="off"
+                            autocapitalize="none" spellcheck="false" style="font-size: 0.85rem; padding: 8px 12px;">
                         <button class="btn-header primary" onclick="redeemPromoCode()"
                             style="padding: 8px 16px; font-size: 0.82rem; white-space: nowrap;">
                             <i class="fa-solid fa-gift"></i> Riscatta
@@ -1182,7 +1222,8 @@
                 <p>Ai sensi dell'Art. 50 dell'AI Act dell'Unione Europea, si informa espressamente l'utente che
                     <strong>i testi interpretativi, le risposte della chat e i report generati in questa applicazione
                         sono prodotti da un sistema di Intelligenza Artificiale Generativa</strong> addestrato su
-                    modelli linguistici avanzati.</p>
+                    modelli linguistici avanzati.
+                </p>
 
                 <h4>2. Natura Simbolico-Archetipica e Filosofica</h4>
                 <p>La Matrice del Destino e i 22 Arcani Maggiori rappresentano un <strong>sistema di modelli simbolici,

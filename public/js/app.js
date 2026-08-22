@@ -2928,12 +2928,7 @@ async function openArcanaImageModal(arcanaNum, arcanaName, archetype) {
                 downloadBtn.download = `arcano_${arcanaNum}_${arcanaName.toLowerCase().replace(/\s+/g, '_')}.jpg`;
             }
 
-            const providerLabels = {
-                'gemini': '✦ Motore: Google Gemini Imagen 3',
-                'pollinations': '✦ Motore: Pollinations Flux Engine',
-                'llmapi': '✦ Motore: LLMAPI GLM-Image'
-            };
-            if (badgeEl) badgeEl.textContent = providerLabels[res.provider] || `✦ Motore: ${res.provider}`;
+            if (badgeEl) badgeEl.textContent = `✦ Motore: ${res.modelLabel || res.provider || 'AI 8K'}`;
 
             if (loadingEl) loadingEl.style.display = 'none';
             if (containerEl) containerEl.style.display = 'block';

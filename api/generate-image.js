@@ -1,8 +1,10 @@
 /**
- * 🌌 Cascading Image Generation Pipeline (MIT-Grade Architecture)
- * Tier 1: Google Gemini Imagen 3 (Luxury 8K Gold Sacred Geometry)
- * Tier 2 (Fallback 1): Pollinations.ai (Flux Fast Engine — 100% Free & Open)
- * Tier 3 (Fallback 2): LLMAPI.ai (GLM-Image Backup Engine)
+ * 🌌 Ultra-Luxury Cascading Image Generation Pipeline (MIT-Grade Architecture)
+ * Tier 1: Qwen Image Max (LLMAPI) — Ultra-HD 8K Sacred Gold Geometry (No Watermark)
+ * Tier 2: Seedream 5.0 Pro (LLMAPI) — Luxury Framed Tarot Art with Astrological Glyphs
+ * Tier 3: Qwen Image Plus (LLMAPI) — High-Res Sacred Art with Classical Typography
+ * Tier 4: CogView-4 / GLM-Image (LLMAPI) — Fast Esoteric Mandala Engine
+ * Tier 5: Pollinations.ai (Flux) — 100% Open Emergency Safety Net
  */
 
 export const ARCANA_IMAGE_PROMPTS = {
@@ -30,6 +32,37 @@ export const ARCANA_IMAGE_PROMPTS = {
     22: "Sacred Tarot Card Arcana 22 The Fool (Il Matto), carefree cosmic traveler in colorful tunic standing on the edge of a mountain cliff with white rose in hand, small playful white dog at his heels, knapsack on wand, brilliant rising sun, boundless freedom and infinite potential, 8k luxury masterpiece, no text"
 };
 
+async function fetchLLMAPIImage(modelId, prompt, apiKey) {
+    const payload = {
+        model: modelId,
+        prompt: prompt,
+        n: 1
+    };
+    if (!modelId.includes('qwen')) {
+        payload.size = '1024x1024';
+    }
+
+    const res = await fetch('https://api.llmapi.ai/v1/images/generations', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
+        throw new Error(err.error?.message || `LLMAPI HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const item = data.data?.[0];
+    if (!item) throw new Error('No image returned from LLMAPI');
+
+    return item.url || item.b64_json;
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: { message: 'Method not allowed' } });
@@ -47,52 +80,46 @@ export default async function handler(req, res) {
         }
     }
 
-    console.log(`[ImageGen Cascade] Avvio generazione per: "${basePrompt.slice(0, 80)}..."`);
+    console.log(`[ImageGen Cascade] Generazione per Arcano ${arcanaNumber || 'Custom'}: "${basePrompt.slice(0, 75)}..."`);
 
-    // =========================================================================
-    // TIER 1: Google Gemini / Imagen 3
-    // =========================================================================
-    const geminiKey = process.env.GEMINI_TTS_API_KEY || process.env.GOOGLE_API_KEY || 'AIzaSyAqrAhDHx5gsVQbFYghzUJKGIcKfoV09OE';
-    if (geminiKey) {
+    const llmKey = process.env.LLMAPI_KEY || 'llmapi_17acd03b348ba3984473006be0ab0ccac001b934f826ade8b26edbc23125cdf5';
+
+    // -------------------------------------------------------------------------
+    // TIER 1 to 4: LLMAPI High-End Image Models Pipeline
+    // -------------------------------------------------------------------------
+    const priorityModels = [
+        { id: 'qwen-image-max', label: 'Qwen Image Max 8K' },
+        { id: 'dola-seedream-5-0-pro-260628', label: 'Seedream 5.0 Pro' },
+        { id: 'qwen-image-plus', label: 'Qwen Image Plus' },
+        { id: 'cogview-4', label: 'CogView-4' },
+        { id: 'glm-image', label: 'GLM Image' }
+    ];
+
+    for (const item of priorityModels) {
         try {
-            console.log(`[ImageGen Cascade] Tentativo Tier 1: Google Imagen 3...`);
-            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${geminiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt: basePrompt,
-                    numberOfImages: 1,
-                    aspectRatio: "1:1",
-                    outputMimeType: "image/jpeg"
-                })
-            });
-
-            if (geminiRes.ok) {
-                const gemData = await geminiRes.json();
-                if (gemData.generatedImages && gemData.generatedImages[0]?.image?.imageBytes) {
-                    console.log(`[ImageGen Cascade] ✅ Successo Tier 1 (Gemini Imagen 3)!`);
-                    const b64 = gemData.generatedImages[0].image.imageBytes;
-                    return res.status(200).json({
-                        success: true,
-                        provider: 'gemini',
-                        mimeType: 'image/jpeg',
-                        base64: b64,
-                        dataUrl: `data:image/jpeg;base64,${b64}`
-                    });
-                }
-            } else {
-                console.warn(`[ImageGen Cascade] Tier 1 Gemini HTTP ${geminiRes.status}: procedo al fallback.`);
+            console.log(`[ImageGen Cascade] Tentativo su LLMAPI: ${item.id}...`);
+            const imageResult = await fetchLLMAPIImage(item.id, basePrompt, llmKey);
+            if (imageResult) {
+                console.log(`[ImageGen Cascade] ✅ SUCCESSO con ${item.label}!`);
+                return res.status(200).json({
+                    success: true,
+                    provider: 'llmapi',
+                    model: item.id,
+                    modelLabel: item.label,
+                    imageUrl: imageResult.startsWith('http') ? imageResult : undefined,
+                    dataUrl: imageResult.startsWith('http') ? imageResult : `data:image/png;base64,${imageResult}`
+                });
             }
         } catch (e) {
-            console.warn(`[ImageGen Cascade] Tier 1 Gemini fallito (${e.message}): procedo al fallback.`);
+            console.warn(`[ImageGen Cascade] ${item.id} non riuscito (${e.message}), provo modello successivo...`);
         }
     }
 
-    // =========================================================================
-    // TIER 2 (Fallback 1): Pollinations.ai (Flux Engine)
-    // =========================================================================
+    // -------------------------------------------------------------------------
+    // TIER 5: Pollinations.ai Flux (Open Fallback Safety Net)
+    // -------------------------------------------------------------------------
     try {
-        console.log(`[ImageGen Cascade] Tentativo Tier 2: Pollinations.ai (Flux)...`);
+        console.log(`[ImageGen Cascade] Tentativo Fallback di Emergenza: Pollinations.ai (Flux)...`);
         const encoded = encodeURIComponent(basePrompt);
         const pollUrl = `https://image.pollinations.ai/prompt/${encoded}?model=flux&width=1024&height=1024&nologo=true&enhance=true&seed=${Math.floor(Math.random() * 999999)}`;
         
@@ -100,62 +127,25 @@ export default async function handler(req, res) {
         if (pollRes.ok) {
             const buffer = Buffer.from(await pollRes.arrayBuffer());
             if (buffer.length > 5000) {
-                console.log(`[ImageGen Cascade] ✅ Successo Tier 2 (Pollinations Flux)! Dimensione: ${(buffer.length / 1024).toFixed(1)} KB`);
+                console.log(`[ImageGen Cascade] ✅ Successo con Pollinations Flux! Dimensione: ${(buffer.length / 1024).toFixed(1)} KB`);
                 const b64 = buffer.toString('base64');
                 return res.status(200).json({
                     success: true,
                     provider: 'pollinations',
+                    model: 'flux',
+                    modelLabel: 'Pollinations Flux Engine',
                     mimeType: 'image/png',
-                    base64: b64,
                     dataUrl: `data:image/png;base64,${b64}`,
                     imageUrl: pollUrl
                 });
             }
         }
-        console.warn(`[ImageGen Cascade] Tier 2 Pollinations HTTP ${pollRes.status}: procedo al fallback Tier 3.`);
     } catch (e) {
-        console.warn(`[ImageGen Cascade] Tier 2 Pollinations fallito (${e.message}): procedo al fallback Tier 3.`);
-    }
-
-    // =========================================================================
-    // TIER 3 (Fallback 2): LLMAPI.ai (GLM-Image)
-    // =========================================================================
-    const llmKey = process.env.LLMAPI_KEY || 'llmapi_17acd03b348ba3984473006be0ab0ccac001b934f826ade8b26edbc23125cdf5';
-    try {
-        console.log(`[ImageGen Cascade] Tentativo Tier 3: LLMAPI.ai (GLM-Image)...`);
-        const llmRes = await fetch('https://api.llmapi.ai/v1/images/generations', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${llmKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'glm-image',
-                prompt: basePrompt,
-                size: '1024x1024',
-                n: 1
-            })
-        });
-
-        if (llmRes.ok) {
-            const llmData = await llmRes.json();
-            const imgUrl = llmData.data?.[0]?.url;
-            if (imgUrl) {
-                console.log(`[ImageGen Cascade] ✅ Successo Tier 3 (LLMAPI GLM-Image)!`);
-                return res.status(200).json({
-                    success: true,
-                    provider: 'llmapi',
-                    imageUrl: imgUrl,
-                    dataUrl: imgUrl
-                });
-            }
-        }
-    } catch (e) {
-        console.error(`[ImageGen Cascade] Tier 3 LLMAPI fallito:`, e.message);
+        console.error(`[ImageGen Cascade] Pollinations fallito:`, e.message);
     }
 
     return res.status(500).json({
         success: false,
-        error: { message: 'Tutti i motori di generazione immagini (Gemini, Pollinations, LLMAPI) sono momentaneamente non disponibili.' }
+        error: { message: 'Tutti i motori di generazione immagini su LLMAPI e di emergenza sono momentaneamente occupati. Riprova tra qualche istante.' }
     });
 }
