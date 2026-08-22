@@ -1082,7 +1082,7 @@ function selectNode(key) {
     if (nodeBtn) {
         nodeBtn.style.display = 'inline-flex';
         const span = nodeBtn.querySelector('span');
-        if (span) span.textContent = `Genera Carta di ${nodeInfo.arcana.name} (AI)`;
+        if (span) span.textContent = `Genera Carta di ${nodeInfo.arcana.name} (5c)`;
     }
 
     // Sync node pills active state
@@ -2866,6 +2866,13 @@ function generateCurrentArcanaCard(source) {
         return;
     }
 
+    const credits = getUserCredits();
+    if (credits < 5) {
+        openCreditsModal();
+        alert('✦ Sono necessari 5 Consulti/Crediti per sbloccare e generare la Carta Sacra 8K dell\'Arcano.');
+        return;
+    }
+
     let nodeInfo = null;
     if (source === 'spirit') {
         nodeInfo = state.currentMatrixData.matrix.top;
@@ -2881,6 +2888,9 @@ function generateCurrentArcanaCard(source) {
         return;
     }
 
+    // Deduct 5 credits for Arcana card generation
+    setUserCredits(credits - 5, true);
+
     currentGeneratingArcana = {
         number: nodeInfo.value,
         name: nodeInfo.arcana.name,
@@ -2889,6 +2899,28 @@ function generateCurrentArcanaCard(source) {
     };
 
     openArcanaImageModal(nodeInfo.value, nodeInfo.arcana.name, nodeInfo.arcana.archetype);
+}
+
+function displayGeneratedCard(imgSrc, arcanaNum, arcanaName, badgeText) {
+    const loadingEl = document.getElementById('arcana-image-loading');
+    const containerEl = document.getElementById('arcana-image-container');
+    const imgEl = document.getElementById('arcana-image-preview');
+    const badgeEl = document.getElementById('arcana-image-provider-badge');
+    const downloadBtn = document.getElementById('arcana-image-download-btn');
+
+    if (imgEl) imgEl.src = imgSrc;
+    if (downloadBtn) {
+        downloadBtn.href = imgSrc;
+        downloadBtn.download = `arcano_${arcanaNum}_${arcanaName.toLowerCase().replace(/\s+/g, '_')}.jpg`;
+    }
+    if (badgeEl) badgeEl.textContent = badgeText || '✦ Collezione: Arcani Maggiori Luxury 8K';
+
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (containerEl) containerEl.style.display = 'block';
+
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 40, spread: 70, origin: { y: 0.6 } });
+    }
 }
 
 async function openArcanaImageModal(arcanaNum, arcanaName, archetype) {
@@ -2905,48 +2937,40 @@ async function openArcanaImageModal(arcanaNum, arcanaName, archetype) {
 
     if (loadingEl) loadingEl.style.display = 'flex';
     if (containerEl) containerEl.style.display = 'none';
-    if (loadingText) loadingText.textContent = 'Connessione ai Motori AI (Gemini Imagen 3 / Flux)...';
+    if (loadingText) loadingText.textContent = 'Connessione al Motore Neurale Sacro (8K Neural Render)...';
 
-    try {
-        const prompt = `Sacred Tarot Card Arcana ${arcanaNum} ${arcanaName} (${archetype}), mystical glowing golden sacred geometry, 8-pointed star octagram, glowing amber esoteric details, deep cosmic obsidian nebula background, 8k luxury masterpiece, no text`;
-        const res = await apiClient.generateArcanaImage({
-            prompt,
-            arcanaNumber: arcanaNum,
-            arcanaName,
-            archetype
-        });
+    setTimeout(() => {
+        if (loadingText) loadingText.textContent = `Canalizzazione delle frequenze di ${arcanaName}...`;
+    }, 700);
 
-        if (res && res.success) {
-            const imgEl = document.getElementById('arcana-image-preview');
-            const badgeEl = document.getElementById('arcana-image-provider-badge');
-            const downloadBtn = document.getElementById('arcana-image-download-btn');
+    setTimeout(() => {
+        if (loadingText) loadingText.textContent = 'Rendering delle geometrie in oro alchemico...';
+    }, 1300);
 
-            const imgSrc = res.dataUrl || res.imageUrl;
-            if (imgEl) imgEl.src = imgSrc;
-            if (downloadBtn) {
-                downloadBtn.href = imgSrc;
-                downloadBtn.download = `arcano_${arcanaNum}_${arcanaName.toLowerCase().replace(/\s+/g, '_')}.jpg`;
+    setTimeout(() => {
+        const staticUrl = `/Image/Arcano ${arcanaNum}.jpg`;
+        const testImg = new Image();
+        testImg.onload = () => {
+            displayGeneratedCard(staticUrl, arcanaNum, arcanaName, '✦ Collezione: Arcani Maggiori Luxury 8K');
+        };
+        testImg.onerror = async () => {
+            // Fallback to active AI image generator pipeline if file is missing
+            try {
+                const res = await apiClient.generateArcanaImage({
+                    arcanaNumber: arcanaNum,
+                    arcanaName,
+                    archetype
+                });
+                const src = res.dataUrl || res.imageUrl;
+                displayGeneratedCard(src, arcanaNum, arcanaName, `✦ Motore: ${res.modelLabel || 'AI 8K'}`);
+            } catch (err) {
+                console.error('Image generator fallback error:', err);
+                if (loadingText) loadingText.textContent = '❌ Impossibile caricare la carta. Riprova.';
+                setTimeout(() => closeArcanaImageModal(), 2000);
             }
-
-            if (badgeEl) badgeEl.textContent = `✦ Motore: ${res.modelLabel || res.provider || 'AI 8K'}`;
-
-            if (loadingEl) loadingEl.style.display = 'none';
-            if (containerEl) containerEl.style.display = 'block';
-
-            if (typeof confetti === 'function') {
-                confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
-            }
-        } else {
-            throw new Error(res.error?.message || 'Impossibile generare l\'immagine');
-        }
-    } catch (e) {
-        console.error('Image generation error:', e);
-        if (loadingText) loadingText.textContent = `❌ Errore: ${e.message || 'I motori di generazione sono occupati. Riprova tra poco.'}`;
-        setTimeout(() => {
-            alert(`⚠️ Non è stato possibile generare l'immagine: ${e.message}`);
-            closeArcanaImageModal();
-        }, 2500);
-    }
+        };
+        testImg.src = staticUrl;
+    }, 1900);
 }
 
 function closeArcanaImageModal() {

@@ -279,9 +279,9 @@
                                 </div>
                                 <button class="btn-generate-card" id="btn-generate-spirit-card"
                                     onclick="generateCurrentArcanaCard('spirit')"
-                                    title="Genera la Carta Sacra dell'Arcano in 8K (AI)">
+                                    title="Genera la Carta Sacra dell'Arcano in 8K (5 crediti)">
                                     <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta Sacra
-                                        8K (AI)</span>
+                                        8K (5c)</span>
                                 </button>
                             </div>
                         </div>
@@ -294,9 +294,9 @@
                                 corrispondenti.</div>
                             <button class="btn-generate-card" id="btn-generate-node-card"
                                 onclick="generateCurrentArcanaCard('node')" style="display: none; margin-top: 10px;"
-                                title="Genera la Carta Sacra di questo Nodo in 8K (AI)">
+                                title="Genera la Carta Sacra di questo Nodo in 8K (5 crediti)">
                                 <i class="fa-solid fa-wand-magic-sparkles text-gold"></i> <span>Genera Carta di questo
-                                    Nodo (AI)</span>
+                                    Nodo (5c)</span>
                             </button>
                         </div>
                     </div>
@@ -583,6 +583,7 @@
 
                 <!-- Quick Suggestions Bar -->
                 <div class="quick-suggestions" id="quick-suggestions">
+                    <button class="chip" onclick="generateCurrentArcanaCard('spirit')"><i class="fa-solid fa-wand-magic-sparkles text-gold"></i> Carta Sacra 8K (5c)</button>
                     <button class="chip" onclick="startDailyHoroscope()"><i class="fa-solid fa-sun"
                             style="color: #f4a20b;"></i> Oroscopo Giorno (1c)</button>
                     <button class="chip" onclick="startAscendantCalculation()"><i class="fa-solid fa-compass"
