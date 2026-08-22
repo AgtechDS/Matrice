@@ -468,6 +468,107 @@ body::after {
     color: rgba(255, 255, 255, 0.1);
 }
 
+/* Quick Node Selector Pills */
+.matrix-node-pills {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 6px 2px;
+    margin-top: 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+.matrix-node-pills::-webkit-scrollbar {
+    display: none;
+}
+.node-pill {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: var(--radius-full);
+    background: rgba(12, 18, 30, 0.9);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    color: var(--text-secondary);
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    transition: all 0.2s ease;
+}
+.node-pill.active, .node-pill:hover {
+    background: rgba(212, 175, 55, 0.18);
+    border-color: var(--gold-bright);
+    color: var(--gold-bright);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* Spirito & Risorse Interiori Card */
+.spirit-resources-card {
+    background: linear-gradient(135deg, rgba(20, 28, 44, 0.95), rgba(10, 15, 26, 0.98));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-top: 8px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    width: 100%;
+}
+.spirit-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.spirit-badge {
+    font-family: var(--font-heading);
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--gold-bright);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.spirit-arcana-tag {
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: var(--gold-bright);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+.spirit-title {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+.spirit-desc {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+.spirit-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.keyword-chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    color: var(--gold-light);
+    font-weight: 600;
+}
+
 /* Right Pane — Chat Workspace — Solid surface */
 .chat-workspace {
     background: var(--bg-card);
@@ -605,6 +706,44 @@ body::after {
     font-style: italic;
     background: rgba(212, 175, 55, 0.03);
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Message Actions Bar (TTS, Copy, Share) */
+.message-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-wrap: wrap;
+}
+
+.btn-tts, .btn-msg-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 32px;
+}
+
+.btn-tts:hover, .btn-msg-action:hover {
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--gold-bright);
+    border-color: var(--gold-bright);
+}
+
+.btn-tts.playing {
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #34d399;
+    color: #34d399;
 }
 
 /* Reasoning Collapsible Box */
@@ -2114,6 +2253,14 @@ body::after {
     box-shadow: 0 0 14px rgba(244, 162, 11, 0.4);
 }
 
+.consults-sidebar-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 24px;
+}
+
 /* User Profile Saved Bar */
 .user-profile-banner {
     display: flex;
@@ -2593,18 +2740,60 @@ html, body {
         gap: 12px;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tab-pane {
+        width: 100% !important;
+        flex: 1;
+        min-height: 0;
     }
 
     .matrix-canvas-card {
         padding: 10px;
+        width: 100%;
     }
 
     .matrix-canvas-card svg {
         width: 100%;
-        max-width: 320px;
-        max-height: 320px;
+        max-width: 340px;
+        max-height: 340px;
         margin: 0 auto;
         display: block;
+    }
+
+    /* Full width Arcani grid on mobile */
+    .aspects-grid {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        gap: 10px;
+        padding-bottom: 24px;
+    }
+
+    .aspect-card {
+        width: 100% !important;
+        padding: 14px 16px !important;
+        min-height: 68px;
+    }
+
+    .pitagora-grid {
+        max-width: 320px;
+        width: 100%;
+        margin: 14px auto !important;
+    }
+
+    .consults-sidebar-list {
+        width: 100% !important;
+        padding-bottom: 30px;
+    }
+
+    .neu-hub-card {
+        width: 100% !important;
+        padding: 16px !important;
+        border-radius: var(--radius-md);
     }
 
     /* Chat layout on mobile */

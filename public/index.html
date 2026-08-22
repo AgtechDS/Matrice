@@ -241,15 +241,39 @@
                                     <text class="matrix-node-text" id="svg-node-love"
                                         style="font-size: 9px; fill: #f59e0b;">?</text>
                                 </g>
-                            </svg>
+                        </div>
+
+                        <!-- Quick Node Selector Pills -->
+                        <div class="matrix-node-pills" id="matrix-node-pills">
+                            <button class="node-pill active" onclick="selectNode('top')"><i class="fa-solid fa-sparkles text-gold"></i> ✦ Spirito (A)</button>
+                            <button class="node-pill" onclick="selectNode('left')"><i class="fa-solid fa-moon text-cyan"></i> 🌙 Anima (B)</button>
+                            <button class="node-pill" onclick="selectNode('right')"><i class="fa-solid fa-coins" style="color: #10b981;"></i> 💰 Materia (C)</button>
+                            <button class="node-pill" onclick="selectNode('bottom')"><i class="fa-solid fa-scale-balanced" style="color: #f87171;"></i> ⚖️ Karma (D)</button>
+                            <button class="node-pill" onclick="selectNode('center')"><i class="fa-solid fa-heart text-gold"></i> 💖 Cuore (E)</button>
+                        </div>
+
+                        <!-- Spirito & Risorse Interiori Dynamic Highlight Card -->
+                        <div class="spirit-resources-card" id="spirit-resources-card">
+                            <div class="spirit-card-header">
+                                <div class="spirit-badge"><i class="fa-solid fa-sun text-gold"></i> SPIRITO & RISORSE INTERIORI</div>
+                                <span class="spirit-arcana-tag" id="spirit-arcana-tag">Punto A • Arcano -</span>
+                            </div>
+                            <div class="spirit-card-body">
+                                <div class="spirit-title" id="spirit-title">In attesa di calcolo dati</div>
+                                <div class="spirit-desc" id="spirit-desc">Inserisci la tua data di nascita per rivelare i talenti innati, la sorgente spirituale e il potenziale energetico dell'Arcano di Nascita.</div>
+                                <div class="spirit-keywords" id="spirit-keywords">
+                                    <span class="keyword-chip">Talenti Innati</span>
+                                    <span class="keyword-chip">Forza Vitale</span>
+                                    <span class="keyword-chip">Luce Interiore</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Selected Node Detail Card -->
-                        <div class="aspect-card" id="selected-node-card" style="margin-top: 10px;">
-                            <div class="aspect-title" id="node-card-title">PUNTO SELEZIONATO</div>
+                        <div class="aspect-card" id="selected-node-card" style="margin-top: 8px;">
+                            <div class="aspect-title" id="node-card-title">DETTAGLIO NODO SELEZIONATO</div>
                             <div class="aspect-value" id="node-card-arcana">Clicca su un nodo dell'ottagramma</div>
-                            <div class="aspect-subtitle" id="node-card-desc">Scopri l'archetipo e le energie
-                                corrispondenti.</div>
+                            <div class="aspect-subtitle" id="node-card-desc">Scopri l'archetipo, i talenti e le energie corrispondenti.</div>
                         </div>
                     </div>
 

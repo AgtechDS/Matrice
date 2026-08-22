@@ -438,10 +438,11 @@ function appendMessage(role, content, reasoning = '', isWelcome = false) {
     contentDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(content || '') : content;
     bubble.appendChild(contentDiv);
 
-    // If Assistant, add TTS Action Button
+    // If Assistant, add TTS & Action Buttons
     if (role === 'assistant' && content) {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'message-actions';
+        
         const ttsBtn = document.createElement('button');
         ttsBtn.className = 'btn-tts';
         ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span>Ascolta</span>';
@@ -452,8 +453,22 @@ function appendMessage(role, content, reasoning = '', isWelcome = false) {
         } else {
             ttsBtn.onclick = () => toggleSpeech(content, ttsBtn);
         }
-        
         actionsDiv.appendChild(ttsBtn);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn-msg-action';
+        copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> <span>Copia</span>';
+        copyBtn.onclick = () => {
+            const rawText = contentDiv.innerText || content;
+            navigator.clipboard.writeText(rawText).then(() => {
+                copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color: #34d399;"></i> <span style="color: #34d399;">Copiato!</span>';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> <span>Copia</span>';
+                }, 2000);
+            }).catch(() => {});
+        };
+        actionsDiv.appendChild(copyBtn);
+
         bubble.appendChild(actionsDiv);
     }
 
@@ -1022,6 +1037,21 @@ function updateMatrixVisualization(fullName, birthDateStr) {
         }
     }
 
+    // Update Spirito & Risorse Interiori Card
+    const spiritTag = document.getElementById('spirit-arcana-tag');
+    const spiritTitle = document.getElementById('spirit-title');
+    const spiritDesc = document.getElementById('spirit-desc');
+    const spiritKw = document.getElementById('spirit-keywords');
+    if (spiritTag && data.matrix.top) {
+        const topN = data.matrix.top;
+        spiritTag.textContent = `Punto A • Arcano ${topN.value}`;
+        if (spiritTitle) spiritTitle.textContent = `${topN.arcana.name} — ${topN.arcana.archetype}`;
+        if (spiritDesc) spiritDesc.textContent = `La tua sorgente primaria di Spirito & Risorse Interiori (Elemento ${topN.arcana.element || 'Astrale'}). Esprime il tuo potere archetipico fondamentale e la forza creativa con cui ti manifesti.`;
+        if (spiritKw && topN.arcana.keywords) {
+            spiritKw.innerHTML = topN.arcana.keywords.split(',').map(k => `<span class="keyword-chip">${k.trim()}</span>`).join('');
+        }
+    }
+
     // Select Top Node by Default
     selectNode('top');
 }
@@ -1033,13 +1063,29 @@ function selectNode(key) {
     if (!nodeInfo) return;
 
     state.selectedNodeKey = key;
-    document.getElementById('node-card-title').textContent = `${nodeInfo.label} (Arcano ${nodeInfo.value})`;
-    document.getElementById('node-card-arcana').textContent = `${nodeInfo.arcana.name}`;
-    document.getElementById('node-card-desc').innerHTML = `
-        <strong>Archetipo:</strong> ${nodeInfo.arcana.archetype}<br>
-        <strong>Elemento:</strong> ${nodeInfo.arcana.element}<br>
-        <strong>Energie chiave:</strong> ${nodeInfo.arcana.keywords}
-    `;
+    const titleEl = document.getElementById('node-card-title');
+    const arcanaEl = document.getElementById('node-card-arcana');
+    const descEl = document.getElementById('node-card-desc');
+
+    if (titleEl) titleEl.textContent = `${nodeInfo.label} (Arcano ${nodeInfo.value})`;
+    if (arcanaEl) arcanaEl.textContent = `${nodeInfo.arcana.name}`;
+    if (descEl) {
+        descEl.innerHTML = `
+            <strong>Archetipo:</strong> ${nodeInfo.arcana.archetype}<br>
+            <strong>Elemento:</strong> ${nodeInfo.arcana.element || 'Sottile'}<br>
+            <strong>Energie chiave:</strong> ${nodeInfo.arcana.keywords}
+        `;
+    }
+
+    // Sync node pills active state
+    const pillMap = { 'top': 0, 'left': 1, 'right': 2, 'bottom': 3, 'center': 4 };
+    const pills = document.querySelectorAll('.matrix-node-pills .node-pill');
+    if (pills && pills.length && pillMap[key] !== undefined) {
+        pills.forEach((p, idx) => {
+            if (idx === pillMap[key]) p.classList.add('active');
+            else p.classList.remove('active');
+        });
+    }
 }
 
 // --- Wizard Modal Handlers ---
