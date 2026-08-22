@@ -673,7 +673,9 @@ async function sendMessage(overrideText = null, creditCost = 1) {
     const text = (overrideText || input?.value || '').trim();
     if (!text) return;
 
-    if (typeof setMobileView === 'function') {
+    if (typeof setMobileTab === 'function') {
+        setMobileTab('chat');
+    } else if (typeof setMobileView === 'function') {
         setMobileView('chat');
     }
 
@@ -1301,19 +1303,93 @@ function getActiveUserProfile() {
     return null;
 }
 
+// Helper to retrieve and calculate enriched profile, astronomical & matrix context
+function getEnrichedProfileContext(profile) {
+    if (!profile) profile = getActiveUserProfile();
+    if (!profile || !profile.date) return null;
+
+    const parts = String(profile.date).split('-');
+    if (parts.length !== 3) return null;
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+
+    let matrixData = state.currentMatrixData;
+    if (!matrixData && typeof matrixCalc !== 'undefined') {
+        matrixData = matrixCalc.calculateDestinyMatrix(day, month, year, profile.name, profile.time, profile.place);
+    }
+
+    const sunSign = typeof matrixCalc !== 'undefined' ? matrixCalc.calculateZodiacSign(day, month) : null;
+    const ascendant = (typeof matrixCalc !== 'undefined' && profile.time) ? matrixCalc.calculateAscendant(day, month, year, profile.time, profile.place) : null;
+
+    // Calculate Personal Day rigorously (AP + MP + GP)
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth() + 1;
+    const curDay = now.getDate();
+
+    function reduceSum(n) {
+        while (n > 9) {
+            n = String(n).split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
+        }
+        return n;
+    }
+    const bDay = reduceSum(day);
+    const bMonth = reduceSum(month);
+    const uYear = reduceSum(curYear);
+    const ap = reduceSum(bDay + bMonth + uYear);
+    const mp = reduceSum(ap + curMonth);
+    const gp = reduceSum(mp + curDay);
+
+    return {
+        profile,
+        day, month, year,
+        sunSign: sunSign ? `${sunSign.name} ${sunSign.symbol} (${sunSign.element})` : 'Calcolato dalla data',
+        ascendant: ascendant ? `${ascendant.formatted}` : (profile.time ? 'In elaborazione' : 'Orario non specificato'),
+        personalYear: ap,
+        personalMonth: mp,
+        personalDay: gp,
+        personalDayArcana: gp,
+        matrixData
+    };
+}
+
 // --- Specialized Oracular Modules Handlers ---
 
 // 1. Oroscopo del Giorno (1 credito)
 function startDailyHoroscope() {
     if (!checkAuthRequired('calcolare l\'Oroscopo del Giorno')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
         alert('ℹ️ Inserisci prima la tua data di nascita per calcolare l\'Oroscopo del Giorno!');
         return;
     }
-    const today = new Date().toLocaleDateString('it-IT');
-    const prompt = `Analisi Oroscopo del Giorno & Vibrazione Astrale (${today}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nCalcola l'Oroscopo del Giorno per il mio Segno Zodiacale Solare e per il mio Ascendente calcolato dall'orario di nascita, combinato con il Giorno Personale numerologico di oggi, le opportunità nelle 24 ore, le insidie da evitare e il rituale pratico d'azione.`;
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
+    const ctx = getEnrichedProfileContext(profile);
+    const today = new Date().toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    let prompt = `🌌 **CONSULTO ORACOLARE: OROSCOPO DEL GIORNO & VIBRAZIONE ASTRALE** (${today})\n\n`;
+    prompt += `**Dati Consultante:**\n`;
+    prompt += `✦ Nome: ${profile.name}\n`;
+    prompt += `✦ Data di Nascita: ${profile.date} (Giorno: ${ctx.day}, Mese: ${ctx.month}, Anno: ${ctx.year})\n`;
+    prompt += `✦ Orario e Luogo: ${profile.time || '12:00 (stimato)'} — ${profile.place || 'Italia'}\n`;
+    prompt += `✦ Segno Solare: ${ctx.sunSign}\n`;
+    prompt += `✦ Ascendente (Jean Meeus): ${ctx.ascendant}\n`;
+    prompt += `✦ Anno Personale: ${ctx.personalYear} | Mese Personale: ${ctx.personalMonth} | **Giorno Personale di Oggi: ${ctx.personalDay} (Arcano ${ctx.personalDayArcana})**\n`;
+
+    if (ctx.matrixData && ctx.matrixData.matrix) {
+        prompt += `✦ Nodi Matrice Chiave: Spirito (Punto A) = Arcano ${ctx.matrixData.matrix.top.value}, Anima (Punto B) = Arcano ${ctx.matrixData.matrix.left.value}, Materia (Punto C) = Arcano ${ctx.matrixData.matrix.right.value}, Karma (Punto D) = Arcano ${ctx.matrixData.matrix.bottom.value}, Centro (Punto E) = Arcano ${ctx.matrixData.matrix.center.value}\n`;
+    }
+
+    prompt += `\n**Richiesta per l'Architetto:**\n`;
+    prompt += `Elabora l'Oroscopo del Giorno in modo rigoroso, profondo ed evolutivo con le seguenti 4 sezioni:\n`;
+    prompt += `1. **Clima Cosmico & Transito del Giorno Personale ${ctx.personalDay}**: Spiega l'energia della giornata combinando il Segno Solare ${ctx.sunSign}, l'Ascendente ${ctx.ascendant} e la vibrazione dell'Arcano ${ctx.personalDayArcana}.\n`;
+    prompt += `2. **Opportunità di Luce (Lavoro & Finanze)**: Quali porte si aprono nelle 24 ore e come agire con successo.\n`;
+    prompt += `3. **Armonia Relazionale & Canale del Cuore**: Come relazionarsi con gli altri e proteggere la propria energia.\n`;
+    prompt += `4. **Insidia d'Ombra da Evitare & Rituale Pratico d'Azione**: L'errore da non commettere oggi e una breve affermazione/azione per allinearsi al flusso cosmico.`;
+
     sendMessage(prompt, 1);
 }
 
@@ -1321,7 +1397,7 @@ function startDailyHoroscope() {
 function startAscendantCalculation() {
     if (!checkAuthRequired('calcolare il tuo Ascendente')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
         alert('ℹ️ Inserisci prima la tua data e orario di nascita per calcolare l\'Ascendente!');
         return;
@@ -1331,7 +1407,31 @@ function startAscendantCalculation() {
         alert('ℹ️ Per calcolare l\'Ascendente con precisione al grado d\'arco, inserisci il tuo orario di nascita nel Modulo Guidato.');
         return;
     }
-    const prompt = `Calcolo Ascendente Zodiacale & 1ª Casa Astrologica (1 credito):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time}\nCittà e Nazione: ${profile.place || 'Italia'}\n\nCalcola l'Ascendente zodiacale esatto con gradi e minuti d'arco, il Pianeta Governatore dell'Ascendente, la maschera sociale ed energetica, l'influenza sulla 1ª Casa e l'interazione alchemica tra Segno Solare e Ascendente nella Matrice del Destino.`;
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
+    const ctx = getEnrichedProfileContext(profile);
+
+    let prompt = `🧭 **CALCOLO ASCENDENTE ZODIACALE & 1ª CASA ASTROLOGICA (METODO JEAN MEEUS)**\n\n`;
+    prompt += `**Dati Astronomici Certificati:**\n`;
+    prompt += `✦ Nome: ${profile.name}\n`;
+    prompt += `✦ Data di Nascita: ${profile.date}\n`;
+    prompt += `✦ Orario di Nascita: ${profile.time}\n`;
+    prompt += `✦ Luogo di Nascita: ${profile.place || 'Italia'}\n`;
+    prompt += `✦ Segno Solare: ${ctx.sunSign}\n`;
+    prompt += `✦ **Ascendente Esatto Calcolato: ${ctx.ascendant}**\n`;
+
+    if (ctx.matrixData && ctx.matrixData.matrix) {
+        prompt += `✦ Punto A (Spirito / Nascita): Arcano ${ctx.matrixData.matrix.top.value} — ${ctx.matrixData.matrix.top.arcana.name}\n`;
+        prompt += `✦ Punto E (Centro / Luce): Arcano ${ctx.matrixData.matrix.center.value} — ${ctx.matrixData.matrix.center.arcana.name}\n`;
+    }
+
+    prompt += `\n**Richiesta per l'Architetto:**\n`;
+    prompt += `Fornisci un'analisi magistrale dell'Ascendente in ${ctx.ascendant} strutturata in 4 capitoli:\n`;
+    prompt += `1. **L'Ascendente in ${ctx.ascendant} & Il Pianeta Governatore**: Significato del grado zodiacale, dell'elemento e del reggente della 1ª Casa.\n`;
+    prompt += `2. **La Maschera Sociale & L'Impatto Energetico**: Come gli altri ti percepiscono al primo incontro, l'aura esteriore e lo stile comunicativo naturale.\n`;
+    prompt += `3. **Alchimia tra Segno Solare (${ctx.sunSign}) e Ascendente (${ctx.ascendant})**: La sinergia tra la tua essenza interiore e il veicolo di manifestazione esteriore.\n`;
+    prompt += `4. **Integrazione con la Matrice del Destino (Punto A dello Spirito)**: Come canalizzare questo Ascendente per potenziare il tuo Arcano di Nascita e sbloccare i tuoi talenti innati.`;
+
     sendMessage(prompt, 1);
 }
 
@@ -1339,12 +1439,26 @@ function startAscendantCalculation() {
 function startWeeklyForecast() {
     if (!checkAuthRequired('calcolare la Guida Settimanale')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
         alert('ℹ️ Inserisci prima la tua data di nascita per calcolare la Guida Settimanale!');
         return;
     }
-    const prompt = `Guida Oracolare Settimanale (Previsione 7 Giorni):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nElabora la mappa oracolare dei 7 giorni della settimana corrente giorno per giorno per il mio Segno Zodiacale e Ascendente. Per ciascun giorno indica l'Arcano guida, il focus principale (lavoro, amore, introspezione) e i giorni più favorevoli per firmare accordi o avviare iniziative.`;
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
+    const ctx = getEnrichedProfileContext(profile);
+
+    let prompt = `📅 **GUIDA ORACOLARE SETTIMANALE (MAPPA DEI 7 GIORNI)**\n\n`;
+    prompt += `**Dati Consultante:**\n`;
+    prompt += `✦ Nome: ${profile.name}\n`;
+    prompt += `✦ Data: ${profile.date} | Segno Solare: ${ctx.sunSign} | Ascendente: ${ctx.ascendant}\n`;
+    prompt += `✦ Anno Personale: ${ctx.personalYear} | Mese Personale: ${ctx.personalMonth}\n\n`;
+    prompt += `**Richiesta per l'Architetto:**\n`;
+    prompt += `Elabora la previsione strategica dei prossimi 7 giorni giorno per giorno:\n`;
+    prompt += `- Per ogni giorno indica l'Arcano Guida e la frequenza dominante (Lavoro, Amore, Salute/Energia).\n`;
+    prompt += `- Evidenzia i 2 giorni di massimo potere decisionale e il giorno di riposo/introspezione.\n`;
+    prompt += `- Formula il mantra settimanale di successo.`;
+
     sendMessage(prompt, 3);
 }
 
@@ -1352,12 +1466,27 @@ function startWeeklyForecast() {
 function startLoveFocus() {
     if (!checkAuthRequired('analizzare il Canale Amore')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
         alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Focus Amore!');
         return;
     }
-    const prompt = `Focus Canale Amore & Relazioni di Coppia:\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nAnalizza in profondità il mio Canale dell'Amore (Nodo D + E) nella Matrice del Destino: chiarisci l'archetipo del partner karmico affine, le ferite emotive da sciogliere per attrarre amore autentico e i consigli pratici per vivere relazioni equilibrate e consapevoli.`;
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
+    const ctx = getEnrichedProfileContext(profile);
+    const loveArcana = ctx.matrixData?.matrix?.love?.value || 'N.D.';
+
+    let prompt = `💖 **FOCUS CANALE AMORE & RELAZIONI EVOLUTIVE**\n\n`;
+    prompt += `**Dati Consultante:**\n`;
+    prompt += `✦ Nome: ${profile.name}\n`;
+    prompt += `✦ Data: ${profile.date} | Segno: ${ctx.sunSign} | Ascendente: ${ctx.ascendant}\n`;
+    prompt += `✦ Arcano del Canale Relazioni (Nodo Amore): Arcano ${loveArcana}\n`;
+    prompt += `✦ Coda Karmica (Punto D): Arcano ${ctx.matrixData?.matrix?.bottom?.value || '-'}\n\n`;
+    prompt += `**Richiesta per l'Architetto:**\n`;
+    prompt += `1. Analisi profonda del nodo relazionale e dell'archetipo del partner ideale/affine.\n`;
+    prompt += `2. Blocchi karmici da dissolvere per non ripetere schemi del passato.\n`;
+    prompt += `3. 3 chiavi pratiche per attrarre e vivere un amore consapevole e armonioso.`;
+
     sendMessage(prompt, 1);
 }
 
@@ -1365,12 +1494,27 @@ function startLoveFocus() {
 function startMoneyFocus() {
     if (!checkAuthRequired('analizzare il Canale Denaro')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
         alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Focus Denaro!');
         return;
     }
-    const prompt = `Focus Canale Denaro, Carriera & Abbondanza:\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nAnalizza in dettaglio il mio Canale del Denaro (Nodo C + E) nella Matrice del Destino: quali sono le mie professioni vocazionali, le credenze limitanti da sbloccare per attrarre prosperità materiale e la strategia ottimale per monetizzare i miei talenti innati.`;
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
+    const ctx = getEnrichedProfileContext(profile);
+    const moneyArcana = ctx.matrixData?.matrix?.money?.value || 'N.D.';
+
+    let prompt = `💰 **FOCUS CANALE DENARO, VOCAZIONE & PROSPERITÀ MATERIALE**\n\n`;
+    prompt += `**Dati Consultante:**\n`;
+    prompt += `✦ Nome: ${profile.name}\n`;
+    prompt += `✦ Data: ${profile.date} | Segno: ${ctx.sunSign}\n`;
+    prompt += `✦ Arcano Sblocco Denaro (Nodo Materia/Finanze): Arcano ${moneyArcana}\n`;
+    prompt += `✦ Punto C (Anno di Nascita): Arcano ${ctx.matrixData?.matrix?.right?.value || '-'}\n\n`;
+    prompt += `**Richiesta per l'Architetto:**\n`;
+    prompt += `1. Le attività professionali e i canali di reddito maggiormente allineati alla tua frequenza.\n`;
+    prompt += `2. La credenza limitante radicata che blocca il flusso dell'abbondanza.\n`;
+    prompt += `3. La strategia concreta per monetizzare i tuoi talenti unici nei prossimi mesi.`;
+
     sendMessage(prompt, 1);
 }
 
@@ -1406,8 +1550,9 @@ function submitSynastryCalculation() {
     }
 
     closeSynastryModal();
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
 
-    const prompt = `Analisi di Sinastria di Coppia & Matrice Congiunta:\n\nPartner 1: ${name1} (Nato/a il: ${date1})\nPartner 2: ${name2} (Nato/a il: ${date2})\n\nCalcola la nostra Matrice Congiunta (somma alchemica dei nodi dei 22 Arcani): scopo evolutivo e karmico del nostro incontro, punti di forza e affinità spirituale/mentale/fisica, zone di frizione e trappole comunicative da evitare, e consigli per consolidare l'unione.`;
+    const prompt = `💑 **ANALISI DI SINASTRIA DI COPPIA & MATRICE CONGIUNTA**\n\n✦ Partner 1: ${name1} (Nato/a il: ${date1})\n✦ Partner 2: ${name2} (Nato/a il: ${date2})\n\n**Richiesta per l'Architetto:**\nCalcola la Matrice Congiunta alchemica dei 22 Arcani:\n1. Scopo evolutivo e karmico dell'incontro.\n2. Punti di affinità spirituale, intellettuale ed emotiva.\n3. Potenziali zone di frizione e trappole comunicative.\n4. Consigli pratici per consolidare l'unione e far prosperare la coppia.`;
     sendMessage(prompt, 5);
 }
 
@@ -1415,12 +1560,16 @@ function submitSynastryCalculation() {
 function startFullZodiacAnalysis() {
     if (!checkAuthRequired('calcolare il Tema Natale & Zodiaco')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
-        alert('ℹ️ Inserisci prima la tua data e ora di nascita per calcolare il Tema Natale & Zodiaco Completo!');
+        alert('ℹ️ Inserisci prima la tua data e ora di nascita per calcolare il Tema Natale!');
         return;
     }
-    const prompt = `Tema Natale & Analisi Zodiacale Completa MIT-Grade (10 crediti):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario di Nascita: ${profile.time || 'non disponibile'}\nCittà e Nazione: ${profile.place || 'Italia'}\n\nEsegui l'analisi astrologica e zodiacale completa in 8 sezioni monumentali: calcola il Segno Solare con elemento e pianeta governatore, l'Ascendente zodiacale esatto dall'ora di nascita, la configurazione delle 12 Case, l'alchimia con l'Arcano di Nascita e il Centro della Matrice del Destino, i talenti vocazionali, le sfide d'ombra, i transiti correnti e la guida oracolare di manifestazione.`;
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
+    const ctx = getEnrichedProfileContext(profile);
+
+    const prompt = `🔮 **TEMA NATALE & ANALISI ZODIACALE COMPLETA (MIT-GRADE)**\n\n✦ Nome: ${profile.name}\n✦ Nascita: ${profile.date} ore ${profile.time || '12:00'} a ${profile.place || 'Italia'}\n✦ Segno Solare: ${ctx.sunSign}\n✦ Ascendente Esatto: ${ctx.ascendant}\n\n**Richiesta:**\nEsegui l'analisi astrologica monumentale completa in 8 sezioni: Segno Solare, Ascendente & 1ª Casa, 12 Case astrologiche, Alchimia con i Nodi della Matrice, Talenti Vocazionali, Sfide d'Ombra, Transiti Planetari attuali e Guida pratica di realizzazione.`;
     sendMessage(prompt, 10);
 }
 
@@ -1428,13 +1577,17 @@ function startFullZodiacAnalysis() {
 function startPinnaclesMaster() {
     if (!checkAuthRequired('calcolare il Master Report Pinnacoli')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
         alert('ℹ️ Inserisci prima la tua data di nascita per calcolare il Master Report Pinnacoli!');
         return;
     }
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
     const currentYear = new Date().getFullYear();
-    const prompt = `Master Report: I 4 Pinnacoli Evolutivi, le 4 Sfide & Proiezione Decennale (${currentYear}-${currentYear + 10}):\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\nOrario: ${profile.time || 'non disponibile'}\nCittà: ${profile.place || 'Italia'}\n\nProcedi con il Master Report avanzato: calcola le età esatte di transizione dei 4 Pinnacoli (formula 36 - LifePath), analizza ciascun Pinnacolo con i relativi archetipi, descrivi le 4 Sfide evolutive da superare e fornisci la proiezione decennale anno per anno con strategie pratiche.`;
+    const ctx = getEnrichedProfileContext(profile);
+
+    const prompt = `🏔️ **MASTER REPORT: I 4 PINNACOLI EVOLUTIVI & PROIEZIONE DECENNALE (${currentYear}-${currentYear + 10})**\n\n✦ Nome: ${profile.name}\n✦ Data: ${profile.date} | Segno: ${ctx.sunSign} | Ascendente: ${ctx.ascendant}\n\n**Richiesta:**\n1. Calcola le 4 fasce di età dei Pinnacoli (formula 36 - LifePath).\n2. Analizza i 4 Archetipi di transizione e le 4 Sfide numerologiche.\n3. Fornisci la mappa strategica decennale anno per anno con focus d'azione.`;
     sendMessage(prompt, 10);
 }
 
@@ -1442,12 +1595,15 @@ function startPinnaclesMaster() {
 async function generateVoiceMeditation() {
     if (!checkAuthRequired('generare l\'Audio-Meditazione')) return;
     const profile = getActiveUserProfile();
-    if (!profile) {
+    if (!profile || !profile.date) {
         openWizardModal();
         alert('ℹ️ Inserisci prima i tuoi dati per creare la tua Audio-Meditazione personalizzata!');
         return;
     }
-    const prompt = `Genera un testo di Meditazione Guidata Oracolare (2-3 minuti) su misura per me:\n\nNome: ${profile.name}\nData di Nascita: ${profile.date}\n\nCrea un viaggio meditativo profondo per connettermi al mio Centro Energetico e sbloccare la fiducia interiore, scritto con tono calmo, solenne e trasformativo.`;
+    if (typeof setMobileTab === 'function') setMobileTab('chat');
+
+    const ctx = getEnrichedProfileContext(profile);
+    const prompt = `🧘 **AUDIO-MEDITAZIONE GUIDATA SU MISURA (2-3 MINUTI)**\n\n✦ Nome: ${profile.name}\n✦ Data di Nascita: ${profile.date}\n✦ Segno: ${ctx.sunSign} | Ascendente: ${ctx.ascendant}\n✦ Arcano di Nascita (Spirito): Arcano ${ctx.matrixData?.matrix?.top?.value || '10'}\n\n**Richiesta:**\nComponi il testo di una meditazione guidata profonda e poetica per connettermi al mio Centro di Luce e sbloccare la fiducia interiore, adatta alla lettura o sintesi vocale neurale.`;
     sendMessage(prompt, 2);
 }
 
